@@ -39,7 +39,7 @@ sm_type next_state;
    logic [21:0] Intersection;
    logic [21:0] size_length_k;
    logic [21:0] size_length_history;
-	logic [4:0] counter;
+	logic [3:0] counter;
 
 
 
