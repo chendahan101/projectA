@@ -1,0 +1,14 @@
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.clk
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.reset_N
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.data_in[111:0]
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.wr
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.addr[7:0]
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.EN
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.data_out[111:0]
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.oflow_registration.oflow_registration_score_board_RAM_255x112.clk
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.oflow_registration.oflow_registration_score_board_RAM_255x112.reset_N
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.oflow_registration.oflow_registration_score_board_RAM_255x112.data_in[111:0]
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.oflow_registration.oflow_registration_score_board_RAM_255x112.wr
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.oflow_registration.oflow_registration_score_board_RAM_255x112.addr[7:0]
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.oflow_registration.oflow_registration_score_board_RAM_255x112.EN
+oflow_core_tb.oflow_core.genblk1[3].oflow_PE.oflow_registration.oflow_registration_score_board_RAM_255x112.data_out[111:0]
