@@ -16,7 +16,7 @@ module oflow_calc_iou #() (input logic clk,
 	 input logic[10:0] bbox_w_frame_history,
 	 input logic[10:0] bbox_h_frame_history,
 	 
-	
+	output logic end_iou_en, 
 	 output logic[21:0] iou  ); 
 
 
@@ -75,7 +75,8 @@ always_comb begin
 	
 	case (current_state)
 		idle_st: begin
-				next_state = coordinate_st;	
+				next_state = coordinate_st;
+				end_iou_en = 1'b0;
 		end
 		
 		coordinate_st: begin
@@ -98,7 +99,10 @@ always_comb begin
 		iou_st: begin 
 			iou = 1 - Intersection / (size_length_k + size_length_history - Intersection);
 			if (counter == 4'd8)
+				begin
+				end_iou_en = 1'b1;	
 				next_state = idle_st;
+				end	
 		end
 	endcase
 end
