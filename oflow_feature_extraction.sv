@@ -6,37 +6,72 @@
  * Description   :
  *------------------------------------------------------------------------------*/
 
+// defines for inputs
+`define BBOX_VECTOR_SIZE 89
+
+
+// defines for wires AND OUTPUTS
+
+`define CM_LEN 11  // len of x,y
+`define CM_CONCATE_LEN 22  // concate
+`define POSITION_CONCATE_LEN 44  // concate
+`define COLOR_LEN 24
+`define D_HISTORY_LEN 3
+
+// defines for intern calculations
+
+`define POSTION_TL_LEN 22 // len of x&y tl-top left
+`define POSTION_BR_LEN 22   // len of x&y br-top left
+
+`define WIDTH_LEN 8  // we want the maximum size to be 200 by 8 bits: q8.0
+`define HEIGHT_LEN 8  // we want the maximum size to be 200 by 8 bits:	q8.0
+
+
+
+
+
+// defines for comb_logic
+
+`define WIDTH_MSB_IN_BBOX (`BBOX_VECTOR_SIZE-`CM_CONCATE_LEN) //
+`define HEIGHT_MSB_IN_BBOX (`WIDTH_MSB_IN_BBOX-`WIDTH_LEN) //
+`define COLOR1_MSB_IN_BBOX (`HEIGHT_MSB_IN_BBOX-`HEIGHT_LEN) //
+`define COLOR2_MSB_IN_BBOX (`COLOR1_MSB_IN_BBOX-`COLOR_LEN) //
+
+
+
 module oflow_features_extraction (
 
 	// inputs
 	input logic clk,
 	input logic reset_N,
-	input logic [99:0] bbox,
-	input logic fe_enable,
+	input logic [BBOX_VECTOR_SIZE-1:0] bbox,
+	input logic fe_enable, // feature_extraction enable                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         nable
 	
 	//outputs
-	output logic [21:0] cm_concate,
-	output logic [43:0] position_concate,
-	output logic [10:0] width,
-	output logic [10:0] height,
-	output logic [23:0] color1,
-	output logic [23:0] color2,
-	output logic [7:0] d_history );
+	output logic [`CM_CONCATE_LEN-1:0] cm_concate,
+	output logic [`POSITION_CONCATE_LEN-1:0] position_concate,
+	output logic [`WIDTH_LEN-1:0] width,
+	output logic [`HEIGHT_LEN-1:0] height,
+	output logic [`COLOR_LEN-1:0] color1,
+	output logic [`COLOR_LEN-1:0] color2,
+	output logic [`D_HISTORY_LEN-1:0] d_history );
 
 //-----------------------------------------
 //				Wire
 //-----------------------------------------								
-	logic [10:0] x_cm;
-	logic [10:0] y_cm;
-	logic [21:0] position_tl;
-	logic [21:0] position_br;
-	logic [10:0] width_tmp;
-	logic [10:0] height_tmp;
-	logic [23:0] color1_tmp;
-	logic [23:0] color2_tmp;
-	logic [7:0] d_history_tmp;
-	logic [43:0] position_concate_tmp;
-	logic [21:0] cm_concate_tmp;
+	logic [`CM_LEN-1:0] x_cm;
+	logic [`CM_LEN-1:0] y_cm;
+	logic [`POSTION_TL_LEN-1:0] position_tl;
+	logic [`POSTION_BR_LEN-1:0] position_br;
+	logic [`WIDTH_LEN-1:0] width_tmp;
+	logic [`HEIGHT_LEN-1:0] height_tmp;
+	logic [`COLOR_LEN-1:0] color1_tmp;
+	logic [`COLOR_LEN-1:0] color2_tmp;
+	logic [`D_HISTORY_LEN:0] d_history_tmp;
+	
+	logic [`CM_CONCATE_LEN-1:0] cm_concate_tmp;
+	logic [`POSITION_CONCATE_LEN-1:0] position_concate_tmp;
+	
 	
 //-----------------------------------------
 //				out
@@ -48,22 +83,22 @@ module oflow_features_extraction (
 //				comb_logic
 //-----------------------------------------
 
-	assign width_tmp = bbox[77:67];
-	assign height_tmp = bbox[66:56];
+	assign width_tmp = bbox[`WIDTH_MSB_IN_BBOX-1:`WIDTH_MSB_IN_BBOX-`WIDTH_LEN];
+	assign height_tmp = bbox[`HEIGHT_MSB_IN_BBOX-1:`HEIGHT_MSB_IN_BBOX-`HEIGHT_LEN];
 	
 	always_comb 
 	begin
-	 position_tl = bbox[99:78];
-	 position_br = {position_tl[21:11] + width_tmp,position_tl[10:0] + height_tmp};
-	 x_cm = position_br[21:11] >> 1;
-	 y_cm = position_br[10:0] >> 1;
+	 position_tl = bbox[BBOX_VECTOR_SIZE-1:BBOX_VECTOR_SIZE-POSTION_TL_LEN];
+	 position_br = {position_tl[POSTION_TL_LEN-1:POSTION_TL_LEN-CM_LEN] + width_tmp, position_tl[POSTION_TL_LEN-CM_LEN-1:0] + height_tmp};
+	 x_cm = position_br[`POSTION_BR_LEN-1:`POSTION_BR_LEN-`CM_LEN] >> 1;
+	 y_cm = position_br[`POSTION_BR_LEN-`CM_LEN-1:0] >> 1;
 	 position_concate_tmp = {position_tl, position_br} ;
 	 cm_concate_tmp = {x_cm, y_cm};
 	end	
 	
-	assign color1_tmp = bbox[55:32];
-	assign color2_tmp = bbox[31:8];
-	assign d_history_tmp = bbox[7:0];
+	assign color1_tmp = bbox[`COLOR1_MSB_IN_BBOX-1:`COLOR1_MSB_IN_BBOX-`COLOR_LEN];
+	assign color2_tmp = bbox[`COLOR2_MSB_IN_BBOX-1:`COLOR2_MSB_IN_BBOX-`COLOR_LEN];
+	assign d_history_tmp = bbox[`D_HISTORY_LEN-1:0];
 
 
 
@@ -93,20 +128,20 @@ module oflow_features_extraction (
    
 	always_ff @(posedge clk or negedge reset_N)   
 	begin    
-		if (!reset_N) width <= #1 11'd0;	
+		if (!reset_N) width <= #1 8'd0;	
 		else if(fe_enable)	width <= #1 width_tmp;	 
 	end  
    
 	always_ff @(posedge clk or negedge reset_N)   
 	begin    
-		if (!reset_N) height <= #1 11'd0;	
+		if (!reset_N) height <= #1 8'd0;	
 		else if(fe_enable) height <= #1 height_tmp;
 	end 
 
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
 		if (!reset_N) color1 <= #1 24'd0;	
-	    else if(fe_enable) color1 <= #1 color1_tmp;
+		else if(fe_enable) color1 <= #1 color1_tmp;
 	end 
 	
 	always_ff @(posedge clk or negedge reset_N)   
@@ -117,7 +152,7 @@ module oflow_features_extraction (
    
 	always_ff @(posedge clk or negedge reset_N)   
 	begin    
-		if (!reset_N) d_history <= #1 8'd0;	
+		if (!reset_N) d_history <= #1 3'd0;	
 		else if(fe_enable) d_history <= #1 d_history_tmp;
 	end 	
    
