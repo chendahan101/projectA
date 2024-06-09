@@ -5,6 +5,9 @@
  * Creation date : Jan 19, 2024
  * Description   :
  *------------------------------------------------------------------------------*/
+`include "/users/epchof/Project/design/work/include_files/oflow_feature_extraction_define.sv"
+`include "/users/epchof/Project/design/work/include_files/oflow_calc_iou_define.sv"
+
 
 module oflow_calc_iou_tb #() ();
 
@@ -16,14 +19,16 @@ module oflow_calc_iou_tb #() ();
 		   
 	 logic clk;
 	 logic reset_N;
+	 logic start;
+	 logic valid_iou;
 
-	 logic[43:0] bbox_position_frame_k;   // {X_TL, Y_TL, X_BR, Y_BR}
-	 logic[43:0] bbox_position_frame_history; // {X_TL, Y_TL, X_BR, Y_BR}
-	 logic[10:0] bbox_w_frame_k;
-	 logic[10:0] bbox_h_frame_k;
-	 logic[10:0] bbox_w_frame_history;
-	 logic[10:0] bbox_h_frame_history;
-	 logic[21:0] iou;
+	 logic[`BBOX_POSITION_FRAME-1:0] bbox_position_frame_k;   // {X_TL, Y_TL, X_BR, Y_BR}
+	 logic[`BBOX_POSITION_FRAME-1:0] bbox_position_frame_history; // {X_TL, Y_TL, X_BR, Y_BR}
+	 logic[`WIDTH_LEN-1:0] bbox_w_frame_k;
+	 logic[`HEIGHT_LEN-1:0] bbox_h_frame_k;
+	 logic[`WIDTH_LEN-1:0] bbox_w_frame_history;
+	 logic[`HEIGHT_LEN-1:0] bbox_h_frame_history;
+	 logic[`IOU_LEN-1:0] iou;
 // ----------------------------------------------------------------------
 //                   Instantiation
 // ----------------------------------------------------------------------
@@ -32,6 +37,7 @@ module oflow_calc_iou_tb #() ();
 
 oflow_calc_iou oflow_calc_iou  (.clk(clk),
 	.reset_N(reset_N),
+	.start(start),
 
 	 .bbox_position_frame_k(bbox_position_frame_k)	,   // {X_TL, Y_TL, X_BR, Y_BR}
 	 .bbox_position_frame_history(bbox_position_frame_history), // {X_TL, Y_TL, X_BR, Y_BR}
@@ -40,6 +46,7 @@ oflow_calc_iou oflow_calc_iou  (.clk(clk),
 	 .bbox_w_frame_history(bbox_w_frame_history),
 	 .bbox_h_frame_history(bbox_h_frame_history),
 	 
+	 .valid_iou(valid_iou),
 	 .iou(iou)  );  
 	 
 	 
@@ -58,9 +65,10 @@ initial
 begin
    initiate_all;                                 // Initiates all input signals to '0' and open necessary files
 	 
-   #100 
+   #50
    @(posedge clk); 
-   insert_new_data;              // CPU WRITE configurations (TSI master) 
+   insert_new_data(100,50, 200,60, 180,55, 200,65, 100, 10, 20, 10 );              // CPU WRITE configurations (TSI master) 
+   
    #100 $finish;  
    
 //   #100000  $finish;
@@ -87,7 +95,8 @@ end
  task initiate_all;        // sets all tso inputs to '0'.
 	  begin
 	  clk = 0;
-	  reset_N = 1	;
+	  start = 0 ;
+	  reset_N = 0	;
 	  
 	   bbox_position_frame_k = 0;	   
 	   bbox_position_frame_history = 0;
@@ -96,24 +105,31 @@ end
 	   bbox_w_frame_history = 0;
 	   bbox_h_frame_history = 0;
 	  
-	   #2 reset_N = 1'b0;     // Disable Reset signal.	 
+	   #10 reset_N = 1'b1;     // Disable Reset signal.	 
 	  end
  endtask
 
 
 
- task insert_new_data;
+ task insert_new_data ( input logic [`POSITION_INTERSECTION-1:0] x_tl_k, input logic [`POSITION_INTERSECTION-1:0] y_tl_k,input logic [`POSITION_INTERSECTION-1:0] x_br_k, input logic [`POSITION_INTERSECTION-1:0] y_br_k,input logic [`POSITION_INTERSECTION-1:0] x_tl_history, input logic [`POSITION_INTERSECTION-1:0] y_tl_history,input logic [`POSITION_INTERSECTION-1:0] x_br_history, input logic [`POSITION_INTERSECTION-1:0] y_br_history, input logic [`WIDTH_LEN-1:0] width_k,input logic [`HEIGHT_LEN-1:0] height_k,input logic [`WIDTH_LEN-1:0] width_history,input logic [`HEIGHT_LEN-1:0] height_history);
 	begin
-  
-	   bbox_position_frame_k = 44'b00111110100_00011111010_01000001000_00100011000;  
-	   bbox_position_frame_history = 44'b01111101000_10010110000_01111110010_10010111111;
-	   bbox_w_frame_k = 11'b00000010100;
-	   bbox_h_frame_k = 11'b0000011110;
-	   bbox_w_frame_history = 11'b00000001010;
-	   bbox_h_frame_history = 11'b00000001111;
+  		
+	   bbox_position_frame_k = {x_tl_k,y_tl_k,x_br_k,y_br_k};  
+	   bbox_position_frame_history = {x_tl_history,y_tl_history,x_br_history,y_br_history};
+	   bbox_w_frame_k = width_k;
+	   bbox_h_frame_k = height_k;
+	   bbox_w_frame_history = width_history;
+	   bbox_h_frame_history = height_history;
 	   
-	 end
- 	endtask	
+	   #10
+		start = 1;	
+	   
+	   #20
+	    start = 0;
+	   
+	end
+	
+ endtask	
  
  
  
