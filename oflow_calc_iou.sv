@@ -43,7 +43,8 @@ sm_type next_state;
    logic [`POSITION_INTERSECTION-1:0] Intersection;
    logic [`SIZE_LENGTH-1:0] size_length_k;
    logic [`SIZE_LENGTH-1:0] size_length_history;
-	logic [`COUNTER_LEN-1:0] counter;
+   logic [`COUNTER_LEN-1:0] counter;
+   logic [`BBOX_POSITION_FRAME-1:0] temp_iou;
 
 
 
@@ -51,7 +52,7 @@ sm_type next_state;
 //                FSM synchronous procedural block.	
 // -----------------------------------------------------------
 	always_ff @(posedge clk, posedge reset_N) begin
-		if (reset_N == 1'b1) begin
+		if (!reset_N ) begin
 			current_state <= #1 idle_st;
 		end
 		else begin
@@ -60,11 +61,11 @@ sm_type next_state;
 	end
 //--------------------counter---------------------------------	
 	 always_ff @(posedge clk, posedge reset_N) begin
-		if (reset_N == 1'b1 || next_state == idle_st || next_state != current_state) begin
+		if (!reset_N  || next_state == idle_st || next_state != current_state) begin
 			counter <= #1 4'd0;
 		end
 		else begin
-			counter <= #1 counter+1;
+			counter <= #1 counter + 1;
 		end
 	end
 	
@@ -107,7 +108,10 @@ always_comb begin
 		end
 		
 		iou_st: begin 
-			iou = 1 - (Intersection / (size_length_k + size_length_history - Intersection));
+			temp_iou = ((Intersection )<< 22) / (size_length_k + size_length_history - Intersection);
+			iou = {22{1'b1}} - temp_iou[21:0];
+			
+			// iou = 1 - (Intersection / (size_length_k + size_length_history - Intersection));
 			if (counter == 4)
 				next_state = idle_st;
 		end
