@@ -103,7 +103,7 @@ always_comb begin
 		intersection_area_st: begin 
 				if ((x_br_intersection < x_tl_intersection) || (y_br_intersection < y_tl_intersection)) Intersection = 22'd0;
 				else Intersection = (x_br_intersection - x_tl_intersection) * (y_br_intersection - y_tl_intersection);
-				if (counter == 3)
+				if (counter == 2) // we need 3 but counter start from 0
 					next_state = iou_st;
 		end
 		
@@ -112,7 +112,7 @@ always_comb begin
 			iou = {22{1'b1}} - temp_iou[21:0];
 			
 			// iou = 1 - (Intersection / (size_length_k + size_length_history - Intersection));
-			if (counter == 4)
+			if (counter == 3) // counter start fom 0
 				next_state = idle_st;
 		end
 	endcase
