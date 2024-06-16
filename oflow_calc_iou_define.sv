@@ -17,7 +17,7 @@
 // defines for wires AND OUTPUTS
 
 
-`define IOU_LEN 22  // len of iou output
+`define IOU_LEN 22  // len of iou output number between 0 to 1 : q0.22
 
 
 // defines for comb_logic

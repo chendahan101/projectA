@@ -74,7 +74,7 @@ sm_type next_state;
  // -----------------------------------------------------------
 	 always_ff @(posedge clk, posedge reset_N) begin
 		 if (!reset_N) valid_iou <= #1 1'b0;
-		 else if (current_state==iou_st && counter == 4) valid_iou <= #1 1'b1;
+		 else if (current_state==iou_st && counter == 3) valid_iou <= #1 1'b1;
 		 else valid_iou <= #1 1'b0;		 				
 	 end
 
@@ -103,7 +103,7 @@ always_comb begin
 		intersection_area_st: begin 
 				if ((x_br_intersection < x_tl_intersection) || (y_br_intersection < y_tl_intersection)) Intersection = 22'd0;
 				else Intersection = (x_br_intersection - x_tl_intersection) * (y_br_intersection - y_tl_intersection);
-				if (counter == 2) // we need 3 but counter start from 0
+				if (counter == 2) // we need 3 but counter start from 0 
 					next_state = iou_st;
 		end
 		
