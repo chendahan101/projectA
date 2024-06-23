@@ -89,15 +89,25 @@ begin
   initiate_all;                                 // Initiates all input signals to '0' and open necessary files
 	
   #50
+		  //iou_weight w_weight h_weight color1_weight color2_weight dhistory_weight 
+  insert_weight(10'b0100000000,10'b0100000000,10'b0100000000,10'b0001010101,10'b0001010101,10'b0001010101);
   @(posedge clk); 
   //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0]
   insert_curr_data({11'd30,11'd55},{11'd50,11'd10,11'd60,11'd110},10,100,50,60,0); 
   //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0] [`ID_LEN-1:0]
   insert_prev_data({11'd31,11'd54},{11'd52,11'd8,11'd62,11'd108},10,100,40,70,1,12);
-  //iou_weight w_weight h_weight color1_weight color2_weight dhistory_weight 
-  insert_weight(10'b0100000000,10'b0100000000,10'b0100000000,10'b0001010101,10'b0001010101,10'b0001010101);
+  
   #10 start = 1;
-  #10 start = 0;
+  #10
+	 start = 0;
+  #100
+  //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0]
+  insert_curr_data({11'd30,11'd55},{11'd50,11'd10,11'd60,11'd110},10,100,50,60,0); 
+  //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0] [`ID_LEN-1:0]
+  insert_prev_data({11'd40,11'd54},{11'd70,11'd8,11'd80,11'd108},10,100,40,70,1,12);
+  #10 start = 1;
+  #30
+	 start = 0;
   #500 $finish;  
   
 //   #100000  $finish;
