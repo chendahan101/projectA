@@ -6,29 +6,37 @@
  * Description   :
  *----------------------------------------------------------------------*/
 
-`include "/users/epchof/Project/design/work/oflow_define.sv"
+`include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 
 //`timescale 1ns/100ps
 module oflow_top ( 
 	  // inputs
 	  input logic clk,
-	  input logic reset_N	,
+	  input logic reset_N,
+	  
+	  input logic start,
+	  // input logic frame_num
 	
-	   input logic [99:0] bbox,			//size 
+	   input logic [`BBOX_VECTOR_SIZE-1:0] bboxes_array_per_frame [`MAX_BBOXES_PER_FRAME-1:0],			//size 
 	   
 	   // APB Interface
 	   input logic apb_pclk, 
 	   input logic apb_pwrite,
 	   input logic apb_psel, 
 	   input logic apb_penable,
-	   input logic[11:0] apb_addr,
-	   input logic[31:0] apb_pwdata,
-	   // outputs
-	   output logic apb_pready,  
-	   output logic[31:0] apb_prdata,
+	   input logic[`REGISTER_ADD_LEN-1:0] apb_addr,
+	   input logic[`REGISTER_DATA_LEN-1:0] apb_pwdata,
 	   
-	   output logic[255:0][20:0] ids   );  
-	
+	   
+	   // outputs 
+	   
+	   // APB Interface
+	   output logic apb_pready,  
+	   output logic[`REGISTER_DATA_LEN-1:0] apb_prdata,
+	   
+	   
+	   output logic done_frame,
+	   output logic [`ID_LEN-1:0] ids [`MAX_BBOXES_PER_FRAME-1:0]  );  
 // -----------------------------------------------------------       
 //                 Registers & Wires
 // -----------------------------------------------------------  

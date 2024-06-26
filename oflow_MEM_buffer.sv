@@ -79,26 +79,26 @@ module oflow_MEM_buffer #() (
 					end
 				2: begin 
 					pointers[0] = 0;
-					pointers[1] = 125;
+					pointers[1] = 64;
 				end
 				3: begin 
 					pointers[0] = 0;
-					pointers[1] = 84;
-					pointers[2] = 168;
+					pointers[1] = 42;
+					pointers[2] = 84;
 				end
 				4: begin 
 					pointers[0] = 0;
-					pointers[1] = 63;
-					pointers[2] = 126;
-					pointers[3] = 189;
+					pointers[1] = 32;
+					pointers[2] = 64;
+					pointers[3] = 96;
 
 				end			
 				5: begin 
 					pointers[0] = 0;
-					pointers[1] = 50;
-					pointers[2] = 100;
-					pointers[3] = 150;
-					pointers[4] = 200;
+					pointers[1] = 25;
+					pointers[2] = 50;
+					pointers[3] = 75;
+					pointers[4] = 100;
 				end	
 			endcase
 		end
