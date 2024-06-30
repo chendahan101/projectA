@@ -15,7 +15,6 @@ module oflow_MEM_buffer #() (
 	input logic reset_N,
 	input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num,//the serial number of the current frame 0-255
 	input logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] num_of_history_frames, // fallback number
-	input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] num_of_bbox_in_frame, // TO POINT TO THE END OF THE FRAME MEM, SO WE WILL READ ONLY THE FULL CELL --- maybe to remove
 	
 	input logic [`DATA_WIDTH-1:0] data_in_0,
 	input logic [`DATA_WIDTH-1:0] data_in_1,
