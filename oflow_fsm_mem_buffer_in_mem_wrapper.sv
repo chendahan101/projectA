@@ -30,7 +30,9 @@ output logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_to_read,
 
 output logic [`OFFSET_WIDTH-1:0] offset_0,
 output logic [`OFFSET_WIDTH-1:0] offset_1,
-output logic we
+output logic we,
+output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_interface
+
 
 
 );
@@ -62,7 +64,8 @@ logic [`ADDR_WIDTH-1:0] end_pointers [5];
 	.frame_to_read(frame_to_read),
 	.offset_0(offset_0),
 	.offset_1(offset_1),
-	.we(we)
+	.we(we),
+	.counter_of_history_frame_to_interface(counter_of_history_frame_to_interface) 
 	);
 //fsm write instantiation
 oflow_fsm_write oflow_fsm_write (
