@@ -6,9 +6,8 @@
  * Description   :
  *------------------------------------------------------------------------------*/
 `include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
-`define ROW_LEN 3 //The maximum rows of each pe mem is 6
-`define PE_LEN 5 // There are 24 PEs
-`define PE_NUM 24
+`include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
+
 
 module oflow_core_fsm_write #() (
 
@@ -25,7 +24,7 @@ module oflow_core_fsm_write #() (
 
 	
 	output logic ready_from_core, // send from fsm core to fsm buffer
-	output logic [1:0] remainder, //if the fsm is in the remainder states
+	output logic [`REMAINDER_LEN-1:0] remainder, //if the fsm is in the remainder states
 	output logic [`ROW_LEN-1:0] row_sel,
 	output logic [`PE_LEN-1:0] pe_sel
 	
