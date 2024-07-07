@@ -27,7 +27,11 @@ output logic done_read,
 output logic done_write,
 //data out for pe
 output logic data_out_0,
-output logic data_out_1 
+output logic data_out_1 ,
+
+//data out for interface
+output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_interface
+
 
 );
 
@@ -83,8 +87,8 @@ output logic data_out_1
 	.start_read(start_read),
 	.start_write(start_write),
 	.done_read(done_read),
-	.done_write(done_write)
-
+	.done_write(done_write),
+	.counter_of_history_frame_to_interface(counter_of_history_frame_to_interface)
 );
 
 
