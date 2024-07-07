@@ -27,7 +27,8 @@ module oflow_fsm_read #() (
 	output logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_to_read,
 	output logic [`OFFSET_WIDTH-1:0] offset_0,
 	output logic [`OFFSET_WIDTH-1:0] offset_1,
-	output logic we
+	output logic we,
+	output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_interface
 
 );
 
@@ -119,6 +120,8 @@ sm_type next_state;
 	assign offset_0 = counter_offset;
 	assign offset_1 = 0;
 	assign we = 0;
+	assign counter_of_history_frame_to_interface = counter_of_history_frame +1;
+
 	 
 	 
 endmodule
