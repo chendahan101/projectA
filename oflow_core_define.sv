@@ -1,20 +1,13 @@
 /*------------------------------------------------------------------------------
- * File          : oflow_similarity_metric_define.sv
+ * File          : oflow_fsm_read.sv
  * Project       : RTL
  * Author        : epchof
- * Creation date : Jun 13, 2024
+ * Creation date : Jun 30, 2024
  * Description   :
  *------------------------------------------------------------------------------*/
 
-
-`include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
-
-`define BBOX_VECTOR_SIZE 89
-`define MAX_BBOXES_PER_FRAME 256
-
-`define REGISTER_DATA_LEN 10 // explenation in ipad, q0.9
-`define REGISTER_ADD_LEN 10 // explenation in ipad, q0.9
-
-
-`define ID_LEN 12
-
+`define ROW_LEN 3 //The maximum rows of each pe mem is 6
+`define PE_LEN 5 // There are 24 PEs
+`define SET_LEN 4 //The maximum sets: 256/PE_NUM=11, need 4 bits: 2^4 = 16 > 11
+`define PE_NUM 24 // There are 24 PEs
+`define DATA_OUT_NUM 4 // Num of the dataouts from the mux
