@@ -75,8 +75,27 @@ sm_type next_state;
 		 else if (cur_state == select_pe_st && next_state == select_row_st ) counter_pe <= #1 0;
 		 else if (cur_state == select_pe0_st && next_state == select_pe0_st ) counter_pe <= #1 counter_pe + 1;
 	  end	  
-	 
-	 
+/*
+//--------------------counter_for_ready_from_core---------------------------------	
+
+	 always_ff @(posedge clk or negedge reset_N) begin
+		 if (!reset_N || current_state ==  idle_st ) counter_for_ready_from_core <= #1 0;
+		 else if ( (cur_state == select_pe_st || cur_state == select_pe0_st ||
+			 cur_state == select_pe1_st || cur_state == select_pe2_st ||  cur_state == select_pe3_st ) && counter_for_ready_from_core < 3 ) counter_for_ready_from_core <= #1 counter_for_ready_from_core + 1;
+		else if ( (cur_state == select_pe_st || cur_state == select_pe0_st ||
+			cur_state == select_pe1_st || cur_state == select_pe2_st ||  cur_state == select_pe3_st ) && counter_for_ready_from_core == 3 ) counter_for_ready_from_core <= #1 0;
+	  end	  
+	
+//--------------------ready_from_core---------------------------------	
+
+	 always_ff @(posedge clk or negedge reset_N) begin
+		 if (!reset_N || current_state ==  idle_st ) ready_from_core <= #1 0;
+		 else if (cur_state == select_pe_st && cur_state == select_pe0_st &&
+			 cur_state == select_pe1_st && cur_state == select_pe2_st && cur_state == select_pe3_st && ) counter_pe <= #1 counter_pe + 1;
+		
+	  end	  
+*/	 
+	 	 
  // -----------------------------------------------------------       
  //						FSM – Async Logic
  // -----------------------------------------------------------	
@@ -106,6 +125,10 @@ sm_type next_state;
 			 if (counter_pe == PE_NUM/4) begin 
 				 next_state = select_row_st;
 			end
+			else if (counter_for_ready_from_core == 3)
+				 next_state = select_row_st;
+
+			
 		
 		
 		select_pe0_st: begin 
