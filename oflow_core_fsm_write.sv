@@ -20,7 +20,7 @@ module oflow_core_fsm_write #() (
 	//from genreal fsm in core (after conflict_resolve done)
 	input logic start_write,
 	//from buffer 
-	input logic done_write_buffer,//only after core fsm ready to fetch us the next 2 line of data
+	//input logic done_write_buffer,//only after core fsm ready to fetch us the next 2 line of data ; we are going to add a wait state to cure this. the wait state has to be sure the buffer is done to writes 2 rows and now we can change the PE's
 
 	
 	output logic ready_from_core, // send from fsm core to fsm buffer
