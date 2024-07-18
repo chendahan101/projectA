@@ -12,3 +12,4 @@
 `define PE_NUM 24 // There are 24 PEs
 `define DATA_OUT_NUM 4 // Num of the dataouts from the mux
 `define REMAINDER_LEN 2 // remainder=1 or2 or 3
+`define REMAIN_BBOX_LEN 8 // each set we will reduce PE_NUM =24.which will be the reminder in each set
