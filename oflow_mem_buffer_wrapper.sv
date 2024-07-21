@@ -15,8 +15,8 @@ input logic reset_N,
 input logic start_read,
 input logic start_write,
 // data in from pe
-input logic data_in_0,
-input logic data_in_1,
+input logic [`DATA_WIDTH-1:0] data_in_0,
+input logic [`DATA_WIDTH-1:0] data_in_1,
 //global variable
 input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num,//the serial number of the current frame 0-255
 input logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] num_of_history_frames, // fallback number
@@ -26,8 +26,8 @@ input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] num_of_bbox_in_frame, // TO POINT 
 output logic done_read,
 output logic done_write,
 //data out for pe
-output logic data_out_0,
-output logic data_out_1 ,
+output logic [`DATA_WIDTH-1:0] data_out_0,
+output logic [`DATA_WIDTH-1:0] data_out_1 ,
 
 //data out for interface
 output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_interface
