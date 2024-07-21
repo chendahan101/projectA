@@ -19,8 +19,6 @@
 `define BBOX_VECTOR_SIZE (89-`D_HISTORY_LEN)
 
 
-
-
 // defines for intern calculations
 
 `define POSTION_TL_LEN 22 // len of x&y tl-top left
