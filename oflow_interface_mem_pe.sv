@@ -48,10 +48,11 @@ module oflow_interface_mem_pe #() (
 	output logic [`ROW_LEN-1:0] row_sel_to_pe,//to pe
 
 	//data to write , come from pe
-	//we will change FEATURE_OF_PREV_LEN from 290 to 284
+	//we will change FEATURE_OF_PREV_LEN from 145 to 142
 	input logic [`FEATURE_OF_PREV_LEN-1:0] data_out_pe [`PE_NUM],
 
 	//data out to mem buffer
+	//we will change FEATURE_OF_PREV_LEN from 290 to 284
 	output logic [`DATA_WIDTH -1:0] data_in_for_buffer_mem_0,
 	output logic [`DATA_WIDTH -1:0] data_in_for_buffer_mem_1,
 
