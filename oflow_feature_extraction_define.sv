@@ -6,9 +6,6 @@
  * Description   :
  *------------------------------------------------------------------------------*/
 
-// defines for inputs
-`define BBOX_VECTOR_SIZE 89
-
 
 // defines for wires AND OUTPUTS
 
@@ -17,6 +14,12 @@
 `define POSITION_CONCATE_LEN 44  // concate
 `define COLOR_LEN 24
 `define D_HISTORY_LEN 3
+
+// defines for inputs
+`define BBOX_VECTOR_SIZE (89-`D_HISTORY_LEN)
+
+
+
 
 // defines for intern calculations
 
@@ -36,8 +39,3 @@
 `define HEIGHT_MSB_IN_BBOX (`WIDTH_MSB_IN_BBOX-`WIDTH_LEN) //
 `define COLOR1_MSB_IN_BBOX (`HEIGHT_MSB_IN_BBOX-`HEIGHT_LEN) //
 `define COLOR2_MSB_IN_BBOX (`COLOR1_MSB_IN_BBOX-`COLOR_LEN) //
-
-
-
-
-
