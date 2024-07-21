@@ -54,7 +54,7 @@ module oflow_interface_mem_pe #() (
 	//data out to mem buffer
 	//we will change FEATURE_OF_PREV_LEN from 290 to 284 (In mem_buffer we won't save d_history)
 	output logic [`DATA_WIDTH -1:0] data_in_for_buffer_mem_0,
-	output logic [`DATA_WIDTH -1:0] data_in_for_buffer_mem_1,
+	output logic [`DATA_WIDTH -1:0] data_in_for_buffer_mem_1
 
 
 );
