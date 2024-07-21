@@ -153,8 +153,7 @@ sm_type next_state;
 	 done_fe = 0; 
 
 	 case (current_state)
-		 idle_st: begin
-			 //start_read = start_read_mem_for_first_set  ? 1: 0;	
+		 idle_st: begin	
 			 next_state = start_fe  ? fe_st: idle_st;	 
 		 end
 		 
