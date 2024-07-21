@@ -16,18 +16,26 @@ module oflow_core_fsm_read #() (
 	input logic reset_N,
 	
 	// global inputs
-	input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] num_of_bbox_in_frame, // TO POINT TO THE END OF THE FRAME MEM, SO WE WILL READ ONLY THE FULL CELL --- maybe to remove
+	
+	
+	//fsm_core_top
+	input logic [`SET_LEN-1:0] num_of_sets, // for stop_counter
+	input logic [`REMAIN_BBOX_LEN-1:0] counter_of_remain_bboxes, // will help us to choose how many pe to activate because sometimes current #bboxes_in_set < 24
+	
 	
 	//control signals
 	input logic done_read, // from fsm buffer read
 	input logic done_registration, // from registration (after set done)
 	input logic start_read_mem_for_first_set, //its not enough to know that this is the first set of the frame, we also need to know that the similarity_metric is starting
-	input logic done_similarity_metric,//from similarity_metric (to read new line)
+	input logic done_similarity_metric_i [`PE_NUM],//from all similarity_metrics (to read new line)
 
 	
 	output logic start_read, // send from fsm core to fsm buffer read
 	output logic read_new_line //send from fsm core to fsm buffer read
-
+	
+	// core_fsm_registration
+	input logic [`SET_LEN-1:0] counter_set_registration;
+	
 );
 
 
@@ -40,6 +48,7 @@ module oflow_core_fsm_read #() (
 
 logic [`SET_LEN-1:0] counter_set;
 logic [`SET_LEN-1:0] stop_counter;
+
 	
 typedef enum {idle_st,start_read_st, end_read_st} sm_type; //select_pe0_st is that the remainder with 4 of the #bboxes%22 is 0, ...
 sm_type current_state;
@@ -95,7 +104,7 @@ sm_type next_state;
  
 		end_read_st: begin 
 		
-			stop_counter = (num_of_bbox_in_frame%PE_NUM) ? num_of_bbox_in_frame/PE_NUM + 1: num_of_bbox_in_frame/PE_NUM;
+			stop_counter = num_of_sets;
 			 if (counter_set < stop_counter && done_registration) begin 
 				 next_state = start_read_st;
 			end
@@ -107,9 +116,11 @@ sm_type next_state;
  end
 	  
 // assignments
-	  
-	assign read_new_line = done_similarity_metric;
-	
+	always_comb begin
+		if( counter_set_registration == num_of_sets - 1 )
+					read_new_line = ( {`PE_NUM{1'b1}}[counter_of_remain_bboxes-1:0] == done_similarity_metric_i[counter_of_remain_bboxes-1:0]);
+		else read_new_line = ( done_similarity_metric_i == {`PE_NUM{1'b1}} );	
+	end
 	
 	 
 	 

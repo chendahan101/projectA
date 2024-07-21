@@ -32,6 +32,8 @@ module oflow_core_fsm_registration #() (
 	input logic done_registration_i [`PE_NUM],
 	output logic start_registration_i [`PE_NUM]
 	
+	// oflow_core_fsm_read
+	output logic [`SET_LEN-1:0] counter_set_registration;
 
 );
 
@@ -43,7 +45,7 @@ module oflow_core_fsm_registration #() (
 //                  logicisters & Wires
 // -----------------------------------------------------------  
 
-logic [`SET_LEN-1:0] counter_set_registration;
+
 
 
 logic generate_done_registration;
