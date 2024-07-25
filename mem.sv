@@ -5,13 +5,14 @@
  * Creation date : Jun 23, 2024
  * Description   :
  *------------------------------------------------------------------------------*/
+`include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
 
 //===========================================
  // Function : Synchronous read write RAM
  // Coder    : Deepak Kumar Tala
  // Date     : 1-Nov-2005
  //===========================================
- module mem #(parameter DATA_WIDTH = 290,
+module mem #(parameter DATA_WIDTH = `DATA_WIDTH,
 				   parameter ADDR_WIDTH = 8,
 				   parameter RAM_DEPTH = (1 << ADDR_WIDTH))(
  input  logic                  clk       , // Clock Input
