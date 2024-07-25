@@ -22,13 +22,14 @@ module oflow_core_fsm_top #() (
 	input logic new_set_from_dma, // dma ready with new feature extraction set
 	input logic new_frame,
 	output logic ready_new_set, // fsm_core_top ready for new_set from DMA
+	output logic ready_new_frame, // fsm_core_top ready for new_frame from DMA
 	
 	
 	// oflow_reg_file
 	input logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frames,
 	input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] num_of_bbox_in_frame, // TO POINT TO THE END OF THE FRAME MEM, SO WE WILL READ ONLY THE FULL CELL --- maybe to remove
 	//input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num,//the serial number of the current frame 0-255; We converted this to counter
-	input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] num_of_total_frames,//the serial number of the current frame 0-255
+	// input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] num_of_total_frames,//the serial number of the current frame 0-255 ; we add ready_new_frame, change the FSM
 
 	//oflow_core_fsm_fe
 	input logic [`SET_LEN-1:0] counter_set_fe, // for counter_of_remain_bboxes in core_fsm_top
@@ -118,11 +119,11 @@ assign new_set = new_set_from_dma;
 	 start_cr = 1'b0;
 	 start_write_score = 1'b0;
 	 start_write_mem = 1'b0;
-			
+	 ready_new_frame = 1'b0;		
 	
 	 case (current_state)
 		 idle_st: begin
-			 next_state = start ? set_variables_st: idle_st;	
+			 next_state = (start | new_frame) ? set_variables_st: idle_st;	
 			 
 		 end
 		 
@@ -164,13 +165,18 @@ assign new_set = new_set_from_dma;
 
 		write_st: begin
 			
-			done_all_frames =  (frame_num == num_of_total_frames);
+			/*done_all_frames =  (frame_num == num_of_total_frames);
 			if(new_frame && done_write) begin
 				next_state = set_variables_st;
 			end	
 			else if (done_all_frames && done_write) begin
 				next_state = idle_st;
-			end		
+			end	
+			*/
+			if(done_write) begin
+				ready_new_frame = 1'b1;
+				next_state = idle_st;
+			end	
 			
 		end			
 		 
