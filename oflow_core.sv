@@ -24,6 +24,8 @@ module oflow_core #() (
 	input logic [`BBOX_VECTOR_SIZE-1:0] set_of_bboxes_from_dma [`PE_NUM],
 	input logic new_set_from_dma, // dma ready with new feature extraction set
 	output logic ready_new_set, // fsm_core_top ready for new_set from DMA
+	output logic ready_new_frame, // fsm_core_top ready for new_frame from DMA
+	output logic conflict_counter_th, // fsm_core_top ready for new_frame from DMA
 	
 	// reg_file
 	input logic [`WEIGHT_LEN-1:0] iou_weight,
@@ -36,7 +38,7 @@ module oflow_core #() (
 	input logic start, // from top
 	input logic new_frame,
 	
-	input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] num_of_total_frames,//the serial number of the current frame 0-255
+	//input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] num_of_total_frames,//the serial number of the current frame 0-255
 	input logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] num_of_history_frames, // fallback number
 	input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] num_of_bbox_in_frame, // TO POINT TO THE END OF THE FRAME MEM, SO WE WILL READ ONLY THE FULL CELL --- maybe to remove
 	 
@@ -49,9 +51,9 @@ module oflow_core #() (
 	 
 	 // outputs	
 	 
-	 output logic [4:0] th_conflict_counter,
-	 // output logic th_conflict_counter_wr,
-	 output logic done_for_dma, 
+	
+	 
+	
 	 
 	 output logic done_frame,
 	 output logic [`ID_LEN-1:0] ids [`MAX_BBOXES_PER_FRAME] );
@@ -242,93 +244,138 @@ oflow_interface_mem_pe oflow_interface_mem_pe(
 	);
 	
 	
+oflow_core_fsm_read oflow_core_fsm_read(
+		.clk (clk),
+		.reset_N (reset_N),
+		
+		 .num_of_sets (num_of_sets), 
+		 .counter_of_remain_bboxes (counter_of_remain_bboxes), 
+		
+        
+	    .done_read (done_read), 
+	    .done_registration (done_registration), 
+	    .start_read_mem_for_first_set (!counter_set_registration), 
+	    .done_similarity_metric_i (done_similarity_metric_i),
+	    
+	    
+	     .start_read (start_read), 
+	     .read_new_line (read_new_line), 
+	    
+	     .counter_set_registration (counter_set_registration)
 	
+	);
 
-endmodule	
+oflow_core_fsm_write oflow_core_fsm_write(	
 	
 	
+	.clk (clk),
+	.reset_N (reset_N),
+	// global inputs
+	.num_of_bbox_in_frame (num_of_bbox_in_frame), // TO POINT TO THE END OF THE FRAME MEM, SO WE WILL READ ONLY THE FULL CELL --- maybe to remove
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-/*
-		   input logic clk,
-		   input logic reset_N	,
-		   input logic [`BIT_NUMBER_OF_PE-1:0][111:0] data_in,//[5-1:0]->22 PEs
-		   input logic [`BIT_NUMBER_OF_PE-1:0] wr,
-		   input logic [`BIT_NUMBER_OF_PE-1:0][7:0] addr,
-		   input logic  EN,
+	//from genreal fsm in core (after conflict_resolve done)
+	.start_write (start_write),
+	//from buffer 
+	//input logic done_write_buffer,//only after core fsm ready to fetch us the next 2 line of data ; we are going to add a wait state to cure this. the wait state has to be sure the buffer is done to writes 2 rows and now we can change the PE's
 
-
-		   output logic [`BIT_NUMBER_OF_PE-1:0][111:0] data_out
-		   );
-		   
-// -----------------------------------------------------------       
-//                  logicisters & Wires
-// -----------------------------------------------------------  
-
-
-
-// -----------------------------------------------------------       
-//				Instanciation
-// -----------------------------------------------------------
- 
-//------------------PEs------------	 
-genvar i;
-generate for  ( i=0;i<`K; i++) 
-begin 
-   oflow_PE oflow_PE_inst( 
-		   .clk(clk),
-		   .reset_N(reset_N)	,
-		   .data_in(data_in[i]),
-		   .wr(wr[i]),
-		   .addr(addr[i]),
-		   .EN(EN),
-		   
-		   
-		   .data_out(data_out[i])
-	   );
-end
-endgenerate
-/*
-//------------------conflict resolve------------
-oflow_conflict_resolve #() (
-   input logic clk,
-   input logic reset_N	,
-	   
-	input logic[43:0] num_of_row_to_read_from_mem,
-	input logic[43:0] is_conflicr_resolve_state_EN,
-	input logic[10:0] num_of_fall_back,
-	input logic[10:0] max_bbox,
-	input logic[10:0] 
 	
-	output logic[20:0] th_conf_counter
-	output logic[20:0] id  ); */
-//------------------mem manager------------	 
-/*oflow_mem_manager*/
+	 .ready_from_core (ready_from_core), // send from fsm core to fsm buffer
+	 .remainder (remainder), //if the fsm is in the remainder states
+	 .row_sel (row_sel),
+	 .pe_sel (pe_sel)
+	
+	);
 	
 	
+oflow_core_fsm_fe oflow_core_fsm_fe(	
+	.clk (clk),
+	.reset_N (reset_N),
 	
+	//fsm_core_top
+	.num_of_sets (num_of_sets), 
+	.start_pe (start_pe),
+	.counter_of_remain_bboxes (counter_of_remain_bboxes), // will help us to choose how many pe to activate because sometimes current #bboxes_in_set < 24
+	.new_set (new_set), // will help to know if new_set in the frame is waiting
+	//output logic [`SET_LEN] counter_set_fe - need to check if need this because we draw it in module but we forgot
+	.counter_set_fe (counter_set_fe) // for counter_of_remain_bboxes in core_fsm_top
+	
+	//oflow_core_fsm_registration
+	.done_registration (done_registration),
+	.done_fe (done_fe), // done_fe of all fe's in use
+	
+	
+	// pe's
+	.done_fe_i (done_fe_i),
+	.start_fe_i (start_fe_i)
+	
+	);
+	
+oflow_core_fsm_registration oflow_core_fsm_registration(
+	.clk (clk),
+	.reset_N (reset_N),
+	
+	//fsm_core_top
+	.num_of_sets (num_of_sets), 
+	.counter_of_remain_bboxes (counter_of_remain_bboxes), // will help us to choose how many pe to activate because sometimes current #bboxes_in_set < 24
+	.done_pe (done_pe),
+	
+	
+	//oflow_core_fsm_fe
+	.done_fe (done_fe),
+	.done_registration (done_registration), // done_registration of all registration's in use
+	
+	// pe's
+	.done_registration_i (done_registration_i),
+	.start_registration_i (start_registration_i),
+	
+	// oflow_core_fsm_read
+	.counter_set_registration (counter_set_registration)	
 
+	);
+	
+	
+oflow_core_fsm_top oflow_core_fsm_top(
+	 .clk (clk),
+	 .reset_N (reset_N),
+	
+	// globals inputs and outputs
+	.start (start), // from top
+	.new_set_from_dma (new_set_from_dma), // dma ready with new feature extraction set
+	.new_frame (new_frame),
+	.ready_new_set (ready_new_set), // fsm_core_top ready for new_set from DMA
+	.ready_new_frame (ready_new_frame), // fsm_core_top ready for new_frame from DMA
+	
+	
+	// oflow_reg_file
+	.num_of_history_frames (num_of_history_frames),
+	.num_of_bbox_in_frame (num_of_bbox_in_frame), // TO POINT TO THE END OF THE FRAME MEM, SO WE WILL READ ONLY THE FULL CELL --- maybe to remove
+	//input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num,//the serial number of the current frame 0-255; We converted this to counter
+	// input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] num_of_total_frames,//the serial number of the current frame 0-255 ; we add ready_new_frame, change the FSM
+
+	//oflow_core_fsm_fe
+	.counter_set_fe (counter_set_fe), // for counter_of_remain_bboxes in core_fsm_top
+	.start_pe (start_pe),
+	.new_set (new_set), // will help to know if new_set in the frame is waiting
+	
+	//oflow_core_fsm_registration
+	.done_pe (done_pe),
+	
+	.counter_of_remain_bboxes (counter_of_remain_bboxes), // will help us to choose how many pe to activate because sometimes current #bboxes_in_set < 24
+	.num_of_sets (num_of_sets), 
+	
+	
+	// oflow_MEM_buffer_wrapper
+	.done_write (done_write),
+	.start_write_mem (start_write_mem),
+	.frame_num (frame_num), // counter for frame_num
+	
+	//oflow_conflict_resolve
+	.done_cr (done_cr), // cr: conflict resolve
+	.start_cr (start_cr),
+	
+	
+	// write_score
+	.start_write_score (start_write_score)
+	
+	);
 endmodule
