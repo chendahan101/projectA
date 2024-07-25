@@ -30,10 +30,10 @@ module oflow_core_fsm_registration #() (
 	
 	// pe's
 	input logic done_registration_i [`PE_NUM],
-	output logic start_registration_i [`PE_NUM]
+	output logic start_registration_i [`PE_NUM],
 	
 	// oflow_core_fsm_read
-	output logic [`SET_LEN-1:0] counter_set_registration;
+	output logic [`SET_LEN-1:0] counter_set_registration
 
 );
 
