@@ -10,7 +10,7 @@
 
 
 `define WEIGHT_LEN 10 // explenation in ipad, q0.9
-`define FEATURE_OF_PREV_LEN 145 // the total length of the features came out of Buffer Mem Unit
+`define FEATURE_OF_PREV_LEN 142 // the total length of the features came out of Buffer Mem Unit
 `define NUM_OF_METRICS 6
 `define INV_NUM_OF_METRICS  6'b0010101   //q0.6, INV=INVERSE 0.1666 
 `define D_HISTORY_METRIC 6 // if `D_HISTORY_LEN is 3, 0-5, the maximum result after shift will be 2^5=32, the we need 6 bits
