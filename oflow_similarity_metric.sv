@@ -74,6 +74,7 @@ module  oflow_similarity_metric(
 	logic [`AVG_SIMILARITY_METRIC_LEN-1:0] avg_similarity_metric;
 
 	logic [`COUNTER_SIZE-1:0] counter;
+	logic [`SCORE_LEN-1:0] score_reg;
 
 	typedef enum {idle_st,calc_st,avg_st,iou_st} sm_type;
 	sm_type current_state;
@@ -100,6 +101,7 @@ module  oflow_similarity_metric(
 	assign color2_metric_pad = {color2_metric, {10{1'b0}}};//q24.10
 	assign d_history_metric_pad = {d_history_metric, {10{1'b0}}}; // the len of metric will be +1 the feature:q6.10	
 
+	assign score = score_reg;
 // -----------------------------------------------------------       
 //				Instantiation
 // -----------------------------------------------------------  
@@ -134,17 +136,19 @@ oflow_calc_iou oflow_calc_iou(
 		
 	end
 	
-	
-	
-	
+//--------------------score_reg---------------------------------	
+	 always_ff @(posedge clk or negedge reset_N) begin
+		 if (!reset_N) score_reg <= #1 0;
+		 else if(valid)	score_reg <= #1 avg_similarity_metric[`AVG_INDEX];	
+	end			
 // -----------------------------------------------------------       
 //						FSM – Async Logic
 // -----------------------------------------------------------	
 always_comb begin
 	next_state = current_state;
-	valid = 1;//of similarity
+	valid = 0;//of similarity
 	start_iou = 0;
-	score = 0;
+	//score = 0;
 	case (current_state)
 		idle_st: begin
 			next_state = start ? calc_st:idle_st;	
@@ -168,9 +172,10 @@ always_comb begin
 				avg_similarity_metric = iou_weight*iou_metric_pad + w_weight*w_metric_pad+h_weight*h_metric_pad+color1_weight*color1_metric_pad+
 										color2_weight*color2_metric_pad+ dhistory_weight*d_history_metric_pad;
 					
-				score = avg_similarity_metric[`AVG_INDEX];
+				
 				
 				if (counter == 4'd10) begin // COUNTER OF THE ABOVE CALC OF THE sum_similarity_metric,avg_similarity_metric
+					// score = avg_similarity_metric[`AVG_INDEX];
 					next_state = idle_st;
 					valid = 1;
 				end
