@@ -12,6 +12,7 @@ module oflow_mem_buffer_wrapper #() (
 input logic clk,
 input logic reset_N,
 // control signal from core fsm
+input logic read_new_line, //only after the similarity metric finish to process one line 	
 input logic start_read,
 input logic start_write,
 // data in from pe
@@ -84,6 +85,7 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	.frame_num(frame_num),
 	.num_of_history_frames(num_of_history_frames),
 	.num_of_bbox_in_frame(num_of_bbox_in_frame),
+	.similarity_metric_flag_ready_to_read_new_line (read_new_line),
 	.start_read(start_read),
 	.start_write(start_write),
 	.done_read(done_read),
