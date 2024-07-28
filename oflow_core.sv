@@ -176,6 +176,7 @@ oflow_mem_buffer_wrapper oflow_mem_buffer_wrapper(
  .clk (clk),
  .reset_N (reset_N),
 // control signal from core fsm
+ .read_new_line (read_new_line),
  .start_read (start_read),
  .start_write (start_write_mem),
 // data in from pe
