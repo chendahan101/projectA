@@ -11,7 +11,7 @@
 `include "/users/epchof/Project/design/work/include_files/oflow_feature_extraction_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
-
+`define MAX_SCORE {`SCORE_LEN{1'b1}} 
 
 
 module oflow_calc_min #() (
@@ -46,6 +46,11 @@ logic [`SCORE_LEN-1:0] min_score_0_reg; // min_score_0
 logic [`ID_LEN-1:0] min_id_0_reg; // id_0 of min score_0 
 logic [`SCORE_LEN-1:0] min_score_1_reg; // min_score_1 (will be the maximum between min_score_0_reg and min_score_1_reg)
 logic [`ID_LEN-1:0] min_id_1_reg; // id_1 of min score_1 (will be the id of the maximum between min_score_0_reg and min_score_1_reg)
+logic [1:0] min1 ,min0;
+logic put_0_in_0 ,put_1_in_0 ,put_0_in_1 ,put_1_in_1  , put_min_0_in_1 ;
+
+
+
 
 typedef enum {idle_st, calc_min_st} sm_type; 
 sm_type current_state;
@@ -62,13 +67,13 @@ sm_type next_state;
 	end
 //--------------------min_score_0_reg---------------------------------	
 	 always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N || start_score_calc) min_score_0_reg <= #1 {32{1'b1}} ;
+		if (!reset_N || start_score_calc) min_score_0_reg <= #1  `MAX_SCORE;
 		else if(put_0_in_0 )	min_score_0_reg <= #1 score_0;
 		else if(put_1_in_0 ) <= #1 min_score_0_reg <= #1 score_1;
 	 end
 //--------------------min_score_1_reg---------------------------------	
 	 always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N || start_score_calc) min_score_0_reg <= #1 {32{1'b1}} ;
+		if (!reset_N || start_score_calc) min_score_0_reg <= #1 `MAX_SCORE ;
 		else if(put_0_in_1 )	min_score_1_reg <= #1 score_0;
 		else if(put_1_in_1 ) <= #1 min_score_1_reg <= #1 score_1;
 		else if(put_min_0_in_1 ) <= #1 min_score_1_reg <= #1 min_score_0_reg;
@@ -100,10 +105,13 @@ sm_type next_state;
 	 next_state = current_state;
 	 
 	 done_calc_min = 0;
-	 put_0_in_1 = 0;	
-	 put_1_in_1 =0 ;
+	 min1 = 0;
+	 min0 = 0;
 	 put_0_in_0 = 0;
 	 put_1_in_0 = 0;
+	 
+	 put_0_in_1 = 0;	
+	 put_1_in_1 =0 ;
 	 put_min_0_in_1 = 0;
 	 
 	 case (current_state)
@@ -114,36 +122,27 @@ sm_type next_state;
 		 
 		 calc_min_st: begin
 
-			if (not (score_0 >= min_score_1_reg and score_1 >= min_score_1_reg ) ) begin 
-				if  (min_score_0_reg=< score_0 < min_score_1_reg and score_1 >= min_score_1_reg )  put_0_in_1=1'b1 
-				else if  (min_score_0_reg=< score_1 < min_score_1_reg and score_0 >= min_score_1_reg)  put_1_in_1=1'b1 
-				else if  (min_score_0_reg=< score_0 < min_score_1_reg and min_score_0_reg=< score_1 < min_score_1_reg) begin 
-					if (score_0<score_1)  put_0_in_1=1'b1  
-					else   put_1_in_1=1'b1  
-				end 
-				else if  (score_0 < min_score_0_reg and min_score_1_reg=< score_1 ) begin
-					put_0_in_0 = 1'b1
-					put_min_0_in_1 = 1'b1
-				end
-				else if  (score_1 < min_score_0_reg and min_score_1_reg=< score_0 ) begin
-					put_1_in_0 = 1'b1
-					put_min_0_in_1 = 1'b1
-				end
-				else if  (score_0 < min_score_0_reg and min_score_0_reg=< score_1 < min_score_1_reg) begin
-					put_0_in_0 = 1'b1
-					put_min_0_in_1 = 1'b1
-				end
-				else if  (score_1 < min_score_0_reg and min_score_0_reg=< score_0 < min_score_1_reg) begin
-					put_1_in_0 = 1'b1
-					put_min_0_in_1 = 1'b1
-				end
-				else if  (score_1 < min_score_0_reg and score_0 < min_score_0_reg) begin
-					if (score_0<score_1) begin  put_0_in_0=1'b1; put_1_in_1=1'b1 end 
-					else begin   put_0_in_1=1'b1; put_1_in_0=1'b1 end 
-				end
-			end 
+			// score_0-00 score_1-01 min_score_0_reg-10
+			if (score_0 < min_score_0_reg) begin
+                min1 <= 2'b10;
+                min0 <= 2'b00;
+            end else if (score_0 < min_score_1_reg) begin
+                min1 <= 2'b00;
+            end
+
+            if (score_1 < min_score_0_reg) begin
+                min1 <= 2'b10;
+                min0 <= 2'b01;
+            end else if (score_1 < min_score_1_reg) begin
+                min1 <= 2'b01;
+            end
 			
+			put_0_in_0 = (min0==2'b00);
+			put_1_in_0 = (min0==2'b01);
 			
+			put_0_in_1 = (min1==2'b00);
+			put_1_in_1 = (min1==2'b01);
+			put_min_0_in_1 = (min1==2'b10);
 			
 			
 			next_st = idle_st;
