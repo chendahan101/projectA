@@ -152,6 +152,7 @@ begin
 			.bboxes_from_dma (set_of_bboxes_from_dma[i]),
 			
 			// core_fsm
+			.frame_num(frame_num),
 			.start_fe (start_fe_i[i]),
 			.start_registration(start_registration_i[i]),
 			.done_pe (done_pe),
