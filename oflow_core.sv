@@ -81,6 +81,7 @@ logic done_similarity_metric_i [`PE_NUM];
 logic data_out_pe [`PE_NUM];
 	
 // logics for outputs of interface
+logic done_read_to_pe;	
 logic [`DATA_TO_PE_WIDTH -1:0] data_to_pe_0; // we will change the d_history_field
 logic [`DATA_TO_PE_WIDTH -1:0] data_to_pe_1; // we will change the d_history_field
 logic [`ROW_LEN-1:0] row_sel_to_pe;
@@ -165,7 +166,8 @@ begin
 			 .data_to_pe_0 (data_to_pe_0),// we will change the d_history_field
 			 .data_to_pe_1 (data_to_pe_1),// we will change the d_history_field
 			 .row_sel_to_pe (row_sel_to_pe),
-			 .data_out_pe (data_out_pe[i])
+			 .data_out_pe (data_out_pe[i]),
+		         .done_read_to_pe (done_read_to_pe)
 			
 	   );
 end
@@ -209,7 +211,7 @@ oflow_interface_mem_pe oflow_interface_mem_pe(
 	//input logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] num_of_history_frames, // fallback number
 	
 //for read from mem buffer
-
+	
 	//control signal
 	//from buffer wrapper
 	 .counter_of_history_frame_to_interface (counter_of_history_frame_to_interface),
@@ -217,12 +219,13 @@ oflow_interface_mem_pe oflow_interface_mem_pe(
 	//data to read , come from buffer mem
 	//data width will be 284
 	 .data_out_from_buffer_mem (data_out_0) ,//output of mem buffer, but this is input to interface
-
+	
 	//data to pe
 	 .data_to_pe_0 (data_to_pe_0),// we will change the d_history_field
 	 .data_to_pe_1 (data_to_pe_1),// we will change the d_history_field
 
-
+	.done_read (done_read),
+	.done_read_to_pe (done_read_to_pe),
 
 //for write to mem buffer
 
