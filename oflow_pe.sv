@@ -38,6 +38,7 @@ module  oflow_pe(
 			
 
 			// interface between buffer&pe
+			input logic done_read_to_pe, 	
 			input logic [`DATA_TO_PE_WIDTH -1:0] data_to_pe_0,// we will change the d_history_field
 			input logic [`DATA_TO_PE_WIDTH -1:0] data_to_pe_1,// we will change the d_history_field
 			input logic [`ROW_LEN-1:0] row_sel_to_pe,
@@ -120,6 +121,7 @@ oflow_registration oflow_registration(
 			
 
 			// interface between buffer&pe
+			.done_read (done_read_to_pe),
 			.data_to_similarity_metric_0(data_to_pe_0),// we will change the d_history_field 
 			.data_to_similarity_metric_1(data_to_pe_1),// we will change the d_history_field
 			.row_sel_to_pe(row_sel_to_pe),
@@ -136,6 +138,6 @@ oflow_registration oflow_registration(
 			
 			);
 
-/* oflow_feature_extraction();    */
+
 
 endmodule
