@@ -25,15 +25,16 @@ module oflow_interface_mem_pe #() (
 	//control signal
 	//from buffer wrapper
 	input logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_interface,
-
+	input logic done_read,
+	
 	//data to read , come from buffer mem
 	//data width will be 284
 	input logic [`DATA_WIDTH-1:0] data_out_from_buffer_mem ,//output of mem buffer, but this is input to interface
-
+	
 	//data to pe
 	output logic [`DATA_TO_PE_WIDTH -1:0] data_to_pe_0,// we will change the d_history_field
 	output logic [`DATA_TO_PE_WIDTH -1:0] data_to_pe_1,// we will change the d_history_field
-
+	output logic done_read_to_pe,
 
 
 //for write to mem buffer
@@ -119,7 +120,7 @@ assign row_sel_to_pe = row_sel_from_core_fsm;
  
 assign data_to_pe_0 = {data_out_from_buffer_mem[`DATA_WIDTH-1:`DATA_WIDTH-`FEATURE_OF_PREV_LEN+`ID_LEN],counter_of_history_frame_to_interface,data_out_from_buffer_mem[`DATA_WIDTH-`FEATURE_OF_PREV_LEN+`ID_LEN-1-:`ID_LEN]};
 assign data_to_pe_1 = {data_out_from_buffer_mem[`DATA_WIDTH-`FEATURE_OF_PREV_LEN-1:`ID_LEN],counter_of_history_frame_to_interface,data_out_from_buffer_mem[`ID_LEN-1:0]} 
- 
+assign done_read_to_pe = done_read; 
 	
 	 
 endmodule
