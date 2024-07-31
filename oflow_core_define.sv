@@ -15,3 +15,5 @@
 `define REMAIN_BBOX_LEN 8 // each set we will reduce PE_NUM =24.which will be the reminder in each set
 `define MAX_BBOXES_PER_FRAME 256
 `define ID_LEN 12
+//in interface in similarity metric
+`define DATA_TO_PE_WIDTH (`FEATURE_OF_PREV_LEN+`D_HISTORY_LEN ) //142+3=145
