@@ -7,6 +7,7 @@
  *------------------------------------------------------------------------------*/
 
 `include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
+`include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 
 
 module  oflow_similarity_metric( 
@@ -20,9 +21,9 @@ module  oflow_similarity_metric(
 			input logic [`HEIGHT_LEN-1:0] height_cur,
 			input logic [`COLOR_LEN-1:0] color1_cur,
 			input logic [`COLOR_LEN-1:0] color2_cur,
-			input logic [`D_HISTORY_LEN-1:0] d_history_cur, 
+			
 				
-			input logic [`FEATURE_OF_PREV_LEN-1:0] features_of_prev,
+			input logic [`DATA_TO_PE_WIDTH-1:0] features_of_prev,
 			
 			input logic [`WEIGHT_LEN-1:0] iou_weight,
 			input logic [`WEIGHT_LEN-1:0] w_weight,
