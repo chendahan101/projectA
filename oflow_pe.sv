@@ -28,6 +28,7 @@ module  oflow_pe(
 			input logic [`BBOX_VECTOR_SIZE-1:0] bboxes_from_dma,
 			
 			// core_fsm
+			input logic frame_num,
 			input logic start_fe,
 			input logic start_registration,
 			input logic done_pe,
@@ -112,6 +113,7 @@ oflow_registration oflow_registration(
 			.dhistory_weight(dhistory_weight),
 			
 			// core_fsm
+			.frame_num(frame_num),
 			.start_registration(start_registration),
 			.done_registration(done_registration), 
 			.done_similarity_metric_i(done_similarity_metric_i), // the similarity_metric will update this to AND of similarity_metric_0 & similarity_metric_1 in the registration
