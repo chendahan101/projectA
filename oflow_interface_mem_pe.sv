@@ -9,7 +9,6 @@
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
 
-`define DATA_TO_PE_WIDTH (`FEATURE_OF_PREV_LEN+`D_HISTORY_LEN ) //142+3=145
 
 
 module oflow_interface_mem_pe #() (
