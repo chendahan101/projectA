@@ -29,6 +29,8 @@ module oflow_score_calc #() (
 	input logic done_read, 	
 	input logic [`DATA_TO_PE_WIDTH -1:0] data_to_similarity_metric_0,// we will change the d_history_field
 	input logic [`DATA_TO_PE_WIDTH -1:0] data_to_similarity_metric_1,
+	output logic control_for_read_new_line, // will be 1 one after both of similarity metrics done 2 cycles before the end, so we can read new line from the buffer that will be ready when we start new similarity_metric
+	// we sure that the new line we read will not change the similarity calc before we end similarity because we have register of the score in the output
 	
 	//reg file
 	input logic [`WEIGHT_LEN-1:0] iou_weight,
@@ -63,14 +65,18 @@ logic [`ID_LEN-1:0] id_0;
 logic [`SCORE_LEN-1:0] score_1;
 logic [`ID_LEN-1:0] id_1;
 
+logic [`ID_LEN-1:0] id_1_prev_frame;	
+logic control_for_read_new_line_0;
+logic control_for_read_new_line_1;	
+	
 logic done_calc_min;
 logic start_calc_min;
 // -----------------------------------------------------------       
 //                  Assignments
 // -----------------------------------------------------------  
 
-
-
+assign id_1_prev_frame = data_to_similarity_metric_1[`ID_LEN-1:0];
+assign control_for_read_new_line = (control_for_read_new_line_0 && (control_for_read_new_line_1 || ~(|id_1_prev_frame) );
 
 // -----------------------------------------------------------       
 //                FSM synchronous procedural block.	
@@ -105,6 +111,7 @@ logic start_calc_min;
         .color2_weight(color2_weight),
         .dhistory_weight(dhistory_weight),
         .valid(done_similarity_metric_0),
+        .control_for_read_new_line(control_for_read_new_line_0),
         .score(score_0),
         .id(id_0)
     );
@@ -128,6 +135,7 @@ logic start_calc_min;
         .color2_weight(color2_weight),
         .dhistory_weight(dhistory_weight),
         .valid(done_similarity_metric_1),
+	 .control_for_read_new_line(control_for_read_new_line_1),
         .score(score_1),
         .id(id_1)
     );
@@ -155,8 +163,8 @@ oflow_calc_min oflow_calc_min (
         .start_score_calc(start_score_calc),
         .done_score_calc(done_score_calc),
         .done_read(done_read),
-        .id_1(data_to_similarity_metric_1[`ID_LEN-1:0]),
-        .done_similarity_metric(done_similarity_metric_0&&done_similarity_metric_1),
+        .id_1(id_1_prev_frame),
+	 .done_similarity_metric(done_similarity_metric_0 && (done_similarity_metric_1 || ~(|id_1_prev_frame) ),
         .start_similarity_metric_0(start_similarity_metric_0),
         .start_similarity_metric_1(start_similarity_metric_1)
     );
@@ -167,7 +175,7 @@ oflow_score_calc_calc_min_fsm oflow_score_calc_calc_min_fsm (
 	.done_calc_min(done_calc_min), 
 	.start_calc_min(start_calc_min), 
 	// similarity metric
-	.done_similarity_metric(done_similarity_metric_0&&done_similarity_metric_1)
+	.done_similarity_metric(done_similarity_metric_0 && (done_similarity_metric_1 || ~(|id_1_prev_frame) )
  );
 	 
 endmodule
