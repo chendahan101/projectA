@@ -34,7 +34,7 @@ module  oflow_pe(
 			input logic done_pe,
 			output logic done_fe,
 			output logic done_registration, 
-			output logic done_similarity_metric_i, // the similarity_metric will update this to AND of similarity_metric_0 & similarity_metric_1 in the registration
+			output logic control_for_read_new_line, // the similarity_metric will update this to AND of similarity_metric_0 & similarity_metric_1 in the registration
 			
 
 			// interface between buffer&pe
@@ -117,8 +117,7 @@ oflow_registration oflow_registration(
 			.frame_num(frame_num),
 			.start_registration(start_registration),
 			.done_registration(done_registration), 
-			.done_similarity_metric_i(done_similarity_metric_i), // the similarity_metric will update this to AND of similarity_metric_0 & similarity_metric_1 in the registration
-			
+			.control_for_read_new_line(control_for_read_new_line), // we want to start read new line after 2 cycles before the end
 
 			// interface between buffer&pe
 			.done_read (done_read_to_pe),
