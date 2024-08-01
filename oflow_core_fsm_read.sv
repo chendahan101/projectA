@@ -27,7 +27,7 @@ module oflow_core_fsm_read #() (
 	input logic done_read, // from fsm buffer read
 	input logic done_registration, // from registration (after set done)
 	input logic start_read_mem_for_first_set, //its not enough to know that this is the first set of the frame, we also need to know that the similarity_metric is starting
-	input logic done_similarity_metric_i [`PE_NUM],//from all similarity_metrics (to read new line)
+	input logic control_for_read_new_line [`PE_NUM],//from all similarity_metrics (to read new line)
 
 	
 	output logic start_read, // send from fsm core to fsm buffer read
@@ -118,8 +118,8 @@ sm_type next_state;
 // assignments
 	always_comb begin
 		if( counter_set_registration == num_of_sets - 1 )
-					read_new_line = ( {`PE_NUM{1'b1}}[counter_of_remain_bboxes-1:0] == done_similarity_metric_i[counter_of_remain_bboxes-1:0]);
-		else read_new_line = ( done_similarity_metric_i == {`PE_NUM{1'b1}} );	
+					read_new_line = ( {`PE_NUM{1'b1}}[counter_of_remain_bboxes-1:0] == control_for_read_new_line[counter_of_remain_bboxes-1:0]);
+		else read_new_line = ( control_for_read_new_line == {`PE_NUM{1'b1}} );	
 	end
 	
 	 
