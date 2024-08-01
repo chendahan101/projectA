@@ -36,6 +36,8 @@ module  oflow_similarity_metric(
 			//input logic  EN,
 			
 			output logic valid ,
+			output logic control_for_read_new_line, // we want to start read new line after 2 cycles before the end
+	
 			output logic [`SCORE_LEN-1:0] score,
 			output logic [`ID_LEN-1:0] id
 			);
@@ -147,8 +149,9 @@ oflow_calc_iou oflow_calc_iou(
 // -----------------------------------------------------------	
 always_comb begin
 	next_state = current_state;
-	valid = 0;//of similarity
-	start_iou = 0;
+	control_for_read_new_line = 1'b0;
+	valid = 1'b0; //of similarity
+	start_iou = 1'b0;
 	//score = 0;
 	case (current_state)
 		idle_st: begin
@@ -174,11 +177,13 @@ always_comb begin
 										color2_weight*color2_metric_pad+ dhistory_weight*d_history_metric_pad;
 					
 				
-				
-				if (counter == 4'd10) begin // COUNTER OF THE ABOVE CALC OF THE sum_similarity_metric,avg_similarity_metric
+				if (counter == 4'd7) begin // COUNTER OF THE ABOVE CALC OF THE sum_similarity_metric,avg_similarity_metric
+					control_for_read_new_line = 1'b1; // we want to start read new line after 2 cycles before the end
+				end
+				if (counter == 4'd9) begin // COUNTER OF THE ABOVE CALC OF THE sum_similarity_metric,avg_similarity_metric
 					// score = avg_similarity_metric[`AVG_INDEX];
-					next_state = idle_st;
 					valid = 1;
+					next_state = idle_st;	
 				end
 		end
 		
