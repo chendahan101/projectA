@@ -77,7 +77,7 @@ logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_interface
 // logics for outputs of PE
 logic done_fe_i [`PE_NUM];
 logic done_registration_i [`PE_NUM]; 
-logic done_similarity_metric_i [`PE_NUM];
+logic control_for_read_new_line_i [`PE_NUM];
 logic data_out_pe [`PE_NUM];
 	
 // logics for outputs of interface
@@ -159,7 +159,7 @@ begin
 			.done_pe (done_pe),
 			.done_fe (done_fe_i[i]),
 			.done_registration (done_registration_i[i]), 
-			.done_similarity_metric_i (done_similarity_metric_i[i]), // the similarity_metric will update this to AND of similarity_metric_0 & similarity_metric_1 in the registration
+	   .control_for_read_new_line (control_for_read_new_line_i[i]), // we want to start read new line after 2 cycles before the end; control_for_read_new_line_0 && ( control_for_read_new_line_1  || (~ |ID1)) 
 			
 
 			// interface between buffer&pe
@@ -260,7 +260,7 @@ oflow_core_fsm_read oflow_core_fsm_read(
 	    .done_read (done_read), 
 	    .done_registration (done_registration), 
 	    .start_read_mem_for_first_set (!counter_set_registration), 
-	    .done_similarity_metric_i (done_similarity_metric_i),
+	    .control_for_read_new_line (control_for_read_new_line_i),
 	    
 	    
 	     .start_read (start_read), 
