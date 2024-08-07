@@ -376,6 +376,7 @@ oflow_core_fsm_top oflow_core_fsm_top(
 	
 	//oflow_conflict_resolve
 	.done_cr (done_cr), // cr: conflict resolve
+	.conflict_counter_th(conflict_counter_th),
 	.start_cr (start_cr),
 	
 	
