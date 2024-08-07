@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------
- * File          : oflow_fsm_read.sv
+ * File          : oflow_core_fsm_top.sv
  * Project       : RTL
  * Author        : epchof
  * Creation date : Jun 30, 2024
@@ -50,6 +50,7 @@ module oflow_core_fsm_top #() (
 	
 	//oflow_conflict_resolve
 	input logic done_cr, // cr: conflict resolve
+	input logic conflict_counter_th,
 	output logic start_cr,
 	
 	
@@ -104,7 +105,7 @@ assign new_set = new_set_from_dma;
 
 	 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st ) frame_num <= #1 0;
+		 if (!reset_N || (current_state ==  idle_st && start == 1) ) frame_num <= #1 0;
 		 else if (cur_state ==  write_st && next_state == set_variables_st) frame_num <= #1 frame_num + 1;
 	  end
 	 	 
@@ -154,12 +155,15 @@ assign new_set = new_set_from_dma;
 		end
 		
 		conflict_resolve_st: begin
-		
-			if(done_cr) begin
+
+			if(conflict_counter_th)
+				next_state = idle_st;
+			 if(done_cr) begin
 				start_write_mem = 1'b1;
 				start_write_score = 1'b1;
 				next_state = write_st;
-			end	
+			end
+			
 				
 		end	
 
