@@ -13,6 +13,7 @@ module oflow_reg_file #() (
 	// inputs
 	input logic clk,    			          
 	input logic reset_N	,
+	input logic apb_pwdata,
 	
 	// APB Interface							
 	input logic apb_pclk, 		
