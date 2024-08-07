@@ -24,6 +24,7 @@ input logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] num_of_history_frames, // fallbac
 input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] num_of_bbox_in_frame, // TO POINT TO THE END OF THE FRAME MEM, SO WE WILL READ ONLY THE FULL CELL --- maybe to remove
 
 //control signal for core fsm
+input logic rnw_st,
 output logic done_read,
 output logic done_write,
 //data out for pe
@@ -41,7 +42,7 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 //              Logics
 // -----------------------------------------------------------  
 //mem logic
-
+	 logic frame_num_to_mem_buffer;
 	 logic frame_to_read;
 	 logic offset_0;
 	 logic offset_1;
@@ -52,6 +53,14 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 
  // fsm mem logic
 	 logic start_new_frame;
+
+// -----------------------------------------------------------       
+//              Assign
+// -----------------------------------------------------------  
+
+	assign frame_num_to_mem_buffer = (rnw_st) ? frame_num : frame_to_read ;
+
+
 	
 // -----------------------------------------------------------       
 //                Instantiations
@@ -62,7 +71,7 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	.clk (clk),
 	.reset_N (reset_N),
 
-	.frame_num(frame_to_read),
+	.frame_num(frame_num_to_mem_buffer),
 	.num_of_history_frames(num_of_history_frames), 
 	
 	.data_in_0(data_in_0),
