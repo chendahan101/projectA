@@ -45,6 +45,7 @@ module oflow_core_fsm_top #() (
 	
 	// oflow_MEM_buffer_wrapper
 	input logic done_write,
+	output logic rnw_st,
 	output logic start_write_mem,
 	output logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num, // counter for frame_num
 	
@@ -77,7 +78,7 @@ sm_type next_state;
 // -----------------------------------------------------------  
 
 assign new_set = new_set_from_dma;
-
+assign rnw_st = (current_state == write_st) ? 1 : 0 ;
 // -----------------------------------------------------------       
 //                FSM synchronous procedural block.	
 // -----------------------------------------------------------
