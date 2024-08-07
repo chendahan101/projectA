@@ -167,6 +167,9 @@ sm_type next_state;
 		wait_st: begin 
 			done_fe = 1'b1;
 			 if (start_fe)  next_state = fe_st;
+			 else if (done_pe)  next_state = idle_st;
+
+			
 		 end
 		 
 	 endcase
