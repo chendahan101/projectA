@@ -59,7 +59,7 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 // -----------------------------------------------------------  
 
 	assign frame_num_to_mem_buffer = (rnw_st) ? frame_num : frame_to_read ;
-
+	assign we = rnw_st; 
 
 	
 // -----------------------------------------------------------       
