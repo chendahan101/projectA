@@ -90,6 +90,7 @@ logic [`DATA_WIDTH -1:0] data_in_for_buffer_mem_1;
 
 
 // logics for outputs of core_fsm
+logic rnw_st;
 
 // core_fsm_top
 logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num; //the serial number of the current frame 0-255
@@ -179,6 +180,7 @@ oflow_mem_buffer_wrapper oflow_mem_buffer_wrapper(
  .clk (clk),
  .reset_N (reset_N),
 // control signal from core fsm
+ .rnw_st(rnw_st),
  .read_new_line (read_new_line),
  .start_read (start_read),
  .start_write (start_write_mem),
@@ -370,6 +372,7 @@ oflow_core_fsm_top oflow_core_fsm_top(
 	
 	
 	// oflow_MEM_buffer_wrapper
+	.rnw_st(rnw_st),
 	.done_write (done_write),
 	.start_write_mem (start_write_mem),
 	.frame_num (frame_num), // counter for frame_num
