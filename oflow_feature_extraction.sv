@@ -12,17 +12,24 @@ module oflow_features_extraction (
 	// inputs
 	input logic clk,
 	input logic reset_N,
-	input logic [`BBOX_VECTOR_SIZE-1:0] bbox,
-	input logic fe_enable, // feature_extraction enable                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         nable
 	
-	//outputs
+	input logic [`BBOX_VECTOR_SIZE-1:0] bbox,
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       nable
+	
+	//outputs to registration
 	output logic [`CM_CONCATE_LEN-1:0] cm_concate,
 	output logic [`POSITION_CONCATE_LEN-1:0] position_concate,
 	output logic [`WIDTH_LEN-1:0] width,
 	output logic [`HEIGHT_LEN-1:0] height,
 	output logic [`COLOR_LEN-1:0] color1,
 	output logic [`COLOR_LEN-1:0] color2,
-	output logic [`D_HISTORY_LEN-1:0] d_history );
+	
+	// core_fsm
+	input logic done_pe,
+	input logic start_fe,
+	output logic done_fe
+	
+	);
 
 //-----------------------------------------
 //				Wire
@@ -35,11 +42,13 @@ module oflow_features_extraction (
 	logic [`HEIGHT_LEN-1:0] height_tmp;
 	logic [`COLOR_LEN-1:0] color1_tmp;
 	logic [`COLOR_LEN-1:0] color2_tmp;
-	logic [`D_HISTORY_LEN:0] d_history_tmp;
+	
 	
 	logic [`CM_CONCATE_LEN-1:0] cm_concate_tmp;
 	logic [`POSITION_CONCATE_LEN-1:0] position_concate_tmp;
 	
+	
+	logic done;
 	
 //-----------------------------------------
 //				out
@@ -66,7 +75,7 @@ module oflow_features_extraction (
 	
 	assign color1_tmp = bbox[`COLOR1_MSB_IN_BBOX-1:`COLOR1_MSB_IN_BBOX-`COLOR_LEN];
 	assign color2_tmp = bbox[`COLOR2_MSB_IN_BBOX-1:`COLOR2_MSB_IN_BBOX-`COLOR_LEN];
-	assign d_history_tmp = bbox[`D_HISTORY_LEN-1:0];
+	
 
 
 
@@ -85,46 +94,86 @@ module oflow_features_extraction (
 	always_ff @(posedge clk or negedge reset_N)   
 	begin    
 		if (!reset_N)  cm_concate <= #1 22'd0;	
-		else if(fe_enable)  cm_concate <= #1 cm_concate_tmp;	 
+		else if(start_fe)  cm_concate <= #1 cm_concate_tmp;	 
 	end  
 
 	always_ff @(posedge clk or negedge reset_N)   
 	begin    
 		if (!reset_N) position_concate <= #1 44'd0;	
-		else if(fe_enable)  position_concate <= #1 position_concate_tmp;
+		else if(start_fe)  position_concate <= #1 position_concate_tmp;
 	end  
    
 	always_ff @(posedge clk or negedge reset_N)   
 	begin    
 		if (!reset_N) width <= #1 8'd0;	
-		else if(fe_enable)	width <= #1 width_tmp;	 
+		else if(start_fe)	width <= #1 width_tmp;	 
 	end  
    
 	always_ff @(posedge clk or negedge reset_N)   
 	begin    
 		if (!reset_N) height <= #1 8'd0;	
-		else if(fe_enable) height <= #1 height_tmp;
+		else if(start_fe) height <= #1 height_tmp;
 	end 
 
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
 		if (!reset_N) color1 <= #1 24'd0;	
-		else if(fe_enable) color1 <= #1 color1_tmp;
+		else if(start_fe) color1 <= #1 color1_tmp;
 	end 
 	
 	always_ff @(posedge clk or negedge reset_N)   
 	begin   
 		if (!reset_N) color2 <= #1 24'd0;	
-		else if(fe_enable) color2 <= #1 color2_tmp; 
+		else if(start_fe) color2 <= #1 color2_tmp; 
 	end 	
    
-	always_ff @(posedge clk or negedge reset_N)   
-	begin    
-		if (!reset_N) d_history <= #1 3'd0;	
-		else if(fe_enable) d_history <= #1 d_history_tmp;
-	end 	
-   
+   //
+  
+  
+typedef enum {idle_st,fe_st, wait_st} sm_type; //
+sm_type next_state;
 
+
+
+
+// -----------------------------------------------------------       
+//                FSM synchronous procedural block.	
+// -----------------------------------------------------------
+	always_ff @(posedge clk or negedge reset_N) begin
+		if (!reset_N) current_state <= #1 idle_st;
+		else current_state <= #1 next_state;
+	
+	end
+
+ // -----------------------------------------------------------       
+ //						FSM – Async Logic
+ // -----------------------------------------------------------	
+ always_comb begin
+	 next_state = current_state;
+	 done_fe = 0; 
+
+	 case (current_state)
+		 idle_st: begin	
+			 next_state = start_fe  ? fe_st: idle_st;	 
+		 end
+		 
+		 
+		 fe_st: begin 
+			 if( !done_pe )	next_state = wait_st;
+			 else next_state = idle_st;
+		 end
+		 
+ 
+		wait_st: begin 
+			done_fe = 1'b1;
+			 if (start_fe)  next_state = fe_st;
+		 end
+		 
+	 endcase
+ end
+	
+	
+	
 
 
 endmodule  // 
