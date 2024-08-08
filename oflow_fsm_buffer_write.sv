@@ -25,8 +25,8 @@ module oflow_fsm_buffer_write #() (
 	
 	output logic done_write, // send to fsm core
 	output logic [`OFFSET_WIDTH-1:0] offset_0,
-	output logic [`OFFSET_WIDTH-1:0] offset_1,
-	output logic we
+	output logic [`OFFSET_WIDTH-1:0] offset_1
+	//output logic we
 
 );
 
@@ -109,7 +109,7 @@ sm_type next_state;
 	  
 	assign offset_0 = counter_offset;
 	assign offset_1 = counter_offset + 1;
-	assign we = 1;
+	//assign we = 1;
 	 
 	 
 endmodule
