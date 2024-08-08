@@ -42,14 +42,14 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 //              Logics
 // -----------------------------------------------------------  
 //mem logic
-	 logic frame_num_to_mem_buffer;
-	 logic frame_to_read;
-	 logic offset_0;
-	 logic offset_1;
+	logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num_to_mem_buffer;
+	 
+	logic [`OFFSET_WIDTH-1:0] offset_0;
+	 logic [`OFFSET_WIDTH-1:0] offset_1;
 	 logic we;
 	 logic done_read_mem;
 	 logic done_write_mem;
-	 
+	
 
  // fsm mem logic
 	logic start_new_frame;
