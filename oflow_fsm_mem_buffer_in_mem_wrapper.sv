@@ -18,6 +18,7 @@ input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] num_of_bbox_in_frame, // TO POINT 
 
 //for fsm to fsm_write
 input logic start_write,
+input logic ready_from_core,	
 //signal from fsm_write to mem
 output logic done_write,
 
@@ -67,16 +68,23 @@ logic [`ADDR_WIDTH-1:0] end_pointers [5];
 	//.we(we),
 	.counter_of_history_frame_to_interface(counter_of_history_frame_to_interface) 
 	);
+	
 //fsm write instantiation
-oflow_fsm_write oflow_fsm_write (
+oflow_fsm_buffer_write oflow_fsm_buffer_write (
 	.clk(clk),
 	.reset_N (reset_N),
+	.frame_num(frame_num),
+	.num_of_history_frames(num_of_history_frames),
+	.end_pointers(end_pointers),
 	.start (start),
 	.start_read(start_read_mem),
+	.ready_from_core(ready_from_core),
 	.start_write(start_write_mem),
-	.done_read(done_read_mem),
-	.done_write(done_write_mem)
-
+	//.done_read(done_read_mem),
+	.done_write(done_write_mem),
+	.offset_0(offset_0),
+	.offset_1(offset_1)
+	
 );
 
 
