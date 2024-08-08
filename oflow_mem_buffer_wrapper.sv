@@ -52,8 +52,8 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	 
 
  // fsm mem logic
-	 logic start_new_frame;
-
+	logic start_new_frame;
+	logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_to_read;
 // -----------------------------------------------------------       
 //              Assign
 // -----------------------------------------------------------  
@@ -99,7 +99,7 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	.start_write(start_write),
 	.done_read(done_read),
 	.done_write(done_write),
-		 
+	 .frame_to_read(frame_to_read),
 	 .offset_0(offset_0),
 	 .offset_1(offset_1),
 	.counter_of_history_frame_to_interface(counter_of_history_frame_to_interface)
