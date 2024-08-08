@@ -9,6 +9,9 @@
 `include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 
+`define R_CHANNEL_BITS 7:0
+`define G_CHANNEL_BITS 15:8
+`define B_CHANNEL_BITS 23:16
 
 module  oflow_similarity_metric( 
 			input logic clk,
@@ -163,8 +166,8 @@ always_comb begin
 				iou_metric = iou;
 				w_metric = l1_distance(width_prev,width_cur);
 				h_metric = l1_distance(height_prev,height_cur);
-				color1_metric = l1_distance(color1_prev,color1_cur);
-				color2_metric = l1_distance(color2_prev,color2_cur);
+				color1_metric = l1_distance_for_rgb(color1_prev,color1_cur);
+				color2_metric = l1_distance_for_rgb(color2_prev,color2_cur);
 				d_history_metric = 1 << d_history_prev;
 			
 			if(valid_iou)
@@ -192,8 +195,13 @@ always_comb begin
 end
 
 	
-function [`COLOR_LEN-1:0] l1_distance (input [`COLOR_LEN-1:0] a,input [`COLOR_LEN-1:0] b);
+function [`WIDTH_LEN-1:0] l1_distance (input [`WIDTH_LEN-1:0] a,input [`WIDTH_LEN-1:0] b);
 	l1_distance = (a>b) ? (a-b):(b-a);
+endfunction
+
+function [`COLOR_LEN-1:0] l1_distance_for_rgb (input [`COLOR_LEN-1:0] a,input [`COLOR_LEN-1:0] b);
+	l1_distance_for_rgb = l1_distane(a[R_CHANNEL_BITS],b[R_CHANNEL_BITS]) + l1_distane(a[G_CHANNEL_BITS],b[G_CHANNEL_BITS])
+	+ l1_distane(a[B_CHANNEL_BITS],b[B_CHANNEL_BITS]);
 endfunction
 	
 endmodule
