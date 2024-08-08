@@ -9,7 +9,7 @@
 `include "/users/epchof/Project/design/work/include_files/oflow_calc_iou_define.sv" 
 
 
-`define WEIGHT_LEN 10 // explenation in ipad, q0.9
+`define WEIGHT_LEN 10 // explenation in ipad, q0.10
 `define FEATURE_OF_PREV_LEN 142 // the total length of the features came out of Buffer Mem Unit
 `define NUM_OF_METRICS 6
 `define INV_NUM_OF_METRICS  6'b0010101   //q0.6, INV=INVERSE 0.1666 
