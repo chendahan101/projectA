@@ -93,7 +93,7 @@ assign control_for_read_new_line = (control_for_read_new_line_0 && (control_for_
  // -----------------------------------------------------------		
 
 //similarity_metric_0
- oflow_similarity_metric u_oflow_similarity_metric_0 (
+ oflow_similarity_metric oflow_similarity_metric_0 (
         .clk(clk),
         .reset_N(reset_N),
         .start(start_similarity_metric_0),
