@@ -181,6 +181,7 @@ oflow_mem_buffer_wrapper oflow_mem_buffer_wrapper(
  .reset_N (reset_N),
 // control signal from core fsm
  .rnw_st(rnw_st),
+ .ready_from_core(ready_from_core),	
  .read_new_line (read_new_line),
  .start_read (start_read),
  .start_write (start_write_mem),
