@@ -99,6 +99,9 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	.start_write(start_write),
 	.done_read(done_read),
 	.done_write(done_write),
+		 
+	 .offset_0(offset_0),
+	 .offset_1(offset_1),
 	.counter_of_history_frame_to_interface(counter_of_history_frame_to_interface)
 );
 
