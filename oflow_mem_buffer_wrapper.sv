@@ -25,6 +25,7 @@ input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] num_of_bbox_in_frame, // TO POINT 
 
 //control signal for core fsm
 input logic rnw_st,
+input logic ready_from_core,	
 output logic done_read,
 output logic done_write,
 //data out for pe
@@ -97,6 +98,7 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	.similarity_metric_flag_ready_to_read_new_line (read_new_line),
 	.start_read(start_read),
 	.start_write(start_write),
+        .ready_from_core(ready_from_core),	 
 	.done_read(done_read),
 	.done_write(done_write),
 	 .frame_to_read(frame_to_read),
