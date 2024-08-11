@@ -30,6 +30,7 @@ module  oflow_pe(
 			// core
 			input logic[`PE_LEN-1:0] num_of_pe,
 			// core_fsm
+			input logic ready_new_frame,
 			input logic [`SET_LEN-1:0] num_of_sets, 
 			input logic frame_num,
 			input logic start_fe,
@@ -121,6 +122,7 @@ oflow_registration oflow_registration(
 			//core
 			.num_of_pe(num_of_pe),
 			// core_fsm
+			.ready_new_frame(ready_new_frame),
 			.num_of_sets(num_of_sets),
 			.frame_num(frame_num),
 			.start_registration(start_registration),
