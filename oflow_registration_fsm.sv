@@ -41,7 +41,7 @@ module oflow_registration_fsm #() (
 	//to score board
 	output logic [`ROW_LEN-1:0] row_sel_by_set,
 	output logic [`ID_LEN-1:0] id_first_frame
-
+);
 	
 
 
