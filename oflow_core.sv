@@ -131,12 +131,12 @@ logic read_new_line;
 // -----------------------------------------------------------       
 //                Assign
 // -----------------------------------------------------------  
-genvar i,j;
+genvar r,j;
 
 generate 
-	for  ( i=0; i < `MAX_ROWS_IN_SCORE_BOARD; i+=1) begin :row
+	for  ( r=0; r < `MAX_ROWS_IN_SCORE_BOARD; r+=1) begin :row
 		for  ( j=0; j < `PE_NUM; j+=1) begin : pe
-			ids[i*`PE_NUM+j] = id_out[i][j];
+			assign ids[(r*(`PE_NUM))+j] = id_out[r][j];
 		end
 	end
 endgenerate
