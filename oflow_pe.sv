@@ -26,7 +26,9 @@ module  oflow_pe(
 
 			// dma
 			input logic [`BBOX_VECTOR_SIZE-1:0] bboxes_from_dma,
-			
+
+			// core
+			input logic[`PE_LEN-1:0] num_of_pe,
 			// core_fsm
 			input logic frame_num,
 			input logic start_fe,
@@ -45,7 +47,9 @@ module  oflow_pe(
 			output logic [`FEATURE_OF_PREV_LEN-1:0] data_out_pe ,
 			
 			// conflict_resolve
-			
+
+			//IDs
+			output logic ['ID_LEN-1:0] id_out ['MAX_ROWS_IN_SCORE_BOARD-1:0];
 			
 			
 			);
@@ -112,7 +116,9 @@ oflow_registration oflow_registration(
 			.color1_weight(color1_weight),
 			.color2_weight(color2_weight),
 			.dhistory_weight(dhistory_weight),
-			
+
+			//core
+			.num_of_pe(num_of_pe),
 			// core_fsm
 			.frame_num(frame_num),
 			.start_registration(start_registration),
@@ -133,7 +139,10 @@ oflow_registration oflow_registration(
 			.height(height),
 			.color1(color1),
 			.color2(color2),
-			//.d_history(d_history) 
+			//.d_history(d_history), 
+
+			//IDs
+			.id_out(id_out)
 			
 			);
 
