@@ -12,7 +12,7 @@
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
 
-`define MAX_ROWS_IN_SCORE_BOARD 11 //COMES FROM: CEIL(TOTAL BBOX NUMBERS/PE NUM)=CEIL(256/24)=11
+
 
 module oflow_core #() (
 	//inputs
