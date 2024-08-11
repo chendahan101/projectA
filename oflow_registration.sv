@@ -13,7 +13,8 @@ module  oflow_registration(
 			input logic wr,
 			input logic [7:0] addr,
 			input logic  EN,
-			
+			//from pe
+			input logic [`SET_LEN-1:0] num_of_sets,
 			
 			output logic [111:0] data_out
 			);
