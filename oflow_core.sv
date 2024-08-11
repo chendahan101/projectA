@@ -168,6 +168,7 @@ begin
 			.bboxes_from_dma (set_of_bboxes_from_dma[i]),
 			
 			// core_fsm
+	   		.num_of_sets (num_of_sets), 
 			.frame_num(frame_num),
 			.start_fe (start_fe_i[i]),
 			.start_registration(start_registration_i[i]),
