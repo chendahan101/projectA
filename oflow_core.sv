@@ -12,7 +12,7 @@
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
 
-
+`define MAX_ROWS_IN_SCORE_BOARD 11 //COMES FROM: CEIL(TOTAL BBOX NUMBERS/PE NUM)=CEIL(256/24)=11
 
 module oflow_core #() (
 	//inputs
@@ -54,7 +54,7 @@ module oflow_core #() (
 	
 	 
 	
-	 
+	 output logic valid_id,
 	 output logic done_frame,
 	 output logic [`ID_LEN-1:0] ids [`MAX_BBOXES_PER_FRAME] );
 
@@ -78,7 +78,8 @@ logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_interface
 logic done_fe_i [`PE_NUM];
 logic done_registration_i [`PE_NUM]; 
 logic control_for_read_new_line_i [`PE_NUM];
-logic data_out_pe [`PE_NUM];
+logic [`DATA_WIDTH -1:0 ]data_out_pe [`PE_NUM];
+logic [`ID_LEN-1:0] id_out[`MAX_ROWS_IN_SCORE_BOARD][`PE_NUM];
 	
 // logics for outputs of interface
 logic done_read_to_pe;	
@@ -87,6 +88,7 @@ logic [`DATA_TO_PE_WIDTH -1:0] data_to_pe_1; // we will change the d_history_fie
 logic [`ROW_LEN-1:0] row_sel_to_pe;
 logic [`DATA_WIDTH -1:0] data_in_for_buffer_mem_0;
 logic [`DATA_WIDTH -1:0] data_in_for_buffer_mem_1;
+
 
 
 // logics for outputs of core_fsm
@@ -126,6 +128,18 @@ logic read_new_line;
 // logics for Conflict_Resolve
 
 
+// -----------------------------------------------------------       
+//                Assign
+// -----------------------------------------------------------  
+genvar i,j;
+
+generate 
+	for  ( i=0; i < `MAX_ROWS_IN_SCORE_BOARD; i+=1) begin :row
+		for  ( j=0; j < `PE_NUM; j+=1) begin : pe
+			ids[i*`PE_NUM+j] = id_out[i][j];
+		end
+	end
+endgenerate
 
 
 // -----------------------------------------------------------       
@@ -140,7 +154,7 @@ begin
 			.clk (clk),
 			.reset_N (reset_N)	,
 			
-			
+	   		.num_of_pe(i),
 			// reg_file
 			.iou_weight (iou_weight),
 			.w_weight (w_weight)  ,
@@ -168,7 +182,10 @@ begin
 			 .data_to_pe_1 (data_to_pe_1),// we will change the d_history_field
 			 .row_sel_to_pe (row_sel_to_pe),
 			 .data_out_pe (data_out_pe[i]),
-		         .done_read_to_pe (done_read_to_pe)
+			 .done_read_to_pe (done_read_to_pe),
+			//IDs
+	   		 .id_out( id_out[`MAX_ROWS_IN_SCORE_BOARD][i])
+	   	
 			
 	   );
 end
@@ -385,7 +402,9 @@ oflow_core_fsm_top oflow_core_fsm_top(
 	
 	
 	// write_score
-	.start_write_score (start_write_score)
+	.start_write_score (start_write_score),
+	//IDs
+	.valid_id(valid_id)
 	
 	);
 endmodule
