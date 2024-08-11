@@ -56,7 +56,10 @@ module oflow_core_fsm_top #() (
 	
 	
 	// write_score
-	output logic start_write_score
+	output logic start_write_score,
+
+	//IDs
+	output logic valid_id
 
 );
 
@@ -121,7 +124,8 @@ assign rnw_st = (current_state == write_st) ? 1 : 0 ;
 	 start_cr = 1'b0;
 	 start_write_score = 1'b0;
 	 start_write_mem = 1'b0;
-	 ready_new_frame = 1'b0;		
+	 ready_new_frame = 1'b0;
+	 valid_id = 1'b0;
 	
 	 case (current_state)
 		 idle_st: begin
@@ -163,6 +167,8 @@ assign rnw_st = (current_state == write_st) ? 1 : 0 ;
 				start_write_mem = 1'b1;
 				start_write_score = 1'b1;
 				next_state = write_st;
+				valid_id = 1'b1;
+
 			end
 			
 				
