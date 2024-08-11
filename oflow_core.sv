@@ -152,9 +152,9 @@ generate for  ( i=0; i < `PE_NUM; i++)
 begin 
    oflow_pe oflow_pe( 
 			.clk (clk),
-			.reset_N (reset_N)	,
+			.reset_N (reset_N),
 			
-	   		.num_of_pe(i),
+	  		 .num_of_pe(i[`PE_LEN-1:0]),
 			// reg_file
 			.iou_weight (iou_weight),
 			.w_weight (w_weight)  ,
