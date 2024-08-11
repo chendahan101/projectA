@@ -25,7 +25,6 @@ module oflow_score_calc #() (
 	input logic [`COLOR_LEN-1:0] color2_cur,
 	
 	//buffer	
-	input logic [`DATA_TO_PE_WIDTH-1:0] features_of_prev,
 	input logic done_read, 	
 	input logic [`DATA_TO_PE_WIDTH -1:0] data_to_similarity_metric_0,// we will change the d_history_field
 	input logic [`DATA_TO_PE_WIDTH -1:0] data_to_similarity_metric_1,
