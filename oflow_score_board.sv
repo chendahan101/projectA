@@ -95,18 +95,21 @@ module  oflow_score_board(
 	always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N || ready_new_frame) begin 
 			for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin scores_reg[i] <= #1 0; end
+		end	
 		else if  (start_score_board)  scores_reg[row_sel_by_set] <= #1 {min_score_0,min_score_1};
 	end	
 			
 	always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N || ready_new_frame) begin 
 			for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin ids_reg[i] <= #1 0; end
+		end	
 		else if  (start_score_board)  ids_reg[row_sel_by_set] <= #1 {min_id_0,min_id_1};
 	end	
 	
 	always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N || ready_new_frame) begin 
 			for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin pointers_reg[i] <= #1 0; end
+		end	
 		else if  (write_to_pointer)  pointers_reg[row_to_change] <= #1 data_from_cr;
 	end	
 	
