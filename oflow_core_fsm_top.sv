@@ -138,7 +138,7 @@ assign rnw_st = (current_state == write_st) ? 1 : 0 ;
 			num_of_sets =  (num_of_bbox_in_frame%PE_NUM) ? num_of_bbox_in_frame/PE_NUM + 1: num_of_bbox_in_frame/PE_NUM;
 			start_pe = 1;
 			ready_new_set = 1'b1;
-			next_state = idle_st;
+			next_state = pe_st;
 			
 		 end
 		 
