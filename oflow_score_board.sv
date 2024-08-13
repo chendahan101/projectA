@@ -121,19 +121,18 @@ module  oflow_score_board(
 //						read from reg
 // -----------------------------------------------------------	
 	//cr
-	assign score_to_cr = scores_reg[row_sel_from_cr];
-	assign id_to_cr = id_reg[row_sel_from_cr];
+	assign score_to_cr = (pointers_reg[row_sel_from_cr]) ? scores_reg[row_sel_from_cr][`SCORE_LEN-1:0] : scores_reg[row_sel_from_cr][`SCORE_LEN*2-1:`SCORE_LEN];	
+	assign id_to_cr =  (pointers_reg[row_sel_from_cr]) ? ids_reg[row_sel_from_cr][`ID_LEN-1:0] : ids_reg[row_sel_from_cr][`ID_LEN*2-1:`ID_LEN];
 	
 	//buffer
-	assign id_to_buffer = id_out[row_sel];
+	assign id_to_buffer = (pointers_reg[row_sel]) ? ids_reg[row_sel][`ID_LEN-1:0] : ids_reg[row_sel][`ID_LEN*2-1:`ID_LEN];
     
 	
 	//IDs
 	genvar i;
 	generate 
 		for  ( i=0; i < `MAX_ROWS_IN_SCORE_BOARD; i+=1) begin :row
-			assign id_out[i] = (pointers_reg[i]) ? ids_reg[i][`ID_LEN-1:0] :ids_reg[i][`ID_LEN*2-1:`ID_LEN];
-			
+			assign id_out[i] = (pointers_reg[i]) ? ids_reg[i][`ID_LEN-1:0] : ids_reg[i][`ID_LEN*2-1:`ID_LEN];
 		end
 	endgenerate
 
