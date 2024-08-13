@@ -43,6 +43,7 @@ module  oflow_registration(
 		//conflict resolve
 		input logic  data_from_cr, // pointer
 		input logic [`ROW_LEN-1:0] row_sel_from_cr,
+		input logic [`ROW_LEN-1:0] row_to_change, // for change the pointer
 		input logic write_to_pointer,//flag indicate we need to write to pointer
 		output logic [(`SCORE_LEN*2)-1:0] score_to_cr,// we insert score0&score1
 		output logic [(`ID_LEN*2)-1:0] id_to_cr,// we insert id0&id1
@@ -180,6 +181,7 @@ oflow_score_board oflow_score_board (
 	.min_id_1(min_id_1_to_score_board),
 	.data_from_cr(data_from_cr),
 	.row_sel_from_cr(row_sel_from_cr),
+	.row_to_change(row_to_change),
 	.write_to_pointer(write_to_pointer),
 	.score_to_cr(score_to_cr),
 	.id_to_cr(id_to_cr),
