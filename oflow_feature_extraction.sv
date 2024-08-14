@@ -7,14 +7,14 @@
  *------------------------------------------------------------------------------*/
 `include "/users/epchof/Project/design/work/include_files/oflow_feature_extraction_define.sv"
 
-module oflow_features_extraction (
+module oflow_feature_extraction (
 
 	// inputs
 	input logic clk,
 	input logic reset_N,
 	
 	input logic [`BBOX_VECTOR_SIZE-1:0] bbox,
-	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       nable
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																														   
 	
 	//outputs to registration
 	output logic [`CM_CONCATE_LEN-1:0] cm_concate,
@@ -131,7 +131,7 @@ module oflow_features_extraction (
   
   
 typedef enum {idle_st,fe_st, wait_st} sm_type; //
-sm_type next_state;
+sm_type next_state, current_state;
 
 
 
@@ -160,7 +160,10 @@ sm_type next_state;
 		 
 		 fe_st: begin 
 			 if( !done_pe )	next_state = wait_st;
-			 else next_state = idle_st;
+			 else  begin 
+				 next_state = idle_st;
+				 done_fe = 1'b1;
+			 end
 		 end
 		 
  

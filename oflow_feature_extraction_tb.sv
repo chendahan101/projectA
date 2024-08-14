@@ -1,23 +1,15 @@
-/*------------------------------------------------------------------------------
- * File          : oflow_feature_extraction_tb.sv
- * Project       : RTL
- * Author        : epchof
- * Creation date : Jan 19, 2024
- * Description   :
- *------------------------------------------------------------------------------*/
+//`timescale 1ns/1ps
 `include "/users/epchof/Project/design/work/include_files/oflow_feature_extraction_define.sv"
 
-module oflow_feature_extraction_tb #();
+module oflow_feature_extraction_tb #() ();
 
-
-// -----------------------------------------------------------       
-//                  registers & wires
-// -----------------------------------------------------------  
   // Testbench signals
   logic clk;
   logic reset_N;
   logic [`BBOX_VECTOR_SIZE-1:0] bbox;
-  logic fe_enable;
+  logic start_fe;
+  logic done_fe;
+  logic done_pe;
   
   // Outputs
   logic [`CM_CONCATE_LEN-1:0] cm_concate;
@@ -26,57 +18,46 @@ module oflow_feature_extraction_tb #();
   logic [`HEIGHT_LEN-1:0] height;
   logic [`COLOR_LEN-1:0] color1;
   logic [`COLOR_LEN-1:0] color2;
-  logic [`D_HISTORY_LEN-1:0] d_history;
 
   // Instantiate the module under test (MUT)
-  oflow_features_extraction  oflow_features_extraction_mut (
+  oflow_feature_extraction mut (
 	.clk(clk),
 	.reset_N(reset_N),
 	.bbox(bbox),
-	.fe_enable(fe_enable),
+	.start_fe(start_fe),
 	.cm_concate(cm_concate),
 	.position_concate(position_concate),
 	.width(width),
 	.height(height),
 	.color1(color1),
 	.color2(color2),
-	.d_history(d_history)
+	.done_fe(done_fe),
+	.done_pe(done_pe)
   );
-//11114523_1100101010_3100101_111_112_
-
-task create_bbox( input logic [`CM_LEN-1:0] x, input logic [`CM_LEN-1:0] y,input logic [`WIDTH_LEN-1:0] width,input logic [`HEIGHT_LEN-1:0] height,input logic [`COLOR_LEN-1:0] color1,input logic [`COLOR_LEN-1:0] color2,input logic [`D_HISTORY_LEN-1:0] d_history);
-	bbox = {x,y,width,height,color1,color2,d_history};
-	fe_enable = 1'b1;
-	@(posedge clk);
-endtask
 
   // Clock generation
   initial begin
 	clk = 0;
-	forever #5 clk = ~clk; // Generate a clock with a period of 10ns
+	forever #2.5 clk = ~clk; // Generate a clock with a period of 10ns
   end
 
   // Test sequence
   initial begin
 	// Initialize inputs
-	reset_N = 1;
-	bbox = 0;
-	fe_enable = 0;
+	initial_task;
 
-	// Reset the module
-	#10;
-	reset_N = 0;
 
 	// Drive some test values
 	#10;
-	 create_bbox(50,10,10,100,50,60,6 );
-	 $display("cm_concate: $d,position_concate %d,width: %d ,height: %d,color1: %d ,color2: %d , d_history: %d",cm_concate,position_concate,width,height,color1,color2,d_history);
+	fe_task (  50,150,20,80, {`COLOR_LEN{1'b1}},`COLOR_LEN'b0,1,0);//set 1,frame 1
 
-	// Wait for a few clock cycles
+	// Wait for a 2 clock cycles
 	#100;
+	fe_task (  50,100,20,80, {`COLOR_LEN{1'b1}},`COLOR_LEN'b0,1,0);//set 2, frame 1
 
-	// Change the input values
-	 create_bbox( 30,70,10,100,50,60,6 );
+	#100;
+	fe_task (  50,100,20,80, {`COLOR_LEN{1'b1}},`COLOR_LEN'b0,1,1);// set3, frame 1
+	//registration done
 
 	// Wait for a few clock cycles
 	#100;
@@ -84,11 +65,44 @@ endtask
 	// Finish the simulation
 	$finish;
   end
+  
+  
 
-  // Optional: Monitor changes on the outputs
-  initial begin
-	$monitor("Time: %0t, cm_concate: %0h, position_concate: %0h, width: %0d, height: %0d, color1: %0h, color2: %0h, d_history: %0b",
-			 $time, cm_concate, position_concate, width, height, color1, color2, d_history);
-  end
+  
+  
+  
+  
+  
+  
+task fe_task (input logic [`CM_CONCATE_LEN/2-1:0 ] x,input logic  [`CM_CONCATE_LEN/2-1:0 ] y,input logic [`WIDTH_LEN-1:0] width,input logic [`HEIGHT_LEN-1:0] height,input logic [`COLOR_LEN-1:0] color1,input logic [`COLOR_LEN-1:0] color2,a,b);
+begin
+  
+	bbox = {x,y,width,height,color1,color2};
+	start_fe = a;
+	done_pe = b; 
+	#5
+	start_fe = 1'b0;
+
+	$monitor("Time: %0t, cm_concate: %0h, position_concate: %0h, width: %0d, height: %0d, color1: %0h, color2: %0h",
+			$time, cm_concate, position_concate, width, height, color1, color2);
+end
+endtask	
+
+task initial_task  ;
+	reset_N = 0;
+	bbox = '0;
+	start_fe = 0;
+	done_pe = 0; 
+	
+	
+	// Reset the module
+	#10;
+	reset_N = 1;
+	$monitor("Time: %0t, cm_concate: %0h, position_concate: %0h, width: %0d, height: %0d, color1: %0h, color2: %0h",
+			$time, cm_concate, position_concate, width, height, color1, color2);
+
+endtask	
+
+
 
 endmodule
