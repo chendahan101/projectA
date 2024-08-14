@@ -101,7 +101,7 @@ module oflow_MEM_buffer #() (
 				end	
 			endcase
 		end
-		else begin
+		//else begin
 			case(frame_num%num_of_history_frames) 
 				0: begin 
 					addr_0 = pointers[0] + offset_0;
@@ -125,7 +125,7 @@ module oflow_MEM_buffer #() (
 					addr_1 = pointers[4] + offset_1;
 					end	
 			endcase
-		end
+		//end
 	end
 	
 	assign oe = (we) ?  1'b0 : 1'b1;
