@@ -6,50 +6,53 @@
  * Description   :
  *------------------------------------------------------------------------------*/
 
-`include "/users/epchof/Project/design/work/oflow_define.sv"
-
+`include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
+`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
+`include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
+`include "/users/epchof/Project/design/work/include_files/oflow_reg_file_define.sv"
 
 module oflow_reg_file #() (
 	// inputs
 	input logic clk,    			          
 	input logic reset_N	,
-	input logic apb_pwdata,
+	input logic [31:0] apb_pwdata,
 	
 	// APB Interface							
-	input logic apb_pclk, 		
+			
 	input logic apb_pwrite,
 	input logic apb_psel, 
 	input logic apb_penable,
-	input logic[11:0] apb_addr,
-	input logic [4:0]  th_conflict_counter,
-	input logic   th_conflict_counter_wr,
+	input logic[`ADDR_LEN-1:0] apb_addr,
+
+	
 
 	// outputs
 	output logic apb_pready,      
 	output logic[31:0] apb_prdata, 
-	output logic [31:0] w_iou,
-	output logic [31:0] w_w,
-	output logic [31:0] w_h, 
-	output logic [31:0] w_color1, 
-	output logic [31:0] w_color2,
-	output logic [31:0] w_dhistory,
-	output logic [2:0]  num_of_history_frame,
-	output logic  	   done_for_dma );
+	output logic [`WEIGHT_LEN-1:0] w_iou,
+	output logic [`WEIGHT_LEN-1:0] w_w,
+	output logic [`WEIGHT_LEN-1:0] w_h, 
+	output logic [`WEIGHT_LEN-1:0] w_color1, 
+	output logic [`WEIGHT_LEN-1:0] w_color2,
+	output logic [`WEIGHT_LEN-1:0] w_dhistory,
+	output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frame
+	);
 
 
 // -----------------------------------------------------------       
 //                  Registers & Wires
 // -----------------------------------------------------------  
 
-   logic [31:0] w_iou_reg;
-   logic [31:0] w_w_reg; 
-   logic [31:0] w_h_reg; 
-   logic [31:0] w_color1_reg; 
-   logic [31:0] w_color2_reg;
-   logic [31:0] w_dhistory_reg;
-   logic [4:0]  th_conflict_counter_reg;
-   logic [2:0]  num_of_history_frame_reg;
-   logic  	   done_for_dma_reg;  
+   logic [`WEIGHT_LEN-1:0] w_iou_reg;
+   logic [`WEIGHT_LEN-1:0] w_w_reg; 
+   logic [`WEIGHT_LEN-1:0] w_h_reg; 
+   logic [`WEIGHT_LEN-1:0] w_color1_reg; 
+   logic [`WEIGHT_LEN-1:0] w_color2_reg;
+   logic [`WEIGHT_LEN-1:0] w_dhistory_reg;
+   
+   logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frame_reg;
+   
+   logic [31:0] apb_prdata_reg;
    
    logic time_to_write, time_to_read; 
 
@@ -57,11 +60,20 @@ module oflow_reg_file #() (
 //                  Assignments
 // -----------------------------------------------------------  
 
-    assign time_to_write = apb_pwrite && apb_psel && apb_penable ;
-    assign time_to_read = !apb_pwrite && apb_psel && apb_penable ;
-	assign apb_pready = (time_to_write || time_to_read) && (apb_addr == `W_Iou || apb_addr == `W_w || apb_addr == `W_h ||  apb_addr == `W_color1 ||apb_addr == `W_color2 || 
-						apb_addr == `W_dhistory ||  apb_addr == `TH_conflict_counter || apb_addr == `NUM_of_history_frame || apb_addr == `DONE_for_dma) ;
-
+	assign time_to_write = apb_pwrite && apb_psel && apb_penable ;
+	assign time_to_read = !apb_pwrite && apb_psel && apb_penable ;
+	assign apb_pready = (time_to_write || time_to_read) && (apb_addr == `W_IOU_ADDR || apb_addr == `W_WIDTH_ADDR || apb_addr == `W_HEIGHT_ADDR ||  apb_addr == `W_COLOR1_ADDR ||apb_addr == `W_COLOR2_ADDR || 
+						 apb_addr == `NUM_OF_HISTORY_FRAMES_ADDR || apb_addr == `W_HISTORY_ADDR)  ;
+	
+	assign w_iou = w_iou_reg;
+	assign w_w = w_w_reg;
+	assign w_h = w_h_reg;
+	assign w_color1 = w_color1_reg;
+	assign w_color2 = w_color2_reg;
+	assign num_of_history_frame = num_of_history_frame_reg;
+	assign w_dhistory = w_dhistory_reg;
+	
+	assign apb_prdata = apb_prdata_reg;
 // -----------------------------------------------------------       
 //            APB - Write to Registers 
 // -----------------------------------------------------------  
@@ -71,59 +83,49 @@ module oflow_reg_file #() (
 	
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
-		if(!reset_N) w_iou <= #1 0; 
-		else if(time_to_write && (apb_addr == `W_Iou)) w_iou <= #1 apb_pwdata; 
+		if(!reset_N) w_iou_reg <= #1 0; 
+		else if(time_to_write && (apb_addr == `W_IOU_ADDR)) w_iou_reg <= #1 apb_pwdata; 
 	end  
 	  
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
-		if(!reset_N) w_w <= #1 0; 
-		else if(time_to_write && (apb_addr == `W_w)) w_w <= #1 apb_pwdata; 
+		if(!reset_N) w_w_reg <= #1 0; 
+		else if(time_to_write && (apb_addr == `W_WIDTH_ADDR)) w_w_reg <= #1 apb_pwdata; 
 	end 
 	
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
-		if(!reset_N) w_h <= #1 0; 
-		else if(time_to_write && (apb_addr == `W_h)) w_h <= #1 apb_pwdata; 
+		if(!reset_N) w_h_reg <= #1 0; 
+		else if(time_to_write && (apb_addr == `W_HEIGHT_ADDR)) w_h_reg <= #1 apb_pwdata; 
 	end 
 	
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
-		if(!reset_N) w_color1 <= #1 0; 
-		else if(time_to_write && (apb_addr == `W_color1)) w_color1 <= #1 apb_pwdata; 
+		if(!reset_N) w_color1_reg <= #1 0; 
+		else if(time_to_write && (apb_addr == `W_COLOR1_ADDR)) w_color1_reg <= #1 apb_pwdata; 
 	end 
 	
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
-		if(!reset_N) w_color2 <= #1 0; 
-		else if(time_to_write && (apb_addr == `W_color2)) w_color2 <= #1 apb_pwdata; 
+		if(!reset_N) w_color2_reg <= #1 0; 
+		else if(time_to_write && (apb_addr == `W_COLOR2_ADDR)) w_color2_reg <= #1 apb_pwdata; 
+		
 	end 
+	
 	
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
-		if(!reset_N) w_dhistory <= #1 0; 
-		else if(time_to_write && (apb_addr == `W_dhistory)) w_dhistory <= #1 apb_pwdata; 
+		if(!reset_N) w_dhistory_reg <= #1 0; 
+		else if(time_to_write && (apb_addr == `W_HISTORY_ADDR)) w_dhistory_reg <= #1 apb_pwdata; 
 	end 
-	
+		
+
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
-		if(reset_N) th_conflict_counter_reg <= #1 5'd0; 
-		else if(th_conflict_counter) th_conflict_counter_reg <= #1 th_conflict_counter; 
+		if(!reset_N) num_of_history_frame_reg <= #1 3'd0; 
+		else if(time_to_write && (apb_addr == `NUM_OF_HISTORY_FRAMES_ADDR)) num_of_history_frame_reg <= #1 apb_pwdata; 
 	end 
-	
-	always_ff @(posedge clk or negedge reset_N)   
-	begin 
-		if(!reset_N) num_of_history_frame <= #1 3'd0; 
-		else if(time_to_write && (apb_addr == `NUM_of_history_frame)) num_of_history_frame <= #1 apb_pwdata[2:0]; 
-	end 
-	
-	always_ff @(posedge clk or negedge reset_N)   
-	begin 
-		if(!reset_N) done_for_dma <= #1 1'b0; 
-		else if(time_to_write && (apb_addr == `DONE_for_dma)) done_for_dma <= #1 apb_pwdata[0]; 
-	end  
-	
-	
+		
 	
 // -----------------------------------------------------------       
 //            APB - Read from Registers 
@@ -138,19 +140,18 @@ module oflow_reg_file #() (
 	 
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
-		if(!reset_N) apb_prdata <= #1 0; 
+		if(!reset_N) apb_prdata_reg <= #1 0; 
 		else if(time_to_read) 
 			 begin 
 				case (apb_addr)
-					`W_Iou: apb_prdata <= #1 w_iou;
-					`W_w: apb_prdata <= #1  w_w;
-					`W_h: apb_prdata <= #1 w_h;
-					`W_color1: apb_prdata <= #1 w_color1;
-					`W_color2:  apb_prdata <= #1 w_color2;
-					`W_dhistory: apb_prdata <= #1 w_dhistory;
-					`TH_conflict_counter: apb_prdata <= #1 { {27{1'b0}}, th_conflict_counter};
-					`NUM_of_history_frame: apb_prdata <= #1 { {29{1'b0}}, num_of_history_frame};
-					`DONE_for_dma: apb_prdata <= #1 { {31{1'b0}}, done_for_dma};	
+					`W_IOU_ADDR: apb_prdata_reg <= #1 w_iou_reg;
+					`W_WIDTH_ADDR: apb_prdata_reg <= #1  w_w_reg;
+					`W_HEIGHT_ADDR: apb_prdata_reg <= #1 w_h_reg;
+					`W_COLOR1_ADDR: apb_prdata_reg <= #1 w_color1_reg;
+					`W_COLOR2_ADDR:  apb_prdata_reg <= #1 w_color2_reg;
+					`W_HISTORY_ADDR: apb_prdata_reg <= #1 w_dhistory_reg;
+					`NUM_OF_HISTORY_FRAMES_ADDR: apb_prdata_reg <= #1  num_of_history_frame_reg;
+					
 				endcase	
 			 end
 	end	
