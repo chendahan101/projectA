@@ -100,9 +100,9 @@ sm_type next_state;
 		 
 		 select_row_st: begin
 			 
-			 if( counter_row < (num_of_bbox_in_frame/PE_NUM) )	next_state = select_pe_st;
+			 if( counter_row < (num_of_bbox_in_frame/`PE_NUM) )	next_state = select_pe_st;
 
-			 else if(counter_row == (num_of_bbox_in_frame/PE_NUM) && (num_of_bbox_in_frame%PE_NUM/4 > 0 || num_of_bbox_in_frame%PE_NUM%4 > 0)
+			 else if(counter_row == (num_of_bbox_in_frame/`PE_NUM) && (num_of_bbox_in_frame%`PE_NUM/4 > 0 || num_of_bbox_in_frame%`PE_NUM%4 > 0)
 				next_state = select_pe0_st;
 			 
 			 else next_state = idle_st;
@@ -111,7 +111,7 @@ sm_type next_state;
 		 
  
 		select_pe_st: begin 
-			if (counter_pe == PE_NUM/4 ) begin 
+			if (counter_pe == `PE_NUM/4 ) begin 
 				 next_state = select_row_st;
 			end
 		
@@ -125,8 +125,8 @@ sm_type next_state;
 		
 		select_pe0_st: begin 
 			
-			 if (counter_pe == num_of_bbox_in_frame%PE_NUM/4) begin 
-				case(num_of_bbox_in_frame%PE_NUM%4) begin
+			 if (counter_pe == num_of_bbox_in_frame%`PE_NUM/4) begin 
+				case(num_of_bbox_in_frame%`PE_NUM%4) begin
 					0: next_state = idle_st;
 					1: next_state = select_pe1_st;
 					2: next_state = select_pe2_st;
