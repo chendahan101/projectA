@@ -40,7 +40,7 @@ sm_type next_state;
    logic [`POSITION_INTERSECTION-1:0] x_br_intersection;
    logic [`POSITION_INTERSECTION-1:0] y_tl_intersection;
    logic [`POSITION_INTERSECTION-1:0] y_br_intersection;
-   logic [`POSITION_INTERSECTION-1:0] Intersection;
+   logic [`INTERSECTION-1:0] Intersection;
    logic [`SIZE_LENGTH-1:0] size_length_k;
    logic [`SIZE_LENGTH-1:0] size_length_history;
    logic [`COUNTER_LEN-1:0] counter;
