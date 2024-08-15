@@ -52,7 +52,7 @@ module oflow_reg_file #() (
    
    logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frame_reg;
    
-   logic [31:0] apb_prdata_reg;
+   //logic [31:0] apb_prdata_reg;
    
    logic time_to_write, time_to_read; 
 
@@ -73,7 +73,7 @@ module oflow_reg_file #() (
 	assign num_of_history_frame = num_of_history_frame_reg;
 	assign w_dhistory = w_dhistory_reg;
 	
-	assign apb_prdata = apb_prdata_reg;
+	//assign apb_prdata = apb_prdata_reg;
 // -----------------------------------------------------------       
 //            APB - Write to Registers 
 // -----------------------------------------------------------  
@@ -138,6 +138,7 @@ module oflow_reg_file #() (
 		else if(time_to_write && (apb_addr == `W_Iou)) apb_prdata <= #1 ()*w_iou + ()*w_m+
 	 */ 
 	 
+/*
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
 		if(!reset_N) apb_prdata_reg <= #1 0; 
@@ -156,7 +157,26 @@ module oflow_reg_file #() (
 			 end
 	end	
 	
-	 
+*/
+
+
+	always_comb 
+	begin 
+		//apb_prdata = num_of_history_frame_reg;
+		 if(time_to_read) 
+			 begin 
+				case (apb_addr)
+					`W_IOU_ADDR: apb_prdata = w_iou_reg;
+					`W_WIDTH_ADDR: apb_prdata=  w_w_reg;
+					`W_HEIGHT_ADDR: apb_prdata= w_h_reg;
+					`W_COLOR1_ADDR: apb_prdata= w_color1_reg;
+					`W_COLOR2_ADDR:  apb_prdata= w_color2_reg;
+					`W_HISTORY_ADDR: apb_prdata= w_dhistory_reg;
+					`NUM_OF_HISTORY_FRAMES_ADDR: apb_prdata =  num_of_history_frame_reg;
+					default: apb_prdata = num_of_history_frame_reg; 	
+				endcase	
+			end
+	end	
 	  
 	  
 	  
