@@ -22,7 +22,7 @@ module oflow_similarity_metric_tb #() ();
 		logic [`HEIGHT_LEN:0] height_cur;
 		logic [`COLOR_LEN-1:0] color1_cur;
 		logic [`COLOR_LEN-1:0] color2_cur;
-		logic [`D_HISTORY_LEN-1:0] d_history_cur; 
+		//logic [`D_HISTORY_LEN-1:0] d_history_cur; 
 			
 		logic [`FEATURE_OF_PREV_LEN-1:0] features_of_prev;
 		
@@ -36,6 +36,7 @@ module oflow_similarity_metric_tb #() ();
 		//input logic [7:0] addr,
 		//input logic  EN,
 		logic valid ;
+		logic control_for_read_new_line; // we want to start read new line after 2 cycles before the end
 		logic [`SCORE_LEN-1:0] score;
 		logic [`ID_LEN-1:0] id;
 		   
@@ -56,7 +57,7 @@ module oflow_similarity_metric_tb #() ();
 		.height_cur (height_cur),
 		.color1_cur (color1_cur),
 		.color2_cur (color2_cur),
-		.d_history_cur (d_history_cur), 
+	//	.d_history_cur (d_history_cur), 
 			
 		.features_of_prev (features_of_prev),
 		
@@ -66,12 +67,12 @@ module oflow_similarity_metric_tb #() ();
 		.color1_weight (color1_weight),
 		.color2_weight (color2_weight),
 		.dhistory_weight (dhistory_weight),
-		//input logic wr,
-		//input logic [7:0] addr,
-		//input logic  EN,
+		
 		.valid(valid),
+		.control_for_read_new_line(control_for_read_new_line),
 		.score (score),
 		.id (id)
+		
 			);
 		 
 		  
@@ -92,19 +93,20 @@ begin
 		  //iou_weight w_weight h_weight color1_weight color2_weight dhistory_weight 
   insert_weight(10'b0100000000,10'b0100000000,10'b0100000000,10'b0001010101,10'b0001010101,10'b0001010101);
   @(posedge clk); 
-  //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0]
-  insert_curr_data({11'd30,11'd55},{11'd50,11'd10,11'd60,11'd110},10,100,50,60,0); 
+  //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0] [`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] 
+  insert_curr_data({11'd30,11'd55}, {11'd50,11'd10,11'd60,11'd110}, 10, 100, {8'd128,8'd127,8'd78}, {8'd204,8'd205,8'd209}); 
   //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0] [`ID_LEN-1:0]
-  insert_prev_data({11'd31,11'd54},{11'd52,11'd8,11'd62,11'd108},10,100,40,70,1,12);
+  insert_prev_data({11'd31,11'd54}, {11'd52,11'd8,11'd62,11'd108}, 10, 100, {8'd130,8'd122,8'd90}, {8'd220,8'd80,8'd200}, 1, 12);
   
-  #10 start = 1;
+  @(posedge clk); 
+  start = 1;
   #10
 	 start = 0;
   #100
   //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0]
-  insert_curr_data({11'd30,11'd55},{11'd50,11'd10,11'd60,11'd110},10,100,50,60,0); 
+  insert_curr_data({11'd30,11'd55}, {11'd50,11'd10,11'd60,11'd110}, 10, 100, {8'd128,8'd127,8'd78}, {8'd204,8'd205,8'd209}); 
   //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0] [`ID_LEN-1:0]
-  insert_prev_data({11'd40,11'd54},{11'd70,11'd8,11'd80,11'd108},10,100,40,70,1,12);
+  insert_prev_data({11'd40,11'd54}, {11'd70,11'd8,11'd80,11'd108}, 10, 100, {8'd130,8'd122,8'd90}, {8'd220,8'd80,8'd200}, 1, 12);
   #10 start = 1;
   #30
 	 start = 0;
@@ -142,16 +144,16 @@ always begin
 		height_cur = 0;
 		color1_cur = 0;
 		color2_cur = 0;
-		d_history_cur = 0; 
+		// d_history_cur = 0; 
 		   
-	    features_of_prev =0; 
+		features_of_prev =0; 
 				
-	    iou_weight = 0;
+		iou_weight = 0;
 		w_weight = 0;
 		h_weight = 0;
-	    color1_weight = 0;
+		color1_weight = 0;
 		color2_weight = 0;
-	    dhistory_weight = 0;	
+		dhistory_weight = 0;	
 	  
 		#10 reset_N = 1'b1;     // Disable Reset signal.	 
 	  end
@@ -161,8 +163,7 @@ always begin
 
 
  task insert_curr_data ( input logic [`CM_CONCATE_LEN-1:0] a, input logic [`POSITION_CONCATE_LEN-1:0] b,input logic [`WIDTH_LEN-1:0] c,
-		 				input logic [`HEIGHT_LEN-1:0] d,input logic [`COLOR_LEN-1:0] e, input logic [`COLOR_LEN-1:0] f,
-						input logic [`D_HISTORY_LEN-1:0] g);
+						input logic [`HEIGHT_LEN-1:0] d,input logic [`COLOR_LEN-1:0] e, input logic [`COLOR_LEN-1:0] f);
 	begin
 				
 		cm_concate_cur = a;
@@ -171,7 +172,7 @@ always begin
 		height_cur = d;
 		color1_cur = e;
 		color2_cur = f;
-		d_history_cur = g;
+		
 	end
  endtask	
 

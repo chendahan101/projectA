@@ -13,6 +13,16 @@
 `define G_CHANNEL_BITS 15:8
 `define B_CHANNEL_BITS 23:16
 
+`define FRACTION_RANGE 19:0
+`define INTEGER_RANGE `AVG_SIMILARITY_METRIC_LEN-1:20
+`define FRACTION_SIZE_AFTER_OF 21
+`define INTEGER_SIZE_AFTER_OF 25
+`define AVG_WIDTH_AFTER_OF 46
+
+
+
+
+
 module  oflow_similarity_metric( 
 			input logic clk,
 			input logic reset_N	,
@@ -77,10 +87,24 @@ module  oflow_similarity_metric(
 	logic start_iou;
 	logic [`IOU_LEN-1:0] iou;
 	
-	logic [`AVG_SIMILARITY_METRIC_LEN-1:0] avg_similarity_metric;
+	logic [`AVG_WIDTH_AFTER_OF-1:0] avg_similarity_metric;
 
 	logic [`COUNTER_SIZE-1:0] counter;
 	logic [`SCORE_LEN-1:0] score_reg;
+	
+	logic [`AVG_WIDTH_AFTER_OF-1:0] color1_mult;
+	logic [`AVG_WIDTH_AFTER_OF-1:0] color2_mult;
+	logic [`AVG_WIDTH_AFTER_OF-1:0] iou_mult;
+	logic [`AVG_WIDTH_AFTER_OF-1:0] w_mult;
+	logic [`AVG_WIDTH_AFTER_OF-1:0] h_mult;
+	logic [`AVG_WIDTH_AFTER_OF-1:0] history_mult;
+	
+
+
+
+	
+	
+	
 
 	typedef enum {idle_st,calc_st,avg_st,iou_st} sm_type;
 	sm_type current_state;
@@ -108,6 +132,7 @@ module  oflow_similarity_metric(
 	assign d_history_metric_pad = {d_history_metric, {10{1'b0}}}; // the len of metric will be +1 the feature:q6.10	
 
 	assign score = score_reg;
+	assign id = features_of_prev[`ID_LEN-1:0];
 // -----------------------------------------------------------       
 //				Instantiation
 // -----------------------------------------------------------  
@@ -137,7 +162,7 @@ oflow_calc_iou oflow_calc_iou(
 //--------------------counter---------------------------------	
 	 always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N) counter <= #1 4'd0;
-		else if(current_state == avg_st)	counter <= #1 4'd0;
+		else if(current_state == calc_st && next_state == avg_st )	counter <= #1 4'd0;
 		else counter <= #1 counter + 1;
 		
 	end
@@ -158,8 +183,9 @@ always_comb begin
 	//score = 0;
 	case (current_state)
 		idle_st: begin
+			start_iou = start ? 1:0;
 			next_state = start ? calc_st:idle_st;	
-			start_iou = start ? 1:0;	
+				
 		end
 		
 		calc_st: begin
@@ -175,10 +201,14 @@ always_comb begin
 		end
 		
 		avg_st: begin 
-				
-				avg_similarity_metric = iou_weight*iou_metric_pad + w_weight*w_metric_pad+h_weight*h_metric_pad+color1_weight*color1_metric_pad+
-										color2_weight*color2_metric_pad+ dhistory_weight*d_history_metric_pad;
-					
+			iou_mult = iou_weight*iou_metric_pad;
+			color1_mult = color1_weight*color1_metric_pad;
+			color2_mult = color2_weight*color2_metric_pad;
+			w_mult = w_weight*w_metric_pad;
+			h_mult = h_weight*h_metric_pad;
+			history_mult = dhistory_weight*d_history_metric_pad;
+			
+			avg_similarity_metric = iou_mult+color1_mult	+color2_mult+w_mult+h_mult+history_mult;
 				
 				if (counter == 4'd7) begin // COUNTER OF THE ABOVE CALC OF THE sum_similarity_metric,avg_similarity_metric
 					control_for_read_new_line = 1'b1; // we want to start read new line after 2 cycles before the end
@@ -200,8 +230,10 @@ function [`WIDTH_LEN-1:0] l1_distance (input [`WIDTH_LEN-1:0] a,input [`WIDTH_LE
 endfunction
 
 function [`COLOR_LEN-1:0] l1_distance_for_rgb (input [`COLOR_LEN-1:0] a,input [`COLOR_LEN-1:0] b);
-	l1_distance_for_rgb = l1_distane(a[R_CHANNEL_BITS],b[R_CHANNEL_BITS]) + l1_distane(a[G_CHANNEL_BITS],b[G_CHANNEL_BITS])
-	+ l1_distane(a[B_CHANNEL_BITS],b[B_CHANNEL_BITS]);
+	l1_distance_for_rgb = l1_distance(a[`R_CHANNEL_BITS],b[`R_CHANNEL_BITS]) + l1_distance(a[`G_CHANNEL_BITS],b[`G_CHANNEL_BITS])
+	+ l1_distance(a[`B_CHANNEL_BITS],b[`B_CHANNEL_BITS]);
 endfunction
+	
+	
 	
 endmodule
