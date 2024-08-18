@@ -33,8 +33,8 @@ module  oflow_score_board(
 			input logic [`ROW_LEN-1:0] row_sel_from_cr,
 			input logic [`ROW_LEN-1:0] row_to_change, // for change the pointer	
 			input logic write_to_pointer,//flag indicate we need to write to pointer
-			output logic [(`SCORE_LEN*2)-1:0] score_to_cr,// we insert score0&score1
-			output logic [(`ID_LEN*2)-1:0] id_to_cr,// we insert id0&id1
+			output logic [(`SCORE_LEN)-1:0] score_to_cr,// we insert score0&score1
+			output logic [(`ID_LEN)-1:0] id_to_cr,// we insert id0&id1
 			
 			//buffer
 			output logic [(`ID_LEN)-1:0] id_to_buffer,
