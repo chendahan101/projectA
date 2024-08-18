@@ -17,6 +17,7 @@
 `define ADDR_WIDTH_LUT 11
 `define HIST_REG_WIDTH 45
 
+
 `define INSTANCES_LEN 4
 
 
@@ -51,6 +52,11 @@ module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 10 ) (
 
 );	
 
+
+// -----------------------------------------------------------       
+//              Parameter
+// -----------------------------------------------------------  
+localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
 
 // -----------------------------------------------------------       
 //              Logics
@@ -91,8 +97,8 @@ module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 10 ) (
 
 	
 	always_comb begin
-		column_lut = (id_to_cr/2048); // suppose to be one bit. Eg. while (id_to_cr/2048)!=0 
-		row_lut = (id_to_cr%2048);
+		column_lut = (id_to_cr/DEPTH_LUT); // suppose to be one bit. Eg. while (id_to_cr/2048)!=0 
+		row_lut = (id_to_cr%DEPTH_LUT);
 	
 		address_lut = row_lut;
 		mask_lut = (column_lut) ? {`HALF_DATA_WIDTH_LUT{1'b0},`HALF_DATA_WIDTH_LUT{1'b1}} : {`HALF_DATA_WIDTH_LUT{1'b1},`HALF_DATA_WIDTH_LUT{1'b0}};
