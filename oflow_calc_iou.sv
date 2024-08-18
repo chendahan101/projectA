@@ -69,22 +69,13 @@ sm_type next_state;
 		end
 	end
 	
- // -----------------------------------------------------------       
- //              valid iou output procedural block.	
- // -----------------------------------------------------------
-	 always_ff @(posedge clk, posedge reset_N) begin
-		 if (!reset_N) valid_iou <= #1 1'b0;
-		 else if (current_state==iou_st && counter == 3) valid_iou <= #1 1'b1;
-		 else valid_iou <= #1 1'b0;		 				
-	 end
-
 	
 // -----------------------------------------------------------       
 //						FSM – Async Logic
 // -----------------------------------------------------------	
 always_comb begin
 	next_state = current_state;
-	
+	valid_iou = 1'b0;
 	case (current_state)
 		idle_st: begin
 				next_state = start ? coordinate_st:idle_st;	
@@ -112,8 +103,10 @@ always_comb begin
 			iou = {22{1'b1}} - temp_iou[21:0];
 			
 			// iou = 1 - (Intersection / (size_length_k + size_length_history - Intersection));
-			if (counter == 3) // counter start fom 0
+			if (counter == 3) begin// counter start fom 0
 				next_state = idle_st;
+				valid_iou = 1'b1;
+			end	
 		end
 	endcase
 end
