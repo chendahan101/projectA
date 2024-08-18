@@ -15,7 +15,8 @@
 `define INV_NUM_OF_METRICS  6'b0010101   //q0.6, INV=INVERSE 0.1666 
 `define D_HISTORY_METRIC 6 // if `D_HISTORY_LEN is 3, 0-5, the maximum result after shift will be 2^5=32, the we need 6 bits
 
-`define AVG_SIMILARITY_METRIC_LEN 44 //Q24.20
+`define AVG_WIDTH_AFTER_OF 46 //Q26.20
+// `define AVG_SIMILARITY_METRIC_LEN 44 //Q24.20
 `define SCORE_LEN 32
 `define ID_LEN 12
 
@@ -37,5 +38,5 @@
 `define COLOR_PAD_LEN 34 //q24.10
 `define D_HISTORY_METRIC_PAD 16 // the len of metric will be +1 the feature:q6.10
 `define IOU_PAD_INDEX `IOU_LEN-1:`IOU_LEN-10
-`define AVG_INDEX `AVG_SIMILARITY_METRIC_LEN-1:(`AVG_SIMILARITY_METRIC_LEN-`SCORE_LEN)
+`define AVG_INDEX `AVG_WIDTH_AFTER_OF-1:(`AVG_WIDTH_AFTER_OF-`SCORE_LEN)
 `define COUNTER_SIZE 4

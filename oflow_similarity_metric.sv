@@ -13,11 +13,11 @@
 `define G_CHANNEL_BITS 15:8
 `define B_CHANNEL_BITS 23:16
 
-`define FRACTION_RANGE 19:0
-`define INTEGER_RANGE `AVG_SIMILARITY_METRIC_LEN-1:20
-`define FRACTION_SIZE_AFTER_OF 21
-`define INTEGER_SIZE_AFTER_OF 25
-`define AVG_WIDTH_AFTER_OF 46
+//`define FRACTION_RANGE 19:0
+//`define INTEGER_RANGE `AVG_SIMILARITY_METRIC_LEN-1:20
+//`define FRACTION_SIZE_AFTER_OF 21
+//`define INTEGER_SIZE_AFTER_OF 25
+
 
 
 
@@ -51,7 +51,7 @@ module  oflow_similarity_metric(
 			output logic valid ,
 			output logic control_for_read_new_line, // we want to start read new line after 2 cycles before the end
 	
-			output logic [`SCORE_LEN-1:0] score,
+			output logic [`SCORE_LEN-1:0] score, // q26.6
 			output logic [`ID_LEN-1:0] id
 			);
 			
@@ -170,7 +170,7 @@ oflow_calc_iou oflow_calc_iou(
 //--------------------score_reg---------------------------------	
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N) score_reg <= #1 0;
-		 else if(valid)	score_reg <= #1 avg_similarity_metric[`AVG_INDEX];	
+		 else if(valid)	score_reg <= #1 avg_similarity_metric[`AVG_INDEX];	// q  .6
 	end			
 // -----------------------------------------------------------       
 //						FSM – Async Logic
