@@ -67,8 +67,14 @@ begin
 	 
    #50
    @(posedge clk); 
-   insert_new_data(100,50, 200,60, 180,55, 200,65, 100, 10, 20, 10 );              // CPU WRITE configurations (TSI master) 
+  // x_tl_k,  y_tl_k, x_br_k,  y_br_k, x_tl_history,  y_tl_history, x_br_history,  y_br_history,  width_k, height_k, width_history, height_history
+   insert_new_data(50,10, 60,110, 52,8, 62,108, 10, 100, 10, 100 );   // 
+   $display("iou: %d, ",iou);
    
+   #50
+	insert_new_data(50,10, 60,110, 70,8, 80,108, 10, 100, 10, 100 );   // 
+   $display("iou: %d, ",iou);
+
    #100 $finish;  
    
 //   #100000  $finish;
