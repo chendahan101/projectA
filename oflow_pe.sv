@@ -51,9 +51,18 @@ module  oflow_pe(
 			// conflict_resolve
 
 			//IDs
-			output logic ['ID_LEN-1:0] id_out ['MAX_ROWS_IN_SCORE_BOARD-1:0];
+			output logic ['ID_LEN-1:0] id_out ['MAX_ROWS_IN_SCORE_BOARD-1:0],
 			
 			
+			//interface between pe to cr
+			output logic [`SCORE_LEN-1:0] score_to_cr_from_pe ,  
+			output logic [`ID_LEN-1:0] id_to_cr_from_pe,  
+			input logic [`ROW_LEN-1:0] row_sel_to_pe_from_cr,  //which row to read from score board
+			input logic  write_to_pointer_to_pe , //for write to score_board
+			input logic  data_to_score_board_to_pe, // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+			input logic [`ROW_LEN-1:0] row_to_change_to_pe, //for write to score_board
+
+	
 			);
 			
 // -----------------------------------------------------------       
@@ -146,7 +155,17 @@ oflow_registration oflow_registration(
 			//.d_history(d_history), 
 
 			//IDs
-			.id_out(id_out)
+			.id_out(id_out),
+			
+			
+				
+			//cr
+			.score_to_cr_from_pe(score_to_cr_from_pe) ,  
+			.id_to_cr_from_pe(id_to_cr_from_pe),  
+			.row_sel_to_pe_from_cr(row_sel_to_pe_from_cr),  //which row to read from score board
+			.write_to_pointer_to_pe(write_to_pointer_to_pe) , //for write to score_board
+			.data_to_score_board_to_pe(data_to_score_board_to_pe), // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+			.row_to_change_to_pe(row_to_change_to_pe) //for write to score_board
 			
 			);
 

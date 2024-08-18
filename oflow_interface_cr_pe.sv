@@ -33,7 +33,7 @@ module interface_cr_pe #() (
 		input logic [`ROW_LEN-1:0] row_to_change, //for write to score_board
 		input logic [`PE_LEN-1:0] pe_to_change, //for write to score_board
 		input logic  data_to_score_board_from_cr, // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
-		input logic  write_to_pointer_from_cr //for write to score_board
+		input logic  write_to_pointer_from_cr, //for write to score_board
 		output logic [`SCORE_LEN-1:0] score_to_cr, //arrives from score_board
 		output logic [`ID_LEN-1:0] id_to_cr //arrives from score_board
 

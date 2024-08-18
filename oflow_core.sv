@@ -126,6 +126,30 @@ logic read_new_line;
 			
 
 // logics for Conflict_Resolve
+	logic start_cr,
+	logic done_cr,
+//interface_to_pe_from_cr
+	logic [`SCORE_LEN-1:0] score_to_cr_from_pe [`PE_NUM]; 
+	logic [`ID_LEN-1:0] id_to_cr_from_pe [`PE_NUM];  
+	logic [`ROW_LEN-1:0] row_sel_to_pe_from_cr;  //which row to read from score board
+	logic  write_to_pointer_to_pe [`PE_NUM]; //for write to score_board
+	logic  data_to_score_board_to_pe; // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+	logic [`ROW_LEN-1:0] row_to_change_to_pe; //for write to score_board
+
+
+//interface_to_cr_from_pe
+		logic [`ROW_LEN-1:0] row_sel_from_cr ;  //which row to read from score board
+		logic [`PE_LEN-1:0] pe_sel_from_cr; //for read from score_board
+		logic [`ROW_LEN-1:0] row_to_change; //for write to score_board
+		logic [`PE_LEN-1:0] pe_to_change; //for write to score_board
+		logic  data_to_score_board_from_cr; // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+		logic  write_to_pointer_from_cr; //for write to score_board
+		logic [`SCORE_LEN-1:0] score_to_cr; //arrives from score_board
+		logic [`ID_LEN-1:0] id_to_cr; //arrives from score_board
+
+
+
+
 
 
 // -----------------------------------------------------------       
@@ -176,7 +200,7 @@ begin
 			.done_pe (done_pe),
 			.done_fe (done_fe_i[i]),
 			.done_registration (done_registration_i[i]), 
-	   .control_for_read_new_line (control_for_read_new_line_i[i]), // we want to start read new line after 2 cycles before the end; control_for_read_new_line_0 && ( control_for_read_new_line_1  || (~ |ID1)) 
+			.control_for_read_new_line (control_for_read_new_line_i[i]), // we want to start read new line after 2 cycles before the end; control_for_read_new_line_0 && ( control_for_read_new_line_1  || (~ |ID1)) 
 			
 
 			// interface between buffer&pe
@@ -186,12 +210,97 @@ begin
 			 .data_out_pe (data_out_pe[i]),
 			 .done_read_to_pe (done_read_to_pe),
 			//IDs
-	   		 .id_out( id_out[`MAX_ROWS_IN_SCORE_BOARD][i])
-	   	
+	   		 .id_out( id_out[`MAX_ROWS_IN_SCORE_BOARD][i]),
+			//interface between conflict resolve and PE
+			.score_to_cr_from_pe(score_to_cr_from_pe [i]), 
+			.id_to_cr_from_pe(id_to_cr_from_pe [i]),  
+			.row_sel_to_pe_from_cr(row_sel_to_pe_from_cr),  //which row to read from score board
+			.write_to_pointer_to_pe(write_to_pointer_to_pe [i]), //for write to score_board
+			.data_to_score_board_to_pe(data_to_score_board_to_pe), // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+			.row_to_change_to_pe(row_to_change_to_pe) //for write to score_board
+
 			
 	   );
 end
 endgenerate
+
+
+
+// Instantiate the interface_cr_pe module
+    interface_cr_pe #() interface_cr_pe (
+        .clk(clk),
+        .reset_N(reset_N),
+        
+        // PE inputs
+        .score_to_cr_from_pe(score_to_cr_from_pe),
+        .id_to_cr_from_pe(id_to_cr_from_pe),
+        
+        // PE outputs
+        .row_sel_to_pe(row_sel_to_pe_from_cr),
+        .write_to_pointer_to_pe(write_to_pointer_to_pe),
+        .data_to_score_board_to_pe(data_to_score_board_to_pe),
+        .row_to_change_to_pe(row_to_change_to_pe),
+
+        // Conflict Resolve inputs
+        .row_sel_from_cr(row_sel_from_cr),
+        .pe_sel_from_cr(pe_sel_from_cr),
+        .row_to_change(row_to_change),
+        .pe_to_change(pe_to_change),
+        .data_to_score_board_from_cr(data_to_score_board_from_cr),
+        .write_to_pointer_from_cr(write_to_pointer_from_cr),
+        
+        // Conflict Resolve outputs
+        .score_to_cr(score_to_cr),
+        .id_to_cr(id_to_cr)
+    );
+
+
+// Instantiate the oflow_conflict_resolve module
+    oflow_conflict_resolve #() oflow_conflict_resolve (
+        .clk(clk),
+        .reset_N(reset_N),
+        
+        // Conflict Resolution
+        .start_cr(start_cr),
+        .done_cr(done_cr),
+        
+        // Interface between CR and PEs
+        .score_to_cr(score_to_cr),
+        .id_to_cr(id_to_cr),
+        .row_sel_from_cr(row_sel_from_cr),
+        .pe_sel_from_cr(pe_sel_from_cr),
+        .row_to_change(row_to_change),
+        .pe_to_change(pe_to_change),
+        .data_to_score_board(data_to_score_board_from_cr),
+        .write_to_pointer(write_to_pointer_from_cr)
+    );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
