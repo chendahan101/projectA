@@ -91,7 +91,7 @@ begin
 	
   #50
 		  //iou_weight w_weight h_weight color1_weight color2_weight dhistory_weight 
-  insert_weight(10'b0100000000,10'b0100000000,10'b0100000000,10'b0001010101,10'b0001010101,10'b0001010101);
+  insert_weight(10'b1000000000,10'b0010000000,10'b0010000000,10'b0001010101,10'b0001010101,10'b0001010101);
   @(posedge clk); 
   //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0] [`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] 
   insert_curr_data({11'd30,11'd55}, {11'd50,11'd10,11'd60,11'd110}, 10, 100, {8'd128,8'd127,8'd78}, {8'd204,8'd205,8'd209}); 
