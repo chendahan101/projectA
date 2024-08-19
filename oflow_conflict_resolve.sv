@@ -42,6 +42,7 @@ module oflow_conflict_resolve #() (
 
 	//LUT 
 	logic [`DATA_WIDTH_LUT-1:0] data_out_lut_for_fsm; 
+	logic [`DATA_WIDTH_LUT-1:0] data_out_dont_care_lut_for_fsm; 
 	logic [`ADDR_WIDTH_LUT-1:0] address_lut; 
 	logic [`DATA_WIDTH_LUT-1:0] data_in_lut;
 	logic we_lut;
@@ -83,7 +84,24 @@ module oflow_conflict_resolve #() (
  
 // Instantiate of the LUT
 
-
+mem_2048x16 mem_inst(
+		.clk(clk)
+		.reset_N(reset_N),
+		.data_in_0(data_in_lut),
+		.data_out_0(data_out_dont_care_lut_for_fsm),
+		.addr_0(address_lut),
+		.web_0(~we_lut),//port 0 is only fo write(active low)
+		.ceb_0(1'b0),//active low
+		.csb_0(1'b0),
+		.oeb_0(1'b1),//active low,but write mode only we dont need to enable read output
+		.data_in_1(0),//dont care, port1 is for reading only
+		.data_out_1(data_out_lut_for_fsm),
+		.addr_1(address_lut),
+		.web_1(1'b1),//port 1 is only fo read(active high)
+		.ceb_1(1'b0//active low
+	        .csb_1(1'b0),
+	        .oeb_1(1'b0)
+		);
 
 
 
