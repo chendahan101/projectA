@@ -128,7 +128,7 @@ module oflow_MEM_buffer #() (
 		//end
 	end
 	
-	assign oe = (we) ?  1'b0 : 1'b1;
+	assign oe = (we) ; / oe is active low 
 	
 
 
