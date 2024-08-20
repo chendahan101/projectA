@@ -162,7 +162,7 @@ oflow_calc_iou oflow_calc_iou(
 //--------------------counter---------------------------------	
 	 always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N) counter <= #1 4'd0;
-		else if(current_state == calc_st && next_state == avg_st )	counter <= #1 4'd0;
+		else if(next_state != current_state )	counter <= #1 4'd0;
 		else counter <= #1 counter + 1;
 		
 	end
@@ -170,7 +170,7 @@ oflow_calc_iou oflow_calc_iou(
 //--------------------score_reg---------------------------------	
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N) score_reg <= #1 0;
-		 else if(valid)	score_reg <= #1 avg_similarity_metric[`AVG_INDEX];	// q  .6
+		 else if(valid)	score_reg <= #1 avg_similarity_metric[`AVG_INDEX];	// q  26.6
 	end			
 // -----------------------------------------------------------       
 //						FSM – Async Logic
