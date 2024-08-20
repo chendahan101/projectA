@@ -106,7 +106,7 @@ module  oflow_similarity_metric(
 	
 	
 
-	typedef enum {idle_st,calc_st,avg_st,iou_st} sm_type;
+	typedef enum {idle_st,calc_st,avg_st} sm_type;
 	sm_type current_state;
 	sm_type next_state;
 	
