@@ -65,7 +65,7 @@ module oflow_reg_file #() (
 	assign time_to_write = apb_pwrite && apb_psel && apb_penable ;
 	assign time_to_read = !apb_pwrite && apb_psel && apb_penable ;
 	assign apb_pready = (time_to_write || time_to_read) && (apb_addr == `W_IOU_ADDR || apb_addr == `W_WIDTH_ADDR || apb_addr == `W_HEIGHT_ADDR ||  apb_addr == `W_COLOR1_ADDR ||apb_addr == `W_COLOR2_ADDR || 
-						 apb_addr == `NUM_OF_HISTORY_FRAMES_ADDR || apb_addr == `W_HISTORY_ADDR)  ;
+						 apb_addr == `W_HISTORY_ADDR || apb_addr == `NUM_OF_HISTORY_FRAMES_ADDR || apb_addr == `SCORE_TH_FOR_NEW_BBOX_ADDR)  ;
 	
 	assign w_iou = w_iou_reg;
 	assign w_w = w_w_reg;
