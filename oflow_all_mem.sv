@@ -116,7 +116,7 @@ generate
 		
 		
 		
-		dpram256x64 dpram256x64(.A1(address_0), .A2(address_1), .CEB1(clk), .CEB2(clk), .WEB1(web_0&&clk), .WEB2(web_1&&clk), .OEB1(oeb_0), .OEB2(oeb_1),
+		dpram256x64 dpram256x64(.A1(address_0), .A2(address_1), .CEB1(clk), .CEB2(clk), .WEB1(web_0), .WEB2(web_1), .OEB1(web_0&&clk), .OEB2(web_1&&clk),
 			.CSB1(csb_0), .CSB2(csb_1),
 			.I1(data_in_inst_0[i]), .I2(data_in_inst_1[i]), .O1(data_out[i]), .O2(data_out_dont_care[i]));
 
