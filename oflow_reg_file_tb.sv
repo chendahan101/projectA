@@ -44,6 +44,7 @@ logic [31:0] apb_pwdata;
  logic [`WEIGHT_LEN-1:0] w_color2;
  logic [`WEIGHT_LEN-1:0] w_dhistory;
  logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frame;
+ logic [`SCORE_LEN-1:0] score_th_for_new_bbox;	
    
   
    
@@ -71,7 +72,8 @@ oflow_reg_file  oflow_reg_file(
 	.w_color1(w_color1),
 	.w_color2(w_color2),
 	.w_dhistory(w_dhistory),
-	.num_of_history_frame(num_of_history_frame)
+	.num_of_history_frame(num_of_history_frame),
+	.score_th_for_new_bbox(score_th_for_new_bbox)
 			   
 );
 
