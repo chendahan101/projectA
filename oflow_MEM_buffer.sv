@@ -48,7 +48,7 @@ module oflow_MEM_buffer #() (
 //				Instantiation
 // ----------------------------------------------------------- 
 	
-	mem mem(.clk(clk),
+	all_mem  #(.DATA_WIDTH_MEM (`DATA_WIDTH)) all_mem(.clk(clk),
 			.reset_N(reset_N),
 			.address_0(addr_0),
 			.address_1(addr_1),
@@ -58,10 +58,10 @@ module oflow_MEM_buffer #() (
 			.data_out_1(data_out_1),
 			.csb_0(1'b0),
 			.csb_1(1'b0),
-			.web_0(we),
-			.web_1(we),
-			.oeb_0(oe),
-			.oeb_1(oe)
+			.web_0(~we),//web =0 write, web=1 read. cause active low
+			.web_1(~we),
+			.oeb_0(1'b0),
+			.oeb_1(1'b0)
 	);
 	
 	
@@ -128,7 +128,7 @@ module oflow_MEM_buffer #() (
 		//end
 	end
 	
-	assign oe = (we) ; / oe is active low 
+	assign oe = (we) ; // oe is active low 
 	
 
 
