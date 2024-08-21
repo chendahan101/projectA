@@ -46,8 +46,19 @@ sm_type next_state;
    logic [`COUNTER_LEN-1:0] counter;
    logic [`BBOX_POSITION_FRAME-1:0] temp_iou;
 
+	logic start_DW_div_seq;
+	logic done_DW_div_seq, divide_by_0, remainder;
+	logic [`INTERSECTION*2-1:0] a;
+	logic [`INTERSECTION-1:0] b;
 
-
+// -----------------------------------------------------------       
+//                 Instantiations
+// -----------------------------------------------------------  
+   
+   DW_div_seq # ( .a_width(`INTERSECTION*2), .b_width(`INTERSECTION) ) DW_div_seq ( .clk(clk) , .rst_n(reset_N), .hold(1'b0)
+	   , .start(start_DW_div_seq), .a(a),   .b(b) , .complete(done_DW_div_seq), .divide_by_0(divide_by_0), .quotient(temp_iou), .remainder(remainder) );
+   
+   
 // -----------------------------------------------------------       
 //                FSM synchronous procedural block.	
 // -----------------------------------------------------------
@@ -76,6 +87,7 @@ sm_type next_state;
 always_comb begin
 	next_state = current_state;
 	valid_iou = 1'b0;
+	start_DW_div_seq = 1'b0;
 	case (current_state)
 		idle_st: begin
 				next_state = start ? coordinate_st:idle_st;	
@@ -98,8 +110,13 @@ always_comb begin
 					next_state = iou_st;
 		end
 		
-		iou_st: begin 
-			temp_iou = ((Intersection )<< 22) / (size_length_k + size_length_history - Intersection); // its ok to sub 22 bits from 16 bits because the 22 bits is less than 16 bits actually
+		iou_st: begin
+			if(counter == 0)
+				start_DW_div_seq = 1'b1;
+			
+			a = (Intersection << 22);
+			b = (size_length_k + size_length_history - Intersection);
+			//temp_iou = ((Intersection )<< 22) / (size_length_k + size_length_history - Intersection); // its ok to sub 22 bits from 16 bits because the 22 bits is less than 16 bits actually
 			iou = {22{1'b1}} - temp_iou[21:0];  // iou q0.22
 			
 			// iou = 1 - (Intersection / (size_length_k + size_length_history - Intersection));
