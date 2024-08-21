@@ -69,11 +69,12 @@ begin
 	// initiate: num_of_history_frame	
   initiate_all(5); // Initiates all input signals to '0' and open necessary files
   //  Write: data_in_0, data_in_1, frame_num, offset_0, offset_1
-  write_data( 290'd0, 290'd0, 0, 0, 0);
+  //write_data( 290'd0, 290'd0, 0, 0, 0);
   #50
   @(posedge clk); 
   //  Write: data_in_0, data_in_1, frame_num, offset_0, offset_1
-  write_data( 290'd5454674563, 290'd5363252365, 6, 34, 35);
+  write_data( {22'd50,44'd70,8'd10,8'd100,24'd200,24'd250,12'd5,22'd50,44'd70,8'd10,8'd100,24'd201,24'd250,12'd6}, 
+		  		{22'd50,44'd70,8'd10,8'd100,24'd200,24'd251,12'd7,22'd50,44'd70,8'd10,8'd100,24'd200,24'd250,12'd9}, 6, 34, 35);
 	#10
   //  Read: frame_num, offset_0, offset_1
   read_data(  6,  34, 35);

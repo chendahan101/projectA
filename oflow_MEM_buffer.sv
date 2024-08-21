@@ -60,8 +60,8 @@ module oflow_MEM_buffer #() (
 			.csb_1(1'b0),
 			.web_0(~we),//web =0 write, web=1 read. cause active low
 			.web_1(~we),
-			.oeb_0(1'b0),
-			.oeb_1(1'b0)
+			.oeb_0(oe),
+			.oeb_1(oe)
 	);
 	
 	
