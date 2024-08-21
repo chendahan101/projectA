@@ -36,6 +36,7 @@ module oflow_reg_file #() (
 	output logic [`WEIGHT_LEN-1:0] w_color2,
 	output logic [`WEIGHT_LEN-1:0] w_dhistory,
 	output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frame
+	output logic [`SCORE_LEN-1:0]  score_th_for_new_bbox;
 	);
 
 
@@ -51,6 +52,7 @@ module oflow_reg_file #() (
    logic [`WEIGHT_LEN-1:0] w_dhistory_reg;
    
    logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frame_reg;
+   logic [`SCORE_LEN-1:0]  score_th_for_new_bbox_reg;
    
    //logic [31:0] apb_prdata_reg;
    
@@ -70,8 +72,11 @@ module oflow_reg_file #() (
 	assign w_h = w_h_reg;
 	assign w_color1 = w_color1_reg;
 	assign w_color2 = w_color2_reg;
-	assign num_of_history_frame = num_of_history_frame_reg;
 	assign w_dhistory = w_dhistory_reg;
+	assign num_of_history_frame = num_of_history_frame_reg;
+	assign score_th_for_new_bbox = score_th_for_new_bbox_reg;
+	
+
 	
 	//assign apb_prdata = apb_prdata_reg;
 // -----------------------------------------------------------       
@@ -125,6 +130,13 @@ module oflow_reg_file #() (
 		if(!reset_N) num_of_history_frame_reg <= #1 3'd0; 
 		else if(time_to_write && (apb_addr == `NUM_OF_HISTORY_FRAMES_ADDR)) num_of_history_frame_reg <= #1 apb_pwdata; 
 	end 
+
+	
+	always_ff @(posedge clk or negedge reset_N)   
+	begin 
+		if(!reset_N) score_th_for_new_bbox_reg <= #1 3'd0; 
+		else if(time_to_write && (apb_addr == `SCORE_TH_FOR_NEW_BBOX_ADDR)) score_th_for_new_bbox_reg <= #1 apb_pwdata; 
+	end 
 		
 	
 // -----------------------------------------------------------       
@@ -143,18 +155,18 @@ module oflow_reg_file #() (
 	begin 
 		if(!reset_N) apb_prdata_reg <= #1 0; 
 		else if(time_to_read) 
-			 begin 
-				case (apb_addr)
-					`W_IOU_ADDR: apb_prdata_reg <= #1 w_iou_reg;
-					`W_WIDTH_ADDR: apb_prdata_reg <= #1  w_w_reg;
-					`W_HEIGHT_ADDR: apb_prdata_reg <= #1 w_h_reg;
-					`W_COLOR1_ADDR: apb_prdata_reg <= #1 w_color1_reg;
-					`W_COLOR2_ADDR:  apb_prdata_reg <= #1 w_color2_reg;
-					`W_HISTORY_ADDR: apb_prdata_reg <= #1 w_dhistory_reg;
-					`NUM_OF_HISTORY_FRAMES_ADDR: apb_prdata_reg <= #1  num_of_history_frame_reg;
-					
-				endcase	
-			 end
+		 begin 
+			case (apb_addr)
+				`W_IOU_ADDR: apb_prdata_reg <= #1 w_iou_reg;
+				`W_WIDTH_ADDR: apb_prdata_reg <= #1  w_w_reg;
+				`W_HEIGHT_ADDR: apb_prdata_reg <= #1 w_h_reg;
+				`W_COLOR1_ADDR: apb_prdata_reg <= #1 w_color1_reg;
+				`W_COLOR2_ADDR:  apb_prdata_reg <= #1 w_color2_reg;
+				`W_HISTORY_ADDR: apb_prdata_reg <= #1 w_dhistory_reg;
+				`NUM_OF_HISTORY_FRAMES_ADDR: apb_prdata_reg <= #1  num_of_history_frame_reg;
+				`SCORE_TH_FOR_NEW_BBOX_ADDR: apb_prdata_reg <= #1 score_th_for_new_bbox_reg;
+			endcase	
+		 end
 	end	
 	
 */
@@ -173,6 +185,7 @@ module oflow_reg_file #() (
 					`W_COLOR2_ADDR:  apb_prdata= w_color2_reg;
 					`W_HISTORY_ADDR: apb_prdata= w_dhistory_reg;
 					`NUM_OF_HISTORY_FRAMES_ADDR: apb_prdata =  num_of_history_frame_reg;
+					`SCORE_TH_FOR_NEW_BBOX_ADDR: apb_prdata = score_th_for_new_bbox_reg;
 					default: apb_prdata = num_of_history_frame_reg; 	
 				endcase	
 			end
