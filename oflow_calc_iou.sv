@@ -106,16 +106,22 @@ always_comb begin
 		intersection_area_st: begin 
 				if ((x_br_intersection < x_tl_intersection) || (y_br_intersection < y_tl_intersection)) Intersection = 22'd0;
 				else Intersection = (x_br_intersection - x_tl_intersection) * (y_br_intersection - y_tl_intersection);
-				if (counter == 2) // we need 3 but counter start from 0 
+				a = (Intersection << 22);
+				b = (size_length_k + size_length_history - Intersection);
+				if (counter == 2) begin // we need 3 but counter start from 0 
+					start_DW_div_seq = 1'b1;
 					next_state = iou_st;
+				end	
+					
 		end
 		
 		iou_st: begin
-			if(counter == 0)
-				start_DW_div_seq = 1'b1;
 			
-			a = (Intersection << 22);
-			b = (size_length_k + size_length_history - Intersection);
+			
+			//a = (Intersection << 22);
+			//b = (size_length_k + size_length_history - Intersection);
+			//if(counter == 0)
+			//	start_DW_div_seq = 1'b1;
 			//temp_iou = ((Intersection )<< 22) / (size_length_k + size_length_history - Intersection); // its ok to sub 22 bits from 16 bits because the 22 bits is less than 16 bits actually
 			iou = {22{1'b1}} - temp_iou[21:0];  // iou q0.22
 			
