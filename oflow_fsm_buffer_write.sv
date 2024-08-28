@@ -1,11 +1,13 @@
 /*------------------------------------------------------------------------------
- * File          : oflow_fsm_read.sv
+ * File          : oflow_fsm_buffer_write.sv
  * Project       : RTL
  * Author        : epchof
- * Creation date : Jun 30, 2024
+ * Creation date : Aug 28, 2024
  * Description   :
  *------------------------------------------------------------------------------*/
+
 `include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
+
 
 module oflow_fsm_buffer_write #() (
 
@@ -32,14 +34,13 @@ module oflow_fsm_buffer_write #() (
 
 
 
-
+localparam MAX_WRITE_CYCLE_WIDTH = 2; //MAX CYCLE IS 3 THUS WE NEED 2 BIT TO REPRESENT 3 
 
 // -----------------------------------------------------------       
 //                  logicisters & Wires
 // -----------------------------------------------------------  
 
 logic [`OFFSET_WIDTH-1:0] counter_offset;
-	
 typedef enum {idle_st,offset_st,wait_st} sm_type;
 sm_type current_state;
 sm_type next_state;
@@ -64,8 +65,7 @@ sm_type next_state;
 		 else if (next_state ==  offset_st && current_state !=  idle_st ) counter_offset <= #1 counter_offset + 2;
 		 
 	  end
-	  
-	 
+
 	 
  // -----------------------------------------------------------       
  //						FSM – Async Logic
@@ -73,6 +73,7 @@ sm_type next_state;
  always_comb begin
 	 next_state = current_state;
 	 done_write = 0;// send to fsm core
+	 
 	 case (current_state)
 		 idle_st: begin
 			 next_state = start_write ? offset_st: idle_st;	
@@ -81,10 +82,10 @@ sm_type next_state;
 		 
 		 offset_st: begin
 			 
-			 if((counter_offset < end_pointers[frame_num % num_of_history_frames]-1) && ready_from_core ) begin
+			 if((counter_offset*2 < end_pointers[frame_num % num_of_history_frames]) && ready_from_core ) begin
 				next_state = offset_st;
 			 end 
-			 else if((counter_offset < end_pointers[frame_num % num_of_history_frames]-1) && !ready_from_core ) begin
+			 else if((counter_offset*2 < end_pointers[frame_num % num_of_history_frames]) && !ready_from_core ) begin
 				next_state = wait_st;
 			 end 
 			 else  begin
