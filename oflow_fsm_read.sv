@@ -92,7 +92,6 @@ sm_type next_state;
 		 frame_st: begin
 			 
 			 if(counter_of_history_frames < num_of_history_frames) begin
-				 frame_to_read = frame_num - counter_of_history_frames - 1;
 				next_state = offset_st;
 			 end 
 			 else begin
@@ -105,7 +104,8 @@ sm_type next_state;
 
 		 
 		 offset_st: begin 
-			 if (counter_offset == end_pointers[frame_to_read % num_of_history_frames]) begin //end to read one frame
+			 frame_to_read = frame_num - counter_of_history_frames - 1;
+			 if (counter_offset == (end_pointers[frame_to_read % num_of_history_frames]-1)) begin //end to read one frame
 				 next_state = frame_st;
 				 new_frame_to_read = 1;
 			end
