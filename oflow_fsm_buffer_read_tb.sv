@@ -33,6 +33,8 @@ module oflow_fsm_buffer_read_tb #() ();
  logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_to_read;
  logic [`OFFSET_WIDTH-1:0] offset_0;
  logic [`OFFSET_WIDTH-1:0] offset_1;
+ logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_interface;
+
  //logic we;//i saw this was in comment in the wrapper fsm buffer
 
 
