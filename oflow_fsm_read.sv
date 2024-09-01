@@ -26,7 +26,8 @@ module oflow_fsm_read #() (
 	output logic done_read,
 	output logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_to_read,
 	output logic [`OFFSET_WIDTH-1:0] offset_0,
-	output logic [`OFFSET_WIDTH-1:0] offset_1
+	output logic [`OFFSET_WIDTH-1:0] offset_1,
+	output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_interface
 	//output logic we //i saw this was in comment in the wrapper fsm buffer
 
 );
@@ -39,7 +40,7 @@ module oflow_fsm_read #() (
 //                  logicisters & Wires
 // -----------------------------------------------------------  
 
-logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frames;
+logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frames_reg;
 logic [`OFFSET_WIDTH-1:0] counter_offset;
 logic new_frame_to_read;
 	
@@ -60,9 +61,9 @@ sm_type next_state;
 	end
 //--------------------counter---------------------------------	
 	 always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N) counter_of_history_frames <= #1 4'd0;
-		else if(current_state ==  idle_st )	counter_of_history_frames <= #1 4'd0;
-		else if (new_frame_to_read) counter_of_history_frames <= #1 counter_of_history_frames + 1;
+		if (!reset_N) counter_of_history_frames_reg <= #1 4'd0;
+		else if(current_state ==  idle_st )	counter_of_history_frames_reg <= #1 4'd0;
+		else if (new_frame_to_read) counter_of_history_frames_reg <= #1 counter_of_history_frames_reg + 1;
 		
 	 end
 	 
@@ -91,7 +92,7 @@ sm_type next_state;
 		 
 		 frame_st: begin
 			 
-			 if(counter_of_history_frames < num_of_history_frames) begin
+			 if(counter_of_history_frames_reg < num_of_history_frames) begin
 				next_state = offset_st;
 			 end 
 			 else begin
@@ -104,7 +105,7 @@ sm_type next_state;
 
 		 
 		 offset_st: begin 
-			 frame_to_read = frame_num - counter_of_history_frames - 1;
+			 frame_to_read = frame_num - counter_of_history_frames_reg - 1;
 			 if (counter_offset == (end_pointers[frame_to_read % num_of_history_frames]-1)) begin //end to read one frame
 				 next_state = frame_st;
 				 new_frame_to_read = 1;
@@ -118,6 +119,7 @@ sm_type next_state;
 	  
 	assign offset_0 = counter_offset;
 	assign offset_1 = 0;
+	assign counter_of_history_frame_to_interface = counter_of_history_frames_reg;
 	//assign we = 0;
 	 
 	 
