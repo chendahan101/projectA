@@ -21,6 +21,8 @@ input logic start_write,
 input logic ready_from_core,	
 //signal from fsm_write to mem
 output logic done_write,
+output logic [`OFFSET_WIDTH-1:0] offset_0_write,
+output logic [`OFFSET_WIDTH-1:0] offset_1_write,
 
 //for fsm to fsm_read
 input logic similarity_metric_flag_ready_to_read_new_line,//only after the similarity metric finish to process one line 
@@ -29,8 +31,8 @@ input logic start_read,
 output logic done_read,
 output logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_to_read,
 
-output logic [`OFFSET_WIDTH-1:0] offset_0,
-output logic [`OFFSET_WIDTH-1:0] offset_1,
+output logic [`OFFSET_WIDTH-1:0] offset_0_read,
+output logic [`OFFSET_WIDTH-1:0] offset_1_read,
 //output logic we,
 output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_interface
 
@@ -63,8 +65,8 @@ logic [`ADDR_WIDTH-1:0] end_pointers [5];
 	
 	.done_read(done_read),
 	.frame_to_read(frame_to_read),
-	.offset_0(offset_0),
-	.offset_1(offset_1),
+	.offset_0(offset_0_read),
+	.offset_1(offset_1_read),
 	//.we(we),
 	.counter_of_history_frame_to_interface(counter_of_history_frame_to_interface) 
 	);
@@ -76,14 +78,14 @@ oflow_fsm_buffer_write oflow_fsm_buffer_write (
 	.frame_num(frame_num),
 	.num_of_history_frames(num_of_history_frames),
 	.end_pointers(end_pointers),
-	.start (start),
-	.start_read(start_read_mem),
+	//.start (start),
+	//.start_read(start_read_mem),
 	.ready_from_core(ready_from_core),
-	.start_write(start_write_mem),
+	.start_write(start_write),
 	//.done_read(done_read_mem),
-	.done_write(done_write_mem),
-	.offset_0(offset_0),
-	.offset_1(offset_1)
+	.done_write(done_write),
+	.offset_0(offset_0_write),
+	.offset_1(offset_1_write)
 	
 );
 
@@ -95,9 +97,12 @@ oflow_fsm_buffer_write oflow_fsm_buffer_write (
 // to set the end pointer
 
 always_comb begin
-	end_pointers[frame_num%num_of_history_frames] = (start_write) ? num_of_bbox_in_frame : 0;
+	//end_pointers[frame_num%num_of_history_frames] = (start_write) ? num_of_bbox_in_frame : 0;
+	if (start_write ) 	end_pointers[frame_num%num_of_history_frames] = num_of_bbox_in_frame ;
+
 end
- 
+
+//assign end_pointers[frame_num%num_of_history_frames] = num_of_bbox_in_frame ;
 
 
 

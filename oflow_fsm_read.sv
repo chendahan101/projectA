@@ -41,9 +41,14 @@ module oflow_fsm_read #() (
 // -----------------------------------------------------------  
 
 logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frames_reg;
+logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] max_frames_to_read;
+
 logic [`OFFSET_WIDTH-1:0] counter_offset;
 logic new_frame_to_read;
-	
+logic  max_bbox_div_2_reminder;
+logic [`ADDR_WIDTH-1:0] max_bbox_div_2_integer;
+logic [`ADDR_WIDTH-1:0] max_bbox_div_2;
+
 typedef enum {idle_st,frame_st,offset_st} sm_type;
 sm_type current_state;
 sm_type next_state;
@@ -91,8 +96,8 @@ sm_type next_state;
 		 end
 		 
 		 frame_st: begin
-			 
-			 if(counter_of_history_frames_reg < num_of_history_frames) begin
+			 max_frames_to_read = (frame_num<num_of_history_frames) ? frame_num : num_of_history_frames;
+			 if(counter_of_history_frames_reg < max_frames_to_read) begin
 				next_state = offset_st;
 			 end 
 			 else begin
@@ -106,7 +111,10 @@ sm_type next_state;
 		 
 		 offset_st: begin 
 			 frame_to_read = frame_num - counter_of_history_frames_reg - 1;
-			 if (counter_offset == (end_pointers[frame_to_read % num_of_history_frames]-1)) begin //end to read one frame
+			 max_bbox_div_2_reminder = end_pointers[frame_to_read % num_of_history_frames] & 1;
+			 max_bbox_div_2_integer = end_pointers[frame_to_read % num_of_history_frames] >>1;
+			 max_bbox_div_2 = (max_bbox_div_2_reminder) ? (max_bbox_div_2_integer+1) :(max_bbox_div_2_integer);
+			 if (counter_offset == max_bbox_div_2-1) begin //end to read one frame
 				 next_state = frame_st;
 				 new_frame_to_read = 1;
 			end
