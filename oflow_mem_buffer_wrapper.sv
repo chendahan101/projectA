@@ -55,11 +55,18 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
  // fsm mem logic
 	logic start_new_frame;
 	logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_to_read;
+	logic [`OFFSET_WIDTH-1:0] offset_0_read;
+	logic [`OFFSET_WIDTH-1:0] offset_1_read;
+	logic [`OFFSET_WIDTH-1:0] offset_0_write;
+	logic [`OFFSET_WIDTH-1:0] offset_1_write;
 // -----------------------------------------------------------       
 //              Assign
 // -----------------------------------------------------------  
 
 	assign frame_num_to_mem_buffer = (rnw_st) ? frame_num : frame_to_read ;
+	assign offset_0 = (rnw_st) ? offset_0_write : offset_0_read ;
+	assign offset_1 = (rnw_st) ? offset_1_write : offset_1_read ;
+
 	assign we = rnw_st; 
 
 	
@@ -98,12 +105,14 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	.similarity_metric_flag_ready_to_read_new_line (read_new_line),
 	.start_read(start_read),
 	.start_write(start_write),
-        .ready_from_core(ready_from_core),	 
+		.ready_from_core(ready_from_core),	 
 	.done_read(done_read),
 	.done_write(done_write),
 	 .frame_to_read(frame_to_read),
-	 .offset_0(offset_0),
-	 .offset_1(offset_1),
+	 .offset_0_read(offset_0_read),
+	 .offset_1_read(offset_1_read),
+	 .offset_0_write(offset_0_write),
+	 .offset_1_write(offset_1_write),
 	.counter_of_history_frame_to_interface(counter_of_history_frame_to_interface)
 );
 
