@@ -47,6 +47,9 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 //              Logics
 // -----------------------------------------------------------  
 logic [`ADDR_WIDTH-1:0] end_pointers [5];
+logic max_row_remainder ;
+logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] max_row_integer;
+logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] max_row;
 // -----------------------------------------------------------       
 //                Instantiations
 // -----------------------------------------------------------  
@@ -98,7 +101,10 @@ oflow_fsm_buffer_write oflow_fsm_buffer_write (
 
 always_comb begin
 	//end_pointers[frame_num%num_of_history_frames] = (start_write) ? num_of_bbox_in_frame : 0;
-	if (start_write ) 	end_pointers[frame_num%num_of_history_frames] = num_of_bbox_in_frame ;
+	max_row_remainder = num_of_bbox_in_frame[0];
+	max_row_integer = num_of_bbox_in_frame >>1;
+	max_row = (max_row_remainder) ? (max_row_integer+1) :(max_row_integer);
+	if (start_write ) 	end_pointers[frame_num%num_of_history_frames] = max_row ;
 
 end
 

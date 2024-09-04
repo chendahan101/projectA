@@ -82,10 +82,10 @@ sm_type next_state;
 		 
 		 offset_st: begin
 			 
-			 if((counter_offset*2 < end_pointers[frame_num % num_of_history_frames]) && ready_from_core ) begin
+			 if((counter_offset < end_pointers[frame_num % num_of_history_frames]) && ready_from_core ) begin
 				next_state = offset_st;
 			 end 
-			 else if((counter_offset*2 < end_pointers[frame_num % num_of_history_frames]) && !ready_from_core ) begin
+			 else if((counter_offset < end_pointers[frame_num % num_of_history_frames]) && !ready_from_core ) begin
 				next_state = wait_st;
 			 end 
 			 else  begin
