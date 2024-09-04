@@ -97,7 +97,7 @@ task initiate_all ();        // sets all oflow inputs to '0'.
 	reset_N	= 1'b1;
 	
 	frame_num = `TOTAL_FRAME_NUM_WIDTH'd12;
-	num_of_history_frames = `NUM_OF_HISTORY_FRAMES_WIDTH'd3;
+	num_of_history_frames = `NUM_OF_HISTORY_FRAMES_WIDTH'd5;
 	end_pointers = '{default: `ADDR_WIDTH'b0};
 	#10
 	end_pointers[0] = `ADDR_WIDTH'd9; //will include the num of bbox in the frame ,if we choose 4 history frame we will have the ability to save only 32 bbox in each frame
