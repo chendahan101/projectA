@@ -5,6 +5,7 @@
  * Creation date : Sep 1, 2024
  * Description   :
  *------------------------------------------------------------------------------*/
+`include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
 
 module oflow_mem_buffer_wrapper_tb #() ();
 
@@ -36,8 +37,8 @@ module oflow_mem_buffer_wrapper_tb #() ();
 
 
 
- logic [`DATA_WIDTH-1:0] data_in_0_reg [3];
- logic [`DATA_WIDTH-1:0] data_in_1_reg [3];
+ logic [`DATA_WIDTH-1:0] data_in_0_reg [2];
+ logic [`DATA_WIDTH-1:0] data_in_1_reg [2];
 
 
  // ----------------------------------------------------------------------
@@ -59,22 +60,22 @@ module oflow_mem_buffer_wrapper_tb #() ();
 	 initiate_all ();   // Initiates all input signals to '0' and open necessary files
 	 #50
 	 
-	 //  Read all frames: 
-	rnw_st = 1'b1;
-	data_in_0_reg  = {`DATA_WIDTH'd5,`DATA_WIDTH'd90,`DATA_WIDTH'd56} ;
-	data_in_1_reg  = {`DATA_WIDTH'd6,`DATA_WIDTH'd91,`DATA_WIDTH'd36} ;
-	 #5
-	 write_mode (`TOTAL_FRAME_NUM_WIDTH'd0,`NUM_OF_BBOX_IN_FRAME_WIDTH'd6,data_in_0_reg,data_in_1_reg,22 );
-	 data_in_0_reg  = {`DATA_WIDTH'd77,`DATA_WIDTH'd99,`DATA_WIDTH'd55} ;
-	 data_in_1_reg  = {`DATA_WIDTH'd88,`DATA_WIDTH'd88,`DATA_WIDTH'd56} ;
+	 // write: 
+	rnw_st = 1'b0;
+	data_in_0_reg  = {`DATA_WIDTH'd5,`DATA_WIDTH'd90} ;
+	data_in_1_reg  = {`DATA_WIDTH'd6,`DATA_WIDTH'd91} ;
+			write_mode (`TOTAL_FRAME_NUM_WIDTH'd0,`NUM_OF_BBOX_IN_FRAME_WIDTH'd8,data_in_0_reg,data_in_1_reg,2 );
+	 //read :
 	 #50
-	 write_mode (`TOTAL_FRAME_NUM_WIDTH'd1,`NUM_OF_BBOX_IN_FRAME_WIDTH'd6,data_in_0_reg,data_in_1_reg,22 );
+	 rnw_st = 1'b1;
+	 read_mode (`TOTAL_FRAME_NUM_WIDTH'd1 , 22 );// cause we dond start read when we on frame=0 
+	 
+	 //write :
 	 #50
 	 rnw_st = 1'b0;
-	 read_mode (`TOTAL_FRAME_NUM_WIDTH'd1 , 22 );// cause we dond start read when we on frame=0 
-	 #50
-	 
-	 
+	 data_in_0_reg  = {`DATA_WIDTH'd77,`DATA_WIDTH'd99} ;
+	 data_in_1_reg  = {`DATA_WIDTH'd88,`DATA_WIDTH'd88} ;
+	 write_mode (`TOTAL_FRAME_NUM_WIDTH'd1,`NUM_OF_BBOX_IN_FRAME_WIDTH'd8,data_in_0_reg,data_in_1_reg,2 );
 	 #50 $finish;  
  end
 
@@ -103,7 +104,7 @@ module oflow_mem_buffer_wrapper_tb #() ();
 	 start_write = 1'b0;
 	 #10
 	 reset_N	= 1'b1;
-	 rnw_st = 1'b0;
+	 rnw_st = 1'b1;
 	 ready_from_core = 1'b0;
 	 read_new_line = 1'b0;
 	 num_of_history_frames = `NUM_OF_HISTORY_FRAMES_WIDTH'd3;
@@ -112,11 +113,11 @@ module oflow_mem_buffer_wrapper_tb #() ();
 
 
 
-task write_mode (input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num_arg ,input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] num_of_bbox_in_frame_arg ,input logic [`DATA_WIDTH-1:0] data_in_0_reg_arg [3],input logic [`DATA_WIDTH-1:0] data_in_1_reg_arg [3],int repeat_num);
+task write_mode (input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num_arg ,input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] num_of_bbox_in_frame_arg ,input logic [`DATA_WIDTH-1:0] data_in_0_reg_arg [2],input logic [`DATA_WIDTH-1:0] data_in_1_reg_arg [2],int repeat_num);
 begin
 	frame_num = frame_num_arg;
 	num_of_bbox_in_frame = num_of_bbox_in_frame_arg;
-	@(negedge clk);
+	@(posedge clk);
 	start_write = 1'b1;
 	@(posedge clk);
 	start_write = 1'b0;  
@@ -125,10 +126,12 @@ begin
 	 for(int i =0; i<repeat_num ; i++) begin
 		 data_in_0 = data_in_0_reg_arg[i];
 		 data_in_1 = data_in_1_reg_arg[i];
-		 @(negedge clk);
+		 @(posedge clk);
 		 ready_from_core = 1'b1;
-		 repeat(3) @(posedge clk);// it will take 3 cycle to data until it will arrive
+		 @(posedge clk);
 		 ready_from_core = 1'b0;
+		 repeat(3) @(posedge clk);// it will take 3 cycle to data until it will arrive
+		 //ready_from_core = 1'b0;
 	end
 
 end
@@ -139,16 +142,17 @@ endtask
 task read_mode (input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num_arg , int repeat_num);
 	begin
 		frame_num = frame_num_arg;
-		@(negedge clk);
+		@(posedge clk);
 		start_read = 1'b1;
 		@(posedge clk);
 		start_read = 1'b0;  
 		 //repeat(3) @(posedge clk);// it will take 3 cycle to data until it will arrive
 		 
 		 for(int i =0; i<repeat_num ; i++) begin
-			 @(negedge clk);
+			 read_new_line = 1'b0;
+			 repeat(7) @(posedge clk);// it will take 3 cycle to data until it will arrive
 			 read_new_line = 1'b1;
-			 repeat(3) @(posedge clk);// it will take 3 cycle to data until it will arrive
+			 @(posedge clk);
 			 read_new_line = 1'b0;
 		end
 

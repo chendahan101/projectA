@@ -21,7 +21,8 @@ module oflow_MEM_buffer #() (
 	
 	input logic [`OFFSET_WIDTH-1:0] offset_0,
 	input logic [`OFFSET_WIDTH-1:0] offset_1,
-	
+	input logic csb_0,
+	input logic csb_1,
 	input logic we,
 
 	
@@ -56,8 +57,8 @@ module oflow_MEM_buffer #() (
 			.data_in_1(data_in_1),
 			.data_out_0(data_out_0),
 			.data_out_1(data_out_1),
-			.csb_0(1'b0),
-			.csb_1(1'b0),
+			.csb_0(csb_0),
+			.csb_1(csb_0),
 			.web_0(~we),//web =0 write, web=1 read. cause active low
 			.web_1(~we),
 			.oeb_0(oe),

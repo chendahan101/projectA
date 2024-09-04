@@ -50,7 +50,12 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	 logic we;
 	 logic done_read_mem;
 	 logic done_write_mem;
-	
+	 // logic valid_read_data;
+	logic [`DATA_WIDTH-1:0] data_out_0_reg;
+	logic [`DATA_WIDTH-1:0] data_out_1_reg;
+	logic csb_0;
+	logic csb_1;
+
 
  // fsm mem logic
 	logic start_new_frame;
@@ -59,17 +64,55 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	logic [`OFFSET_WIDTH-1:0] offset_1_read;
 	logic [`OFFSET_WIDTH-1:0] offset_0_write;
 	logic [`OFFSET_WIDTH-1:0] offset_1_write;
+	
+	
+	
+// -----------------------------------------------------------       
+//               synchronous procedural block.	
+// -----------------------------------------------------------
+/*always_ff @(posedge clk or negedge reset_N) begin
+		if (!reset_N) data_out_0 <= #1 0;
+		else if(valid_read_data) data_out_0 <= #1 data_out_0_reg;
+end
+// -----------------------------------------------------------       
+//                synchronous procedural block.	
+// -----------------------------------------------------------
+always_ff @(posedge clk or negedge reset_N) begin
+		if (!reset_N) data_out_1 <= #1 0;
+		else if(valid_read_data) data_out_1 <= #1 data_out_1_reg;
+end
+*/
+
+// -----------------------------------------------------------       
+//               synchronous procedural block.	
+// -----------------------------------------------------------
+/*always_ff @(posedge clk or negedge reset_N) begin
+		if (!reset_N) csb_0 <= #1 0;
+		else csb_0 <= #1 (!rnw_st) ? !(ready_from_core) : !(read_new_line || start_read);// we add not cause csb is active low
+end
+// -----------------------------------------------------------       
+//                synchronous procedural block.	
+// -----------------------------------------------------------
+always_ff @(posedge clk or negedge reset_N) begin
+		if (!reset_N) csb_1 <= #1 0;
+		else csb_1 <= #1 (!rnw_st) ? !(ready_from_core) : 1'b1;
+end
+*/	
 // -----------------------------------------------------------       
 //              Assign
 // -----------------------------------------------------------  
 
-	assign frame_num_to_mem_buffer = (rnw_st) ? frame_num : frame_to_read ;
-	assign offset_0 = (rnw_st) ? offset_0_write : offset_0_read ;
-	assign offset_1 = (rnw_st) ? offset_1_write : offset_1_read ;
+	assign frame_num_to_mem_buffer = (!rnw_st) ? frame_num : frame_to_read ;
+	assign offset_0 = (!rnw_st) ? offset_0_write : offset_0_read ;
+	assign offset_1 = (!rnw_st) ? offset_1_write : offset_1_read ;
 
-	assign we = rnw_st; 
-
+	assign we = ((!rnw_st)& ready_from_core); //rnw=1-read.
+	// assign valid_read_data = (!clk )& (!we);
 	
+	
+	assign csb_0 = (!rnw_st) ? !(ready_from_core) : !(read_new_line || start_read);// we add not cause csb is active low
+	assign csb_1 = (!rnw_st) ? !(ready_from_core) : 1'b1;
+
 // -----------------------------------------------------------       
 //                Instantiations
 // -----------------------------------------------------------  
@@ -87,11 +130,12 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	
 	.offset_0(offset_0),
 	.offset_1(offset_1),
-	
+	.csb_0(csb_0),
+	.csb_1(csb_1),
 	.we(we),
 
-	.data_out_0(data_out_0),
-	.data_out_1(data_out_1) 
+	.data_out_0(data_out_0_reg),
+	.data_out_1(data_out_1_reg) 
 	);
 	 
 	 
@@ -105,7 +149,7 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	.similarity_metric_flag_ready_to_read_new_line (read_new_line),
 	.start_read(start_read),
 	.start_write(start_write),
-		.ready_from_core(ready_from_core),	 
+	.ready_from_core(ready_from_core),	 
 	.done_read(done_read),
 	.done_write(done_write),
 	 .frame_to_read(frame_to_read),
