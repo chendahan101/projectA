@@ -81,7 +81,7 @@ sm_type next_state;
 // -----------------------------------------------------------  
 
 assign new_set = new_set_from_dma;
-assign rnw_st = (current_state == write_st) ? 1 : 0 ;
+assign rnw_st = (current_state == write_st) ? 0 : 1 ;
 // -----------------------------------------------------------       
 //                FSM synchronous procedural block.	
 // -----------------------------------------------------------
