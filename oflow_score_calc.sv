@@ -7,12 +7,14 @@
  *------------------------------------------------------------------------------*/
 
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
-`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
+//`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
 
 
 
 module oflow_score_calc #() (
 
+	input logic clk,
+	input logic reset_N,
 	//registration
 	input logic start_score_calc,
 	
@@ -75,7 +77,7 @@ logic start_calc_min;
 // -----------------------------------------------------------  
 
 assign id_1_prev_frame = data_to_similarity_metric_1[`ID_LEN-1:0];
-assign control_for_read_new_line = (control_for_read_new_line_0 && (control_for_read_new_line_1 || ~(|id_1_prev_frame) );
+assign control_for_read_new_line = (control_for_read_new_line_0 && (control_for_read_new_line_1 || ~(|id_1_prev_frame)) );
 
 // -----------------------------------------------------------       
 //                FSM synchronous procedural block.	
@@ -93,80 +95,81 @@ assign control_for_read_new_line = (control_for_read_new_line_0 && (control_for_
 
 //similarity_metric_0
  oflow_similarity_metric oflow_similarity_metric_0 (
-        .clk(clk),
-        .reset_N(reset_N),
-        .start(start_similarity_metric_0),
-        .cm_concate_cur(cm_concate_cur),
-        .position_concate_cur(position_concate_cur),
-        .width_cur(width_cur),
-        .height_cur(height_cur),
-        .color1_cur(color1_cur),
-        .color2_cur(color2_cur),
-        .features_of_prev(data_to_similarity_metric_0),
-        .iou_weight(iou_weight),
-        .w_weight(w_weight),
-        .h_weight(h_weight),
-        .color1_weight(color1_weight),
-        .color2_weight(color2_weight),
-        .dhistory_weight(dhistory_weight),
-        .valid(done_similarity_metric_0),
-        .control_for_read_new_line(control_for_read_new_line_0),
-        .score(score_0),
-        .id(id_0)
-    );
+		.clk(clk),
+		.reset_N(reset_N),
+		.start(start_similarity_metric_0),
+		.cm_concate_cur(cm_concate_cur),
+		.position_concate_cur(position_concate_cur),
+		.width_cur(width_cur),
+		.height_cur(height_cur),
+		.color1_cur(color1_cur),
+		.color2_cur(color2_cur),
+		.features_of_prev(data_to_similarity_metric_0),
+		.iou_weight(iou_weight),
+		.w_weight(w_weight),
+		.h_weight(h_weight),
+		.color1_weight(color1_weight),
+		.color2_weight(color2_weight),
+		.dhistory_weight(dhistory_weight),
+		.valid(done_similarity_metric_0),
+		.control_for_read_new_line(control_for_read_new_line_0),
+		.score(score_0),
+		.id(id_0)
+	);
 	
 	
  oflow_similarity_metric oflow_similarity_metric_1 (
-        .clk(clk),
-        .reset_N(reset_N),
-        .start(start_similarity_metric_1),
-        .cm_concate_cur(cm_concate_cur),
-        .position_concate_cur(position_concate_cur),
-        .width_cur(width_cur),
-        .height_cur(height_cur),
-        .color1_cur(color1_cur),
-        .color2_cur(color2_cur),
-        .features_of_prev(data_to_similarity_metric_1),
-        .iou_weight(iou_weight),
-        .w_weight(w_weight),
-        .h_weight(h_weight),
-        .color1_weight(color1_weight),
-        .color2_weight(color2_weight),
-        .dhistory_weight(dhistory_weight),
-        .valid(done_similarity_metric_1),
+		.clk(clk),
+		.reset_N(reset_N),
+		.start(start_similarity_metric_1),
+		.cm_concate_cur(cm_concate_cur),
+		.position_concate_cur(position_concate_cur),
+		.width_cur(width_cur),
+		.height_cur(height_cur),
+		.color1_cur(color1_cur),
+		.color2_cur(color2_cur),
+		.features_of_prev(data_to_similarity_metric_1),
+		.iou_weight(iou_weight),
+		.w_weight(w_weight),
+		.h_weight(h_weight),
+		.color1_weight(color1_weight),
+		.color2_weight(color2_weight),
+		.dhistory_weight(dhistory_weight),
+		.valid(done_similarity_metric_1),
 	 .control_for_read_new_line(control_for_read_new_line_1),
-        .score(score_1),
-        .id(id_1)
-    );
+		.score(score_1),
+		.id(id_1)
+	);
 
 oflow_calc_min oflow_calc_min (
-        .clk(clk),
-        .reset_N(reset_N),
-        .start_score_calc(start_score_calc),
-        .start_calc_min(start_calc_min),
-        .done_calc_min(done_calc_min),
-        .score_0(score_0),
-        .id_0(id_0),
-        .score_1(score_1), // Assuming you have another score and id to connect here
-        .id_1(id_1),       // You might need to adjust these signals based on your design
-        .min_score_0(min_score_0),
-        .min_id_0(min_id_0),
-        .min_score_1(min_score_1),
-        .min_id_1(min_id_1)
-    );
+		.clk(clk),
+		.reset_N(reset_N),
+		.start_score_calc(start_score_calc),
+		.start_calc_min(start_calc_min),
+		.done_calc_min(done_calc_min),
+		.score_0(score_0),
+		.id_0(id_0),
+		.score_1(score_1), // Assuming you have another score and id to connect here
+		.id_1(id_1),       // You might need to adjust these signals based on your design
+		.min_score_0(min_score_0),
+		.min_id_0(min_id_0),
+		.min_score_1(min_score_1),
+		.min_id_1(min_id_1)
+	);
 
 
  oflow_score_calc_similarity_metric_fsm oflow_score_calc_similarity_metric_fsm (
-        .clk(clk),
-        .reset_N(reset_N),
-        .start_score_calc(start_score_calc),
-        .done_score_calc(done_score_calc),
-        .done_read(done_read),
-        .id_1(id_1_prev_frame),
-	 .done_similarity_metric(done_similarity_metric_0 && (done_similarity_metric_1 || ~(|id_1_prev_frame) ),
-        .start_similarity_metric_0(start_similarity_metric_0),
-        .start_similarity_metric_1(start_similarity_metric_1)
-    );
+		.clk(clk),
+		.reset_N(reset_N),
+		.start_score_calc(start_score_calc),
+		.done_score_calc(done_score_calc),
+		.done_read(done_read),
+		.id_1(id_1_prev_frame),
+		 .done_similarity_metric(done_similarity_metric_0 && (done_similarity_metric_1 || ~(|id_1_prev_frame)) ),
+		.start_similarity_metric_0(start_similarity_metric_0),
+		.start_similarity_metric_1(start_similarity_metric_1)
+	);
+ 
 oflow_score_calc_calc_min_fsm oflow_score_calc_calc_min_fsm (
 	.clk(clk),
 	.reset_N(reset_N) ,
@@ -174,7 +177,7 @@ oflow_score_calc_calc_min_fsm oflow_score_calc_calc_min_fsm (
 	.done_calc_min(done_calc_min), 
 	.start_calc_min(start_calc_min), 
 	// similarity metric
-	.done_similarity_metric(done_similarity_metric_0 && (done_similarity_metric_1 || ~(|id_1_prev_frame) )
+	.done_similarity_metric(done_similarity_metric_0 && (done_similarity_metric_1 || ~(|id_1_prev_frame)) )
  );
 	 
 endmodule

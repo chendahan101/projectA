@@ -6,7 +6,7 @@
  * Description   :	
  *------------------------------------------------------------------------------*/
 
-`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
+//`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 
 `define R_CHANNEL_BITS 7:0
@@ -106,7 +106,7 @@ module  oflow_similarity_metric(
 	
 	
 
-	typedef enum {idle_st,calc_st,avg_st} sm_type;
+	typedef enum {idle_st,calc_st,avg_st,iou_st} sm_type;
 	sm_type current_state;
 	sm_type next_state;
 	
@@ -172,14 +172,22 @@ oflow_calc_iou oflow_calc_iou(
 		 if (!reset_N) score_reg <= #1 0;
 		 else if(valid)	score_reg <= #1 avg_similarity_metric[`AVG_INDEX];	// q  26.6
 	end			
+	 
+ /*//--------------------start iou---------------------------------	
+		  always_ff @(posedge clk or negedge reset_N) begin
+			  if (!reset_N) start_iou <= #1 1'b0;
+			  else if(start && current_state == idle_st)	start_iou <= #1 1'b1;
+			  else start_iou <= #1 1'b0;
+		 end
+		 */	
 // -----------------------------------------------------------       
 //						FSM – Async Logic
 // -----------------------------------------------------------	
 always_comb begin
 	next_state = current_state;
 	control_for_read_new_line = 1'b0;
-	valid = 1'b0; //of similarity
 	start_iou = 1'b0;
+	valid = 1'b0; //of similarity
 	//score = 0;
 	case (current_state)
 		idle_st: begin
