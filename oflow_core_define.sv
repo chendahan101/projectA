@@ -6,6 +6,8 @@
  * Description   :
  *------------------------------------------------------------------------------*/
 
+`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
+
 `define ROW_LEN 4 //The maximum rows of each pe mem is 11
 `define PE_LEN 5 // There are 24 PEs
 `define SET_LEN 4 //The maximum sets: 256/PE_NUM=11, need 4 bits: 2^4 = 16 > 11

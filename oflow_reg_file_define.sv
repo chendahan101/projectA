@@ -15,6 +15,5 @@
 `define W_COLOR2_ADDR  3'h4
 `define W_HISTORY_ADDR  3'h5
 `define NUM_OF_HISTORY_FRAMES_ADDR 3'h6
-`define SCORE_TH_FOR_NEW_BBOX_ADDR 3'h7
 
 `define ADDR_LEN 3
