@@ -46,7 +46,7 @@ logic [`ID_LEN-1:0] min_id_0_reg; // id_0 of min score_0
 logic [`SCORE_LEN-1:0] min_score_1_reg; // min_score_1 (will be the maximum between min_score_0_reg and min_score_1_reg)
 logic [`ID_LEN-1:0] min_id_1_reg; // id_1 of min score_1 (will be the id of the maximum between min_score_0_reg and min_score_1_reg)
 logic [1:0] min1 ,min0;
-logic put_0_in_0 ,put_1_in_0 ,put_0_in_1 ,put_1_in_1  , put_min_0_in_1 ;
+logic put_0_in_0 ,put_1_in_0 ,put_0_in_1 ,put_1_in_1  , put_min_0_in_1, dont_change_0, dont_change_1 ;
 
 
 
@@ -69,6 +69,7 @@ sm_type next_state;
 		if (!reset_N || start_score_calc) min_score_0_reg <= #1  `MAX_SCORE;
 		else if(put_0_in_0 )	min_score_0_reg <= #1 score_0;
 		else if(put_1_in_0 )  min_score_0_reg <= #1 score_1;
+		else if (dont_change_0) min_score_0_reg <= #1 min_score_0_reg;
 	 end
 //--------------------min_score_1_reg---------------------------------	
 	 always_ff @(posedge clk or negedge reset_N) begin
@@ -76,6 +77,7 @@ sm_type next_state;
 		else if(put_0_in_1 )	min_score_1_reg <= #1 score_0;
 		else if(put_1_in_1 )  min_score_1_reg <= #1 score_1;
 		else if(put_min_0_in_1 )  min_score_1_reg <= #1 min_score_0_reg;
+		else if(dont_change_1)	min_score_1_reg <= #1 min_score_1_reg;
 		
 	 end
 	 
@@ -103,15 +105,19 @@ sm_type next_state;
  always_comb begin
 	 next_state = current_state;
 	 
-	 done_calc_min = 0;
-	 min1 = 0;
-	 min0 = 0;
-	 put_0_in_0 = 0;
-	 put_1_in_0 = 0;
+	 done_calc_min = 1'b0;
 	 
-	 put_0_in_1 = 0;	
-	 put_1_in_1 =0 ;
-	 put_min_0_in_1 = 0;
+	 min0 = 2'b00;
+	 min1 = 2'b00;
+	 
+	 put_0_in_0 = 1'b0;
+	 put_1_in_0 = 1'b0;
+	 put_0_in_1 = 1'b0;	
+	 put_1_in_1 = 1'b0 ;
+	 put_min_0_in_1 = 1'b0;
+	 
+	 dont_change_1 = 1'b0;
+	 dont_change_1 = 1'b0;
 	 
 	 case (current_state)
 		idle_st: begin
@@ -122,41 +128,84 @@ sm_type next_state;
 		 calc_min_st: begin
 
 			// score_0-00 score_1-01 min_score_0_reg-10
-			if (score_0 < min_score_0_reg) begin
-				min1 <= 2'b10;
-				min0 <= 2'b00;
-			end else if (score_0 < min_score_1_reg) begin
-				min1 <= 2'b00;
-			end
-
-			if (score_1 < min_score_0_reg) begin
-				min1 <= 2'b10;
-				min0 <= 2'b01;
-			end else if (score_1 < min_score_1_reg) begin
-				min1 <= 2'b01;
-			end
+			 if (score_0 < min_score_0_reg && score_1 < min_score_0_reg) begin
+				 if(score_0 <= score_1) begin
+				     min0 = 2'b01;
+				   	 min1 = 2'b10;                                   // before this was <= instead of =
+				 end
+				 else begin
+					 min0 = 2'b10;
+					 min1 = 2'b01;                                  
+				 end
+			 end
+		 
+			 else if (score_0 < min_score_0_reg && score_1 >= min_score_0_reg) begin
+						min0 = 2'b01;
+						min1 = 2'b11;  
+			 end
+			 
+			 else if (score_0 >= min_score_0_reg && score_1 < min_score_0_reg) begin
+						min0 = 2'b10;
+						min1 = 2'b11;
+			 end
+			 
+			 else if ( (score_0 >= min_score_0_reg && score_0 < min_score_1_reg) && (score_1 >= min_score_0_reg && score_1 < min_score_1_reg)) begin
+						 if(score_0 <= score_1) begin
+							 min0 = 2'b00;
+							 min1 = 2'b01;
+						 end
+						 else begin
+							 min0 = 2'b00;
+							 min1 = 2'b10;                                  
+						 end
+			 end
+			 
+			 else if ( (score_0 >= min_score_0_reg && score_0 < min_score_1_reg) &&  score_1 >= min_score_1_reg) begin
+					 min0 = 2'b00;
+					 min1 = 2'b01;
+			 end
+			 
+			 else if (  score_0 >= min_score_1_reg && (score_1 >= min_score_0_reg && score_1 < min_score_1_reg)) begin
+				 	 min0 = 2'b00;
+					 min1 = 2'b10;                                  
+			 end	
+			 
+			 else if (  score_0 >= min_score_1_reg && score_1 >= min_score_1_reg) begin
+				 min0 = 2'b00;
+				 min1 = 2'b00;   
+			 end	
+			 										
+						
+			put_0_in_0 = (min0==2'b01);
+			put_1_in_0 = (min0==2'b10);
 			
-			put_0_in_0 = (min0==2'b00);
-			put_1_in_0 = (min0==2'b01);
+			put_0_in_1 = (min1==2'b01);
+			put_1_in_1 = (min1==2'b10);
+			put_min_0_in_1 = (min1==2'b11);
 			
-			put_0_in_1 = (min1==2'b00);
-			put_1_in_1 = (min1==2'b01);
-			put_min_0_in_1 = (min1==2'b10);
-			
+			dont_change_0 = (min0==2'b00);
+			dont_change_1 = (min1==2'b00);
 			
 			next_state = idle_st;
 			done_calc_min = 1;
+			
 		 end
 		 
 		 
 	 endcase
+	 
  end
+ 
+ // -----------------------------------------------------------       
+ //             Assignments
+ // -----------------------------------------------------------  
 	  
 	assign min_score_0 = min_score_0_reg;
 	assign min_score_1 = min_score_1_reg;
 	assign min_id_0 = min_id_0_reg;
 	assign min_id_1 = min_id_1_reg ;
 
+	 
 	 
 	 
 endmodule

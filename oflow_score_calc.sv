@@ -162,7 +162,7 @@ oflow_calc_min oflow_calc_min (
 		.clk(clk),
 		.reset_N(reset_N),
 		.start_score_calc(start_score_calc),
-		.done_score_calc(done_score_calc),
+		//.done_score_calc(done_score_calc),
 		.done_read(done_read),
 		.id_1(id_1_prev_frame),
 		 .done_similarity_metric(done_similarity_metric_0 && (done_similarity_metric_1 || ~(|id_1_prev_frame)) ),
@@ -175,7 +175,11 @@ oflow_score_calc_calc_min_fsm oflow_score_calc_calc_min_fsm (
 	.reset_N(reset_N) ,
 	// calc_min
 	.done_calc_min(done_calc_min), 
-	.start_calc_min(start_calc_min), 
+	.start_calc_min(start_calc_min),
+	//buffer
+	.done_read(done_read),
+	//score_calc
+	.done_score_calc(done_score_calc),
 	// similarity metric
 	.done_similarity_metric(done_similarity_metric_0 && (done_similarity_metric_1 || ~(|id_1_prev_frame)) )
  );

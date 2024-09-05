@@ -19,7 +19,7 @@ module oflow_score_calc_similarity_metric_fsm #() (
 	
 	// registration
 	input logic start_score_calc, 
-	output logic done_score_calc, 
+	//output logic done_score_calc, 
 
 	
 	// buffer
@@ -43,6 +43,8 @@ module oflow_score_calc_similarity_metric_fsm #() (
 
 
 logic last;
+
+logic flg_start_similarity_metric;
 	
 typedef enum {idle_st,similarity_metric_st,wait_st} sm_type; 
 sm_type current_state;
@@ -74,6 +76,17 @@ sm_type next_state;
 	end
 
 
+
+// -----------------------------------------------------------       
+//                			flg_start_similarity_metric	
+// -----------------------------------------------------------
+	always_ff @(posedge clk or negedge reset_N) begin
+		if (!reset_N) flg_start_similarity_metric <= #1 1'b0;
+		else if (current_state == wait_st && next_state == similarity_metric_st) flg_start_similarity_metric <= #1 1'b1;  /////////////////////////////
+		else flg_start_similarity_metric <= #1 1'b0;
+	end
+
+
  // -----------------------------------------------------------       
  //						FSM – Async Logic
  // -----------------------------------------------------------	
@@ -81,7 +94,8 @@ sm_type next_state;
 	next_state = current_state;
 	start_similarity_metric_0 = 0;
 	start_similarity_metric_1 = 0;
-	done_score_calc = 0;
+	//done_score_calc = 0;
+	
 	case (current_state)
 		 idle_st: begin
 			if (start_score_calc) begin 
@@ -89,21 +103,25 @@ sm_type next_state;
 				start_similarity_metric_1 = |(id_1);
 				next_state = similarity_metric_st;
 			end 
+			
 		 end
 		 
 		 similarity_metric_st: begin
+		    if (flg_start_similarity_metric) begin
+				 start_similarity_metric_0 = 1;
+				 start_similarity_metric_1 = |(id_1);
+			end	 
 			next_state = wait_st;
+			
 		 end
 		 
  
 		wait_st: begin 
 			if (done_similarity_metric && !last) begin 
-				start_similarity_metric_0 = 1;
-				start_similarity_metric_1 = |(id_1);
 				next_state = similarity_metric_st;			
 			end
 			else if (done_similarity_metric && last) begin 
-				done_score_calc = 1;
+				//done_score_calc = 1;
 				next_state = idle_st;			
 			end
 
