@@ -216,12 +216,12 @@ always_comb begin
 			h_mult = h_weight*h_metric_pad;
 			history_mult = dhistory_weight*d_history_metric_pad;
 			
-			avg_similarity_metric = iou_mult+color1_mult	+color2_mult+w_mult+h_mult+history_mult;
+			avg_similarity_metric = iou_mult+color1_mult+color2_mult+w_mult+h_mult+history_mult;
 				
-				if (counter == 4'd7) begin // COUNTER OF THE ABOVE CALC OF THE sum_similarity_metric,avg_similarity_metric
+				if (counter == 4'd3) begin // COUNTER OF THE ABOVE CALC OF THE sum_similarity_metric,avg_similarity_metric
 					control_for_read_new_line = 1'b1; // we want to start read new line after 2 cycles before the end
 				end
-				if (counter == 4'd9) begin // COUNTER OF THE ABOVE CALC OF THE sum_similarity_metric,avg_similarity_metric
+				if (counter == 4'd5) begin // COUNTER OF THE ABOVE CALC OF THE sum_similarity_metric,avg_similarity_metric
 					// score = avg_similarity_metric[`AVG_INDEX];
 					valid = 1;
 					next_state = idle_st;	
