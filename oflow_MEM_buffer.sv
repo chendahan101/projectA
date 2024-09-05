@@ -50,7 +50,7 @@ module oflow_MEM_buffer #() (
 //				Instantiation
 // ----------------------------------------------------------- 
 	
-	all_mem  #(.DATA_WIDTH_MEM (`DATA_WIDTH)) all_mem(.clk(~clk),
+	all_mem  #(.DATA_WIDTH_MEM (`DATA_WIDTH)) all_mem(.clk(clk),
 			.reset_N(reset_N),
 			.address_0(addr_0),
 			.address_1(addr_1),
