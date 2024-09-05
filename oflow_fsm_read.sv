@@ -63,19 +63,18 @@ sm_type next_state;
 	
 	end
 //--------------------counter---------------------------------	
-	 always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N) counter_of_history_frames_reg <= #1 4'd0;
-		else if(current_state ==  idle_st )	counter_of_history_frames_reg <= #1 4'd0;
-		else if (new_frame_to_read) counter_of_history_frames_reg <= #1 counter_of_history_frames_reg + 1;
-		
-	 end
-	 
-	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N) counter_offset <= #1 0;
-		 else if(current_state ==  idle_st || new_frame_to_read)	counter_offset <= #1 0;
-		 else if (current_state ==  offset_st && similarity_metric_flag_ready_to_read_new_line ) counter_offset <= #1 counter_offset + 1;
-		 
-	  end
+ always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N) counter_of_history_frames_reg <= #1 4'd0;
+	else if(current_state ==  idle_st )	counter_of_history_frames_reg <= #1 4'd0;
+	else if (new_frame_to_read) counter_of_history_frames_reg <= #1 counter_of_history_frames_reg + 1;
+	
+ end
+ 
+ always_ff @(posedge clk or negedge reset_N) begin
+	 if (!reset_N) counter_offset <= #1 0;
+	 else if(current_state ==  idle_st || new_frame_to_read)	counter_offset <= #1 0;
+	 else if (current_state ==  offset_st && similarity_metric_flag_ready_to_read_new_line ) counter_offset <= #1 counter_offset + 1; 
+  end
 	  
 	 
 	 
@@ -85,7 +84,7 @@ sm_type next_state;
  always_comb begin
 	 next_state = current_state;
 	 new_frame_to_read = 0;
-	 frame_to_read = 0;
+	 frame_to_read = frame_num - 1;
 	 done_read = 0;
 	 case (current_state)
 		 idle_st: begin
@@ -94,6 +93,8 @@ sm_type next_state;
 		 end
 		 
 		 frame_st: begin
+			 frame_to_read =  (counter_offset ==  end_pointers[frame_to_read % num_of_history_frames]) ? (frame_num - (counter_of_history_frames_reg+1) - 1) :  (frame_num - counter_of_history_frames_reg - 1);
+
 			 max_frames_to_read = (frame_num<num_of_history_frames) ? frame_num : num_of_history_frames;
 			 if(counter_of_history_frames_reg < max_frames_to_read) begin
 				next_state = offset_st;
@@ -101,16 +102,16 @@ sm_type next_state;
 			 else begin
 					 next_state = idle_st;
 					 done_read = 1;
-					end
+			end
 			
 		 end
 		 
 
 		 
 		 offset_st: begin 
-			 frame_to_read = frame_num - counter_of_history_frames_reg - 1;
+			 frame_to_read =  (counter_offset ==  end_pointers[frame_to_read % num_of_history_frames]) ? (frame_num - (counter_of_history_frames_reg+1) - 1) :  (frame_num - counter_of_history_frames_reg - 1);
 			 
-			 if (counter_offset == end_pointers[frame_to_read % num_of_history_frames]-1 || (!end_pointers[frame_to_read % num_of_history_frames])) begin //end to read one frame
+			 if ( (counter_offset == end_pointers[frame_to_read % num_of_history_frames])  ||  (end_pointers[frame_to_read % num_of_history_frames]==0)) begin //end to read one frame
 				 next_state = frame_st;
 				 new_frame_to_read = 1;
 			end
@@ -121,7 +122,7 @@ sm_type next_state;
 	 endcase
  end
 	  
-	assign offset_0 = counter_offset;
+	assign offset_0 = (counter_offset < end_pointers[frame_to_read % num_of_history_frames]) ? counter_offset : 0;
 	assign offset_1 = 0;
 	assign counter_of_history_frame_to_interface = counter_of_history_frames_reg;
 	//assign we = 0;

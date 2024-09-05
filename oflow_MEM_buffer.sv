@@ -24,6 +24,7 @@ module oflow_MEM_buffer #() (
 	input logic csb_0,
 	input logic csb_1,
 	input logic we,
+	input logic oeb,
 
 	
 	//input logic fe_enable,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       nable
@@ -41,7 +42,7 @@ module oflow_MEM_buffer #() (
 	logic [`ADDR_WIDTH-1:0] addr_1;
 	logic [`ADDR_WIDTH-1:0] pointers [5];
 
-	logic oe;
+	//logic oe;
 
 
 	
@@ -49,7 +50,7 @@ module oflow_MEM_buffer #() (
 //				Instantiation
 // ----------------------------------------------------------- 
 	
-	all_mem  #(.DATA_WIDTH_MEM (`DATA_WIDTH)) all_mem(.clk(clk),
+	all_mem  #(.DATA_WIDTH_MEM (`DATA_WIDTH)) all_mem(.clk(~clk),
 			.reset_N(reset_N),
 			.address_0(addr_0),
 			.address_1(addr_1),
@@ -61,8 +62,8 @@ module oflow_MEM_buffer #() (
 			.csb_1(csb_0),
 			.web_0(~we),//web =0 write, web=1 read. cause active low
 			.web_1(~we),
-			.oeb_0(oe),
-			.oeb_1(oe)
+			.oeb_0(oeb),
+			.oeb_1(oeb)
 	);
 	
 	
@@ -129,7 +130,7 @@ module oflow_MEM_buffer #() (
 		//end
 	end
 	
-	assign oe = (we) ; // oe is active low 
+	//assign oe = (we) ; // oe is active low 
 	
 
 

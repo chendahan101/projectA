@@ -51,10 +51,11 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	 logic done_read_mem;
 	 logic done_write_mem;
 	 // logic valid_read_data;
-	logic [`DATA_WIDTH-1:0] data_out_0_reg;
-	logic [`DATA_WIDTH-1:0] data_out_1_reg;
+	//logic [`DATA_WIDTH-1:0] data_out_0_reg;
+	//logic [`DATA_WIDTH-1:0] data_out_1_reg;
 	logic csb_0;
 	logic csb_1;
+	logic oeb;
 
 
  // fsm mem logic
@@ -102,17 +103,17 @@ end
 //              Assign
 // -----------------------------------------------------------  
 
-	assign frame_num_to_mem_buffer = (!rnw_st) ? frame_num : frame_to_read ;
-	assign offset_0 = (!rnw_st) ? offset_0_write : offset_0_read ;
-	assign offset_1 = (!rnw_st) ? offset_1_write : offset_1_read ;
+	assign frame_num_to_mem_buffer = (~rnw_st) ? frame_num : frame_to_read ;
+	assign offset_0 = (~rnw_st) ? offset_0_write : offset_0_read ;
+	assign offset_1 = (~rnw_st) ? offset_1_write : offset_1_read ;
 
-	assign we = ((!rnw_st)& ready_from_core); //rnw=1-read.
+	assign we = ((~rnw_st)& ready_from_core); //rnw=1-read.
 	// assign valid_read_data = (!clk )& (!we);
 	
 	
-	assign csb_0 = (!rnw_st) ? !(ready_from_core) : !(read_new_line || start_read);// we add not cause csb is active low
-	assign csb_1 = (!rnw_st) ? !(ready_from_core) : 1'b1;
-
+	assign csb_0 = (~rnw_st) ? ~(ready_from_core) : ~(read_new_line | start_read);// we add not cause csb is active low
+	assign csb_1 = (~rnw_st) ? ~(ready_from_core) : 1'b1;
+	assign oeb = ~rnw_st;
 // -----------------------------------------------------------       
 //                Instantiations
 // -----------------------------------------------------------  
@@ -133,9 +134,10 @@ end
 	.csb_0(csb_0),
 	.csb_1(csb_1),
 	.we(we),
-
-	.data_out_0(data_out_0_reg),
-	.data_out_1(data_out_1_reg) 
+	.oeb(oeb),
+	
+	.data_out_0(data_out_0),
+	.data_out_1(data_out_1) 
 	);
 	 
 	 

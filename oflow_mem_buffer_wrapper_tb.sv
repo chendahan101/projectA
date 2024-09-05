@@ -62,20 +62,27 @@ module oflow_mem_buffer_wrapper_tb #() ();
 	 
 	 // write: 
 	rnw_st = 1'b0;
-	data_in_0_reg  = {`DATA_WIDTH'd5,`DATA_WIDTH'd90} ;
-	data_in_1_reg  = {`DATA_WIDTH'd6,`DATA_WIDTH'd91} ;
-			write_mode (`TOTAL_FRAME_NUM_WIDTH'd0,`NUM_OF_BBOX_IN_FRAME_WIDTH'd8,data_in_0_reg,data_in_1_reg,2 );
+	data_in_0_reg  = {`DATA_WIDTH'd5, `DATA_WIDTH'd90} ;
+	data_in_1_reg  = {`DATA_WIDTH'd6, `DATA_WIDTH'd91} ;
+	write_mode (`TOTAL_FRAME_NUM_WIDTH'd0, `NUM_OF_BBOX_IN_FRAME_WIDTH'd8, data_in_0_reg, data_in_1_reg, 2 );
+			
 	 //read :
 	 #50
 	 rnw_st = 1'b1;
-	 read_mode (`TOTAL_FRAME_NUM_WIDTH'd1 , 22 );// cause we dond start read when we on frame=0 
+	 read_mode (`TOTAL_FRAME_NUM_WIDTH'd1 , 3 );// cause we don't start read when we on frame=0 
 	 
 	 //write :
 	 #50
 	 rnw_st = 1'b0;
-	 data_in_0_reg  = {`DATA_WIDTH'd77,`DATA_WIDTH'd99} ;
-	 data_in_1_reg  = {`DATA_WIDTH'd88,`DATA_WIDTH'd88} ;
-	 write_mode (`TOTAL_FRAME_NUM_WIDTH'd1,`NUM_OF_BBOX_IN_FRAME_WIDTH'd8,data_in_0_reg,data_in_1_reg,2 );
+	 data_in_0_reg  = {`DATA_WIDTH'd77, `DATA_WIDTH'd99} ;
+	 data_in_1_reg  = {`DATA_WIDTH'd88, `DATA_WIDTH'd85} ;
+	 write_mode (`TOTAL_FRAME_NUM_WIDTH'd1, `NUM_OF_BBOX_IN_FRAME_WIDTH'd8, data_in_0_reg, data_in_1_reg, 2 );
+	 
+	 //read :
+	 #50
+	 rnw_st = 1'b1;
+	 read_mode (`TOTAL_FRAME_NUM_WIDTH'd2 , 7 );// cause we don't start read when we on frame=0 
+	 
 	 #50 $finish;  
  end
 
@@ -148,9 +155,14 @@ task read_mode (input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num_arg , int rep
 		start_read = 1'b0;  
 		 //repeat(3) @(posedge clk);// it will take 3 cycle to data until it will arrive
 		 
-		 for(int i =0; i<repeat_num ; i++) begin
+		repeat(7) @(posedge clk);// it will take 3 cycle to data until it will arrive
+		read_new_line = 1'b1;
+		@(posedge clk);
+		read_new_line = 1'b0;
+		
+		for(int i =0; i<repeat_num ; i++) begin
 			 read_new_line = 1'b0;
-			 repeat(7) @(posedge clk);// it will take 3 cycle to data until it will arrive
+			 repeat(9) @(posedge clk);// it will take 3 cycle to data until it will arrive
 			 read_new_line = 1'b1;
 			 @(posedge clk);
 			 read_new_line = 1'b0;
