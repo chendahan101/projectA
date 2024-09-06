@@ -23,7 +23,7 @@ module oflow_score_calc_similarity_metric_fsm #() (
 
 	
 	// buffer
-	input logic done_read,
+	//input logic done_read,
 	input logic [`ID_LEN-1:0] id_1,
 
 	
@@ -69,13 +69,13 @@ sm_type next_state;
 // -----------------------------------------------------------       
 //                			last REG	
 // -----------------------------------------------------------
-	always_ff @(posedge clk or negedge reset_N) begin
+	/* always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N) last <= #1 0;
 		else if (done_read) last <= #1 1;
 		else if (done_similarity_metric && last ) last <= #1 0;
 	end
 
-
+        */
 
 // -----------------------------------------------------------       
 //                			flg_start_similarity_metric	
