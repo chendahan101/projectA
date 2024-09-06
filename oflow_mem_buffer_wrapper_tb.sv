@@ -155,14 +155,14 @@ task read_mode (input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num_arg , int rep
 		start_read = 1'b0;  
 		 //repeat(3) @(posedge clk);// it will take 3 cycle to data until it will arrive
 		 
-		repeat(7) @(posedge clk);// it will take 3 cycle to data until it will arrive
+		repeat(8) @(posedge clk);// it will take 3 cycle to data until it will arrive
 		read_new_line = 1'b1;
 		@(posedge clk);
 		read_new_line = 1'b0;
 		
 		for(int i =0; i<repeat_num ; i++) begin
 			 read_new_line = 1'b0;
-			 repeat(9) @(posedge clk);// it will take 3 cycle to data until it will arrive
+			 repeat(10) @(posedge clk);// it will take 3 cycle to data until it will arrive
 			 read_new_line = 1'b1;
 			 @(posedge clk);
 			 read_new_line = 1'b0;

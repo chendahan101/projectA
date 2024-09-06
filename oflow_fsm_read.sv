@@ -84,7 +84,7 @@ sm_type next_state;
  always_comb begin
 	 next_state = current_state;
 	 new_frame_to_read = 0;
-	 frame_to_read = frame_num - 1;
+	 frame_to_read = frame_num-1;
 	 done_read = 0;
 	 case (current_state)
 		 idle_st: begin
@@ -93,7 +93,7 @@ sm_type next_state;
 		 end
 		 
 		 frame_st: begin
-			 frame_to_read =  (counter_offset ==  end_pointers[frame_to_read % num_of_history_frames]) ? (frame_num - (counter_of_history_frames_reg+1) - 1) :  (frame_num - counter_of_history_frames_reg - 1);
+			// frame_to_read =  (counter_offset ==  end_pointers[frame_to_read % num_of_history_frames]) ? (frame_num - (counter_of_history_frames_reg+1) - 1) :  (frame_num - counter_of_history_frames_reg - 1);
 
 			 max_frames_to_read = (frame_num<num_of_history_frames) ? frame_num : num_of_history_frames;
 			 if(counter_of_history_frames_reg < max_frames_to_read) begin
