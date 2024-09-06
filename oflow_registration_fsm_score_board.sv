@@ -10,7 +10,7 @@
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
 
-module oflow_registration_fsm_score_calc #() (
+module oflow_registration_fsm_score_board #() (
 
 	input logic clk,
 	input logic reset_N,
