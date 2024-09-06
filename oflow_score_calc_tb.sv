@@ -81,12 +81,13 @@ begin
   @(posedge clk); 
   //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0] [`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] 
   insert_curr_data({11'd30,11'd55}, {11'd50,11'd10,11'd60,11'd110}, 10, 100, {8'd128,8'd127,8'd78}, {8'd204,8'd205,8'd209}); 
-  //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0] [`ID_LEN-1:0]
-  insert_prev_data_0({11'd31,11'd54}, {11'd52,11'd8,11'd62,11'd108}, 10, 100, {8'd130,8'd122,8'd90}, {8'd220,8'd80,8'd200}, 1, 12);
- 
+  
+  
+  insert_prev_data_0({11'd31,11'd54}, {11'd52,11'd8,11'd62,11'd108}, 10, 100, {8'd140,8'd122,8'd90}, {8'd220,8'd80,8'd200}, 4, 12);
   
   //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0] [`ID_LEN-1:0]
-  insert_prev_data_1({11'd40,11'd54}, {11'd70,11'd8,11'd80,11'd108}, 10, 100, {8'd130,8'd122,8'd90}, {8'd220,8'd80,8'd200}, 1, 14);
+  insert_prev_data_1({11'd40,11'd54}, {11'd70,11'd8,11'd80,11'd108}, 10, 100, {8'd140,8'd122,8'd90}, {8'd220,8'd80,8'd200}, 4, 14);
+  
   
   
   @(posedge clk); 
@@ -99,14 +100,20 @@ begin
 	  @(posedge clk); 
   end
   
-  insert_prev_data_0({11'd31,11'd54}, {11'd52,11'd8,11'd62,11'd108}, 10, 100, {8'd140,8'd122,8'd90}, {8'd220,8'd80,8'd200}, 4, 12);
+  
   
   //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0] [`ID_LEN-1:0]
-  insert_prev_data_1({11'd40,11'd54}, {11'd70,11'd8,11'd80,11'd108}, 10, 100, {8'd140,8'd122,8'd90}, {8'd220,8'd80,8'd200}, 4, 14);
+  insert_prev_data_0({11'd31,11'd54}, {11'd52,11'd8,11'd62,11'd108}, 10, 100, {8'd130,8'd122,8'd90}, {8'd220,8'd80,8'd200}, 1, 12);
+ 
+  
+  //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0] [`ID_LEN-1:0]
+  insert_prev_data_1({11'd40,11'd54}, {11'd70,11'd8,11'd80,11'd108}, 10, 100, {8'd130,8'd122,8'd90}, {8'd220,8'd80,8'd200}, 1, 14);
   
   
+
   
-  repeat(8) 
+  
+  repeat(10) 
   begin
 	  @(posedge clk); 
   end

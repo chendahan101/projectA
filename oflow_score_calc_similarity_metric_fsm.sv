@@ -23,7 +23,7 @@ module oflow_score_calc_similarity_metric_fsm #() (
 
 	
 	// buffer
-	//input logic done_read,
+	input logic done_read,
 	input logic [`ID_LEN-1:0] id_1,
 
 	
@@ -69,20 +69,19 @@ sm_type next_state;
 // -----------------------------------------------------------       
 //                			last REG	
 // -----------------------------------------------------------
-	/* always_ff @(posedge clk or negedge reset_N) begin
+	 always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N) last <= #1 0;
 		else if (done_read) last <= #1 1;
 		else if (done_similarity_metric && last ) last <= #1 0;
 	end
 
-        */
 
 // -----------------------------------------------------------       
 //                			flg_start_similarity_metric	
 // -----------------------------------------------------------
 	always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N) flg_start_similarity_metric <= #1 1'b0;
-		else if (current_state == idle_st && next_state == similarity_metric_st || current_state == wait_st && next_state == similarity_metric_st) flg_start_similarity_metric <= #1 1'b1;  /////////////////////////////
+		else if (current_state == wait_st && next_state == similarity_metric_st) flg_start_similarity_metric <= #1 1'b1;  /////////////////////////////
 		else flg_start_similarity_metric <= #1 1'b0;
 	end
 
@@ -99,15 +98,15 @@ sm_type next_state;
 	case (current_state)
 		 idle_st: begin
 			if (start_score_calc) begin 
-				//start_similarity_metric_0 = 1;
-				//start_similarity_metric_1 = |(id_1);
+				start_similarity_metric_0 = 1;
+				start_similarity_metric_1 = |(id_1);
 				next_state = similarity_metric_st;
 			end 
 			
 		 end
 		 
 		 similarity_metric_st: begin
-		    if (flg_start_similarity_metric) begin
+			if (flg_start_similarity_metric) begin
 				 start_similarity_metric_0 = 1;
 				 start_similarity_metric_1 = |(id_1);
 			end	 
@@ -118,6 +117,7 @@ sm_type next_state;
  
 		wait_st: begin 
 			if (done_similarity_metric && !last) begin 
+			
 				next_state = similarity_metric_st;			
 			end
 			else if (done_similarity_metric && last) begin 

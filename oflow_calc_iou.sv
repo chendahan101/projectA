@@ -108,7 +108,7 @@ always_comb begin
 				else Intersection = (x_br_intersection - x_tl_intersection) * (y_br_intersection - y_tl_intersection);
 				a = (Intersection << 22);
 				b = (size_length_k + size_length_history - Intersection);
-				if (counter == 2) begin // we need 3 but counter start from 0 
+				if (counter == 2) begin // we need 3 but counter start from 0 //this counter for the mul in line 108
 					start_DW_div_seq = 1'b1;
 					next_state = iou_st;
 				end	

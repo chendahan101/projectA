@@ -163,7 +163,7 @@ oflow_calc_min oflow_calc_min (
 		.reset_N(reset_N),
 		.start_score_calc(start_score_calc),
 		//.done_score_calc(done_score_calc),
-		//.done_read(done_read),
+		.done_read(done_read),
 		.id_1(id_1_prev_frame),
 		 .done_similarity_metric(done_similarity_metric_0 && (done_similarity_metric_1 || ~(|id_1_prev_frame)) ),
 		.start_similarity_metric_0(start_similarity_metric_0),
