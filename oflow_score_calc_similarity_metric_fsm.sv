@@ -82,7 +82,7 @@ sm_type next_state;
 // -----------------------------------------------------------
 	always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N) flg_start_similarity_metric <= #1 1'b0;
-		else if (current_state == wait_st && next_state == similarity_metric_st) flg_start_similarity_metric <= #1 1'b1;  /////////////////////////////
+		else if (current_state == idle_st && next_state == similarity_metric_st || current_state == wait_st && next_state == similarity_metric_st) flg_start_similarity_metric <= #1 1'b1;  /////////////////////////////
 		else flg_start_similarity_metric <= #1 1'b0;
 	end
 
@@ -99,8 +99,8 @@ sm_type next_state;
 	case (current_state)
 		 idle_st: begin
 			if (start_score_calc) begin 
-				start_similarity_metric_0 = 1;
-				start_similarity_metric_1 = |(id_1);
+				//start_similarity_metric_0 = 1;
+				//start_similarity_metric_1 = |(id_1);
 				next_state = similarity_metric_st;
 			end 
 			
