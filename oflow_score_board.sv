@@ -74,7 +74,7 @@ module  oflow_score_board(
 	logic [(`SCORE_LEN*2)-1:0] scores_reg[`MAX_ROWS_IN_SCORE_BOARD];// we insert score0&score1
 	logic [(`ID_LEN*2)-1:0] ids_reg[`MAX_ROWS_IN_SCORE_BOARD];// we insert id0&id1
 	logic pointers_reg [`MAX_ROWS_IN_SCORE_BOARD];// will help us to choose id0 or id1
-	logic done_score_board;
+	//logic done_score_board;
 	/*//conflict resolve
 	logic [(`SCORE_LEN*2)-1:0] score_to_cr;
 	logic [(`ID_LEN*2)-1:0] id_to_cr;*/
@@ -94,21 +94,25 @@ module  oflow_score_board(
 
 	always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N || ready_new_frame) begin 
-			for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin scores_reg[i] <= #1 0; end
+			//for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin scores_reg[i] <= #1 '0; end
+			 scores_reg <= #1 '{default: 0};
+
 		end	
 		else if  (start_score_board)  scores_reg[row_sel_by_set] <= #1 {min_score_0,min_score_1};
 	end	
 			
 	always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N || ready_new_frame) begin 
-			for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin ids_reg[i] <= #1 0; end
+			//for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin ids_reg[i] <= #1 '0; end
+			ids_reg <= #1 '{default: 0};
 		end	
 		else if  (start_score_board)  ids_reg[row_sel_by_set] <= #1 {min_id_0,min_id_1};
 	end	
 	
 	always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N || ready_new_frame) begin 
-			for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin pointers_reg[i] <= #1 0; end
+			//for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin pointers_reg[i] <= #1 '0; end
+			pointers_reg <= #1 '{default: 0};
 		end	
 		else if  (write_to_pointer)  pointers_reg[row_to_change] <= #1 data_from_cr;
 	end	
@@ -129,7 +133,7 @@ module  oflow_score_board(
 	
 	//buffer
 	assign id_to_buffer = (pointers_reg[row_sel]) ? ids_reg[row_sel][`ID_LEN-1:0] : ids_reg[row_sel][`ID_LEN*2-1:`ID_LEN];
-    
+	
 	
 	//IDs
 	genvar i;
