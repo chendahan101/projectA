@@ -19,5 +19,7 @@
 `define ID_LEN 12
 //in interface in similarity metric
 `define DATA_TO_PE_WIDTH (`FEATURE_OF_PREV_LEN+`D_HISTORY_LEN ) //142+3=145
+// only feature_extraction length for regs registration
+`define FEATURE_EXTRACTION_ONLY 130
 //score board
 `define MAX_ROWS_IN_SCORE_BOARD 11 //COMES FROM: CEIL(TOTAL BBOX NUMBERS/PE NUM)=CEIL(256/24)=11
