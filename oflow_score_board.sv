@@ -48,7 +48,7 @@ module  oflow_score_board(
 			
 			
 			//from interface
-			input logic [`ROW_LEN-1:0] row_sel
+			input logic [`ROW_LEN-1:0] row_sel_to_pe
 
 			);
 			
@@ -132,7 +132,7 @@ module  oflow_score_board(
 	assign id_to_cr =  (pointers_reg[row_sel_from_cr]) ? ids_reg[row_sel_from_cr][`ID_LEN-1:0] : ids_reg[row_sel_from_cr][`ID_LEN*2-1:`ID_LEN];
 	
 	//buffer
-	assign id_to_buffer = (pointers_reg[row_sel]) ? ids_reg[row_sel][`ID_LEN-1:0] : ids_reg[row_sel][`ID_LEN*2-1:`ID_LEN];
+	assign id_to_buffer = (pointers_reg[row_sel_to_pe]) ? ids_reg[row_sel_to_pe][`ID_LEN-1:0] : ids_reg[row_sel_to_pe][`ID_LEN*2-1:`ID_LEN];
 	
 	
 	//IDs

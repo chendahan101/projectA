@@ -53,7 +53,7 @@ module oflow_score_board_tb #() ();
 		
 		
 		//from interface
-		 logic [`ROW_LEN-1:0] row_sel;
+		 logic [`ROW_LEN-1:0] row_sel_to_pe;
   
 		 logic [(`SCORE_LEN*2)-1:0] scores_reg[`MAX_ROWS_IN_SCORE_BOARD];// we insert score0&score1
 		 logic [(`ID_LEN*2)-1:0] ids_reg[`MAX_ROWS_IN_SCORE_BOARD];// we insert id0&id1
@@ -137,7 +137,7 @@ always begin
 		min_id_0 = 0;
 		min_id_1 = 0;
 		row_sel_by_set = 0;
-		row_sel = 0; 
+		row_sel_to_pe = 0; 
 		row_sel_from_cr = 0;
 		row_to_change =0; 
 		write_to_pointer = 0;
@@ -186,7 +186,7 @@ always begin
 task read_from_score_board (int number_of_row_to_read );
 begin
 		 for (int i = 0; i<number_of_row_to_read;i++) begin 
-			row_sel = i;
+			row_sel_to_pe = i;
 			repeat (3) @(posedge clk);//we read from score board, and write the data to mem, the write mode is 3 cycle so we will demme this action
 			end
 end
