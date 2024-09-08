@@ -5,8 +5,8 @@
  * Creation date : Jan 13, 2024
  * Description   :	
  *------------------------------------------------------------------------------*/
-`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
-`include "/users/epchof/Project/design/work/include_files/oflow_feature_extraction_define.sv"
+
+
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
 

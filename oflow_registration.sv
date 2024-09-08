@@ -6,6 +6,11 @@
  * Description   :	
  *------------------------------------------------------------------------------*/
 
+
+`include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
+`include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
+
+
 module  oflow_registration( 
 			input logic clk,
 			input logic reset_N	,
@@ -52,7 +57,7 @@ module  oflow_registration(
 		
 		
 		//from interface between buffer
-		input logic [`ROW_LEN-1:0] row_sel, // aka row_sel_to_pe
+		input logic [`ROW_LEN-1:0] row_sel_to_pe, // aka row_sel_to_pe
 	
 
 	//fsm registration
@@ -64,7 +69,7 @@ module  oflow_registration(
 	
 	//PE
 	input logic [`PE_LEN-1:0] num_of_pe,
-	output logic [`FEATURES_OF_PREV_LEN-1:0] data_out_pe,
+	output logic [`FEATURE_OF_PREV_LEN-1:0] data_out_pe,
 	
 	//Cr
 	//interface between pe to cr
@@ -112,12 +117,13 @@ module  oflow_registration(
 	logic [(`ID_LEN)-1:0] id_to_buffer;
 	
 // fe_mem
-	logic [`ROW_LEN-1:0] addr_0;
-	logic we_0;
-	logic oe_0;
-	logic [`FEATURES_OF_PREV_LEN-1:0] data_in_0;
-	logic [`FEATURES_OF_PREV_LEN-1:0] data_out_0;
-	logic [`FEATURES_OF_PREV_LEN-1:0] data_out_1;
+	logic [`ROW_LEN-1:0] addr;
+	logic we;
+	
+	//logic oe_0;
+	logic [`FEATURE_EXTRACTION_ONLY-1:0] data_in;
+	logic [`FEATURE_EXTRACTION_ONLY-1:0] data_out;
+	//logic [`FEATURE_OF_PREV_LEN-1:0] data_out_1;
 	
 // -----------------------------------------------------------       
 //				Assignments
@@ -128,14 +134,14 @@ assign min_id_0_to_score_board = (frame_num) ? min_id_0 : id_first_frame;
 assign min_score_1_to_score_board = (frame_num) ? min_score_1 : 0; 
 assign min_id_1_to_score_board = (frame_num) ? min_id_1 : 0;
 
-assign data_out_pe = {data_out_0, id_to_buffer};
-assign data_in_0 = {cm_concate_cur, position_concate_cur, width_cur, height_cur,
-                    color1_cur, color2_cur};
+assign data_out_pe = {data_out, id_to_buffer};
+assign data_in = {cm_concate_cur, position_concate_cur, width_cur, height_cur,
+					color1_cur, color2_cur};
 
-assign we_0 = start_registration;
-assign oe_0 = ~we_0; 					
+assign we = start_registration;
+//assign oe_0 = ~we; 					
 				
-assign addr_0 = (we_0) ? row_sel_by_set : row_sel;	
+assign addr = (we) ? row_sel_by_set : row_sel_to_pe;	
 
 assign done_registration = done_score_board;			
 // -----------------------------------------------------------       
@@ -188,7 +194,7 @@ oflow_score_board oflow_score_board (
 	.id_to_buffer(id_to_buffer),
 	.id_out(id_out),
 	.ready_new_frame(ready_new_frame),
-	.row_sel(row_sel)
+	.row_sel_to_pe (row_sel_to_pe)
 );
 
 
@@ -207,25 +213,37 @@ oflow_registration_fsm oflow_registration_fsm (
 	.id_first_frame(id_first_frame)
 );
 
+oflow_registration_feature_extraction_reg_sb oflow_registration_feature_extraction_reg_sb(
+	.clk(clk),
+	.reset_N(reset_N),
+	.data_in(data_in),
+	.data_out(data_out),
+	.addr(addr),
+	.we(we),
+	.ready_new_frame(ready_new_frame)
 
+);
+
+/*
 mem #(
-        .DATA_WIDTH(`FEATURES_OF_PREV_LEN-`ID_LEN),
-        .ADDR_WIDTH(`ROW_LEN)
-    )
+		.DATA_WIDTH(`FEATURE_OF_PREV_LEN-`ID_LEN),
+		.ADDR_WIDTH(`ROW_LEN)
+	)
 	oflow_registration_fe_mem(.clk(clk),
 	.reset_N(reset_N),
-	.address_0(addr_0),
+	.address_0(addr),
 	.address_1(0),
-	.data_in_0(data_in_0),
+	.data_in(data_in),
 	.data_in_1(0),
-	.data_out_0(data_out_0),
+	.data_out(data_out),
 	.data_out_1(data_out_1),
 	.cs_0(1'b1),
 	.cs_1(1'b0),
-	.we_0(we_0),
+	.we(we),
 	.we_1(1'b0),
 	.oe_0(oe_0),
 	.oe_1(1'b0)
 );
+*/
 	
 endmodule

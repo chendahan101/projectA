@@ -57,11 +57,11 @@ sm_type next_state;
 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st ) counter_of_sets <= #1 0;
-		 else  if( cur_state == wait_st && next_state==score_calc_st) counter_of_sets <= #1 counter_of_sets+1 ;
+		 else  if( current_state == wait_st && next_state==score_calc_st) counter_of_sets <= #1 counter_of_sets+1 ;
 		 
 	  end	
 
-	 	 
+		 
  // -----------------------------------------------------------       
  //						FSM – Async Logic
  // -----------------------------------------------------------	
@@ -74,7 +74,7 @@ sm_type next_state;
 		 
 			if (start_registration && frame_num != 0) begin
 				next_state = score_calc_st; 
-				start_score_calc = 1'b1; 
+				
 			end 
 			 
 		 end
@@ -82,18 +82,18 @@ sm_type next_state;
 		 score_calc_st: begin
 		
 			next_state = wait_st;
-			
+			start_score_calc = 1'b1; 
 		 end
 		 
  
 		wait_st: begin 
 			
-			if ( done_score_calc && counter_of_sets < num_of_sets ) begin 
-				start_score_calc = 1'b1;
+			if ( done_score_calc && counter_of_sets < num_of_sets - 1) begin 
+				
 				next_state = score_calc_st;
 			end
-			else if ( done_score_calc && counter_of_sets == num_of_sets ) begin 
-						next_state = idle_st;
+			else if ( done_score_calc && counter_of_sets == num_of_sets - 1 ) begin 
+					next_state = idle_st;
 			end 
 
 

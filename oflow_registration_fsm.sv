@@ -1,14 +1,13 @@
 /*------------------------------------------------------------------------------
-* File          : oflow_registration_fsm.sv
-* Project       : RTL
-* Author        : epchof
-* Creation date : Jan 13, 2024
-* Description   :	
-*------------------------------------------------------------------------------*/
+ * File          : oflow_registration_fsm.sv
+ * Project       : RTL
+ * Author        : epchof
+ * Creation date : Jan 13, 2024
+ * Description   :	
+ *------------------------------------------------------------------------------*/
 
-	
-`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
-`include "/users/epchof/Project/design/work/include_files/oflow_feature_extraction_define.sv"
+	 
+
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
 
@@ -57,7 +56,7 @@ module oflow_registration_fsm #() (
 // -----------------------------------------------------------       
 //                Assign
 // -----------------------------------------------------------  
-	assign  row_sel_by_set = (frame_num) ? counter_of_sets : counter_first_frame_sets;
+	assign  row_sel_by_set = (frame_num) ? counter_of_sets  : counter_first_frame_sets;
 	assign  id_first_frame  = (counter_first_frame_sets)*(`PE_NUM) + num_of_pe+1; 
 // -----------------------------------------------------------       
 //                Instantiations

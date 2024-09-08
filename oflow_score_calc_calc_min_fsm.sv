@@ -80,14 +80,23 @@ sm_type next_state;
 		else if (done_read) last <= #1 1;
 		else if (done_calc_min && last ) last <= #1 0;
 	end
-		
+
+// -----------------------------------------------------------       
+//                		done_score_calc
+// -----------------------------------------------------------
+	always_ff @(posedge clk or negedge reset_N) begin
+		if (!reset_N) done_score_calc <= #1 0;
+		else if(done_calc_min && last) done_score_calc <= #1 1;
+		else  done_score_calc <= #1 0;
+	end
+			
  // -----------------------------------------------------------       
  //						FSM – Async Logic
  // -----------------------------------------------------------	
  always_comb begin
 	 next_state = current_state;
 	start_calc_min = 1'b0;
-	done_score_calc = 1'b0;
+	//done_score_calc = 1'b0;
 	case (current_state)
 		idle_st: begin
 			next_state = done_similarity_metric ? calc_min_st : idle_st;
@@ -97,7 +106,7 @@ sm_type next_state;
 			if (done_similarity_metric_reg) 
 				start_calc_min = 1'b1;
 			if(done_calc_min && last) begin
-				done_score_calc = 1'b1;
+				//done_score_calc = 1'b1;
 				next_state = idle_st;
 			end
 			else if(done_calc_min && ~last)

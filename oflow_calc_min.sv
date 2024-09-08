@@ -64,6 +64,14 @@ sm_type next_state;
 		else current_state <= #1 next_state;
 	
 	end
+	
+	
+	//--------------------done_calc_min---------------------------------	
+	always_ff @(posedge clk or negedge reset_N) begin
+	   if (!reset_N ) done_calc_min <= #1 1'b0;
+	   else if(current_state == calc_min_st && next_state == idle_st)	done_calc_min <= #1 1'b1;
+	   else done_calc_min <= #1 1'b0;   
+	end	
 //--------------------min_score_0_reg---------------------------------	
 	 always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N || start_score_calc) min_score_0_reg <= #1  `MAX_SCORE;
@@ -105,7 +113,7 @@ sm_type next_state;
  always_comb begin
 	 next_state = current_state;
 	 
-	 done_calc_min = 1'b0;
+	 //done_calc_min = 1'b0;
 	 
 	 min0 = 2'b00;
 	 min1 = 2'b00;
@@ -116,7 +124,7 @@ sm_type next_state;
 	 put_1_in_1 = 1'b0 ;
 	 put_min_0_in_1 = 1'b0;
 	 
-	 dont_change_1 = 1'b0;
+	 dont_change_0 = 1'b0;
 	 dont_change_1 = 1'b0;
 	 
 	 case (current_state)
@@ -187,7 +195,7 @@ sm_type next_state;
 			dont_change_1 = (min1==2'b00);
 			
 			next_state = idle_st;
-			done_calc_min = 1;
+			//done_calc_min = 1;
 			
 		 end
 		 
