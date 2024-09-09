@@ -59,7 +59,7 @@ module oflow_MEM_buffer #() (
 			.data_out_0(data_out_0),
 			.data_out_1(data_out_1),
 			.csb_0(csb_0),
-			.csb_1(csb_0),
+			.csb_1(csb_1),
 			.web_0(~we),//web =0 write, web=1 read. cause active low
 			.web_1(~we),
 			.oeb_0(oeb),
