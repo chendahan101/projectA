@@ -1,30 +1,24 @@
 /*------------------------------------------------------------------------------
-* File          : oflow_conflict_resolve_fsm.sv
-* Project       : RTL
-* Author        : epchof
-* Creation date : Jan 13, 2024
-* Description   :	
-*------------------------------------------------------------------------------*/
+ * File          : oflow_conflict_resolve_fsm.sv
+ * Project       : RTL
+ * Author        : epchof
+ * Creation date : Jan 13, 2024
+ * Description   :	
+ *------------------------------------------------------------------------------*/
 
-	
-`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
-`include "/users/epchof/Project/design/work/include_files/oflow_feature_extraction_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
-`include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
+
 
 `define DATA_WIDTH_LUT 16
 `define HALF_DATA_WIDTH_LUT (`DATA_WIDTH_LUT)/2
 `define ADDR_WIDTH_LUT 11
 `define HIST_REG_WIDTH 45
 
-
 `define INSTANCES_LEN 4
 
 
-
-
 module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 10 ) (
-	//inputs
+	
 	input logic clk,
 	input logic reset_N,
 	
@@ -37,6 +31,12 @@ module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 10 ) (
 	output logic [`ADDR_WIDTH_LUT-1:0] address_lut, 
 	output logic [`DATA_WIDTH_LUT-1:0] data_in_lut, 
 	output logic we_lut,
+	
+	//flag reg
+	input logic [`FLAG_REG_WIDTH-1:0] data_out_flag, 
+	output logic [`ADDR_WIDTH_LUT-1:0] address_flag, 
+	output logic [`FLAG_REG_WIDTH-1:0] data_in_flag, 
+	
 	
 	
 	//interface_betwe_luten_conflict_resolve_and_pes
@@ -57,6 +57,7 @@ module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 10 ) (
 //              Parameter
 // -----------------------------------------------------------  
 localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
+localparam  COUNTER_STATE = 2;
 
 // -----------------------------------------------------------       
 //              Logics
@@ -64,11 +65,16 @@ localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
 
 	 logic [`ROW_LEN-1:0] counter_row_sel;
 	 logic [`PE_LEN-1:0] counter_pe_sel;
+	 logic [COUNTER_STATE-1:0] counter_state;
 	 logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] counter_hist; //count how many different ids in lut/hist
 	
 	logic column_lut;
 	logic [`DATA_WIDTH_LUT-1:0] row_lut;
 	logic [`DATA_WIDTH_LUT-1:0] mask_lut;
+	logic [`FLAG_REG_WIDTH-1:0] mask_flag;
+	logic [`DATA_WIDTH_LUT-1:0] the_mask_side;
+
+	
 	
 	logic [`INSTANCES_LEN-1:0] hist_reg_instances [`MAX_BBOXES_PER_FRAME];
 	logic [`SCORE_LEN-1:0] hist_reg_min_score [`MAX_BBOXES_PER_FRAME];
@@ -93,15 +99,17 @@ localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
 // -----------------------------------------------------------  
 	assign  row_sel = counter_row_sel;
 	assign  pe_sel  = counter_pe_sel; 
-	
+	assign address_flag = address_lut;
 
 	
 	always_comb begin
-		column_lut = (id_to_cr/DEPTH_LUT); // suppose to be one bit. Eg. while (id_to_cr/2048)!=0 
-		row_lut = (id_to_cr%DEPTH_LUT);
+		column_lut = (id_to_cr / DEPTH_LUT); // suppose to be one bit. Eg. while (id_to_cr/2048)!=0 
+		row_lut = (id_to_cr % DEPTH_LUT);
 	
 		address_lut = row_lut;
-		mask_lut = (column_lut) ? {`HALF_DATA_WIDTH_LUT{1'b0},`HALF_DATA_WIDTH_LUT{1'b1}} : {`HALF_DATA_WIDTH_LUT{1'b1},`HALF_DATA_WIDTH_LUT{1'b0}};
+		mask_lut = (column_lut) ? {{`HALF_DATA_WIDTH_LUT{1'b0}}, {`HALF_DATA_WIDTH_LUT{1'b1}}} : {{`HALF_DATA_WIDTH_LUT{1'b1}}, {`HALF_DATA_WIDTH_LUT{1'b0}}};
+		mask_flag = (column_lut) ? {1'b0, 1'b1} : {1'b1, 1'b0};
+
 	end	
 // -----------------------------------------------------------       
 //                Instantiations
@@ -119,11 +127,20 @@ localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
 	
 	end
 	
+//--------------------counter_state---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N || current_state ==  idle_st || (current_state!= pe_sel_N_fill_lut_st  && next_state== pe_sel_N_fill_lut_st ) ) counter_state <= #1 0;
+	else  if( current_state == pe_sel_N_fill_lut_st ) counter_state <= #1 counter_state + 1 ;
+	
+ end	
+	
+	
 //--------------------counter_row_sel---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st ) counter_row_sel <= #1 0;
-		 else  if( cur_state == pe_sel_N_fill_lut_st && next_state == row_sel_st) counter_row_sel <= #1 counter_row_sel + 1 ;
+		 else  if( current_state == pe_sel_N_fill_lut_st && next_state == row_sel_st) counter_row_sel <= #1 counter_row_sel + 1 ;
 		 
 	  end	
 
@@ -131,7 +148,7 @@ localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st || current_state ==  row_sel_st) counter_pe_sel <= #1 0;
-		 else  if( cur_state ==  pe_sel_N_fill_lut_st && next_state == fill_hist_st) counter_pe_sel <= #1 counter_pe_sel + 1 ;
+		 else  if( current_state ==  pe_sel_N_fill_lut_st && next_state == fill_hist_st) counter_pe_sel <= #1 counter_pe_sel + 1 ;
 		 
 	  end	
 //--------------------cur_pe_reg---------------------------------	
@@ -152,7 +169,7 @@ localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N ) cur_data_lut_reg <= #1 0;
-		 else  if( current_state ==  pe_sel_N_fill_lut_st) cur_data_lut_reg <= #1 (data_out_lut_for_fsm & write_mask) ? data_out_lut_for_fsm : counter_hist + 1 ;
+		 else  if( current_state ==  pe_sel_N_fill_lut_st) cur_data_lut_reg <= #1 (data_out_lut_for_fsm & mask_lut) ? data_out_lut_for_fsm : counter_hist + 1 ;
 		 
 	  end	
 	  
@@ -160,8 +177,8 @@ localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
 //--------------------counter_hist---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st) counter_pe_sel <= #1 0;
-		 else  if( cur_state ==  pe_sel_N_fill_lut_st && !(data_out_lut_for_fsm & write_mask)) counter_hist <= #1 counter_hist + 1 ;
+		 if (!reset_N || current_state ==  idle_st) counter_hist <= #1 0;
+		 else  if( current_state ==  pe_sel_N_fill_lut_st && !(data_out_lut_for_fsm & mask_lut)) counter_hist <= #1 counter_hist + 1 ;
 		 
 	  end	
 //--------------------hist_reg_instances---------------------------------	
@@ -170,7 +187,7 @@ localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
 		 if (!reset_N || current_state ==  idle_st) begin
 			for (int i=0; i<`MAX_BBOXES_PER_FRAME; i+=1) begin hist_reg_instances[i] <= #1 0; 	end
 		end
-		else  if( cur_state ==  fill_hist_st) hist_reg_instances[cur_data_lut_reg -1] <= #1 hist_reg_instances[cur_data_lut_reg -1] + 1 ;
+		else  if( current_state ==  fill_hist_st) hist_reg_instances[cur_data_lut_reg -1] <= #1 hist_reg_instances[cur_data_lut_reg -1] + 1 ;
 			
 	  end	
 
@@ -180,7 +197,7 @@ localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
 		 if (!reset_N || current_state ==  idle_st) begin
 			for (int i=0; i<`MAX_BBOXES_PER_FRAME; i+=1) begin hist_reg_pe[i] <= #1 0; 	end
 		end
-		else  if( cur_state ==  fill_hist_st && update_hist) hist_reg_pe[cur_data_lut_reg -1] <= #1 cur_pe_reg ;
+		else  if( current_state ==  fill_hist_st && update_hist) hist_reg_pe[cur_data_lut_reg -1] <= #1 cur_pe_reg ;
 			
 	  end	
 
@@ -190,7 +207,7 @@ localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
 		 if (!reset_N || current_state ==  idle_st) begin
 			for (int i=0; i<`MAX_BBOXES_PER_FRAME; i+=1) begin hist_reg_row[i] <= #1 0; 	end
 		end
-		else  if( cur_state ==  fill_hist_st && update_hist) hist_reg_row[cur_data_lut_reg -1] <= #1 counter_row_sel ;
+		else  if( current_state ==  fill_hist_st && update_hist) hist_reg_row[cur_data_lut_reg -1] <= #1 counter_row_sel ;
 			
 	  end
 
@@ -200,7 +217,7 @@ localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
 		 if (!reset_N || current_state ==  idle_st) begin
 			for (int i=0; i<`MAX_BBOXES_PER_FRAME; i+=1) begin hist_reg_min_score[i] <= #1 {`SCORE_LEN{1'b1}}; 	end
 		end
-		else  if( cur_state ==  fill_hist_st && update_hist) hist_reg_min_score[cur_data_lut_reg -1] <= #1 cur_score_reg ;
+		else  if( current_state ==  fill_hist_st && update_hist) hist_reg_min_score[cur_data_lut_reg -1] <= #1 cur_score_reg ;
 			
 	  end	  
  // -----------------------------------------------------------       
@@ -241,22 +258,37 @@ localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
  
 		pe_sel_N_fill_lut_st: begin 
 			
-			
-			
-			
-			if (counter_pe_sel == `PE_NUM) begin
-				next_state = row_sel_st; 
+			if (!id_to_cr) begin 
+				done_cr = 1'b1;
+				next_state = idle_st;
 			end
-			else  begin
-				
-				if(!(data_out_lut_for_fsm & write_mask)) begin
-					we_lut = 1'b1;
-					data_in_lut =  (data_out_lut_for_fsm & ~write_mask) | ((hist_counter+1) & write_mask); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
-				end	
-				
-				next_state = fill_hist; 
+			else begin
+					if (counter_pe_sel == `PE_NUM) begin
+						next_state = row_sel_st; 
+					end
+					else  begin
+						
+					
+						if(!(data_out_flag & mask_flag)) begin
+							
+							data_in_flag =  (data_out_flag & ~mask_flag) | (( 2'b11) & mask_flag); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
+							we_lut = 1'b1;
+							
+							the_mask_side = (!data_out_flag) ? 0: (data_out_lut_for_fsm & ~mask_lut);
+							
+							data_in_lut =  (the_mask_side) | ((counter_hist+1)<<( (column_lut) ? 0 : 8 ) & mask_lut); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
+						end	
+						//next_state = fill_hist_st; 
+						
+					end
+					if (counter_state==1) begin 
+						next_state = fill_hist_st; 
+					end
 			end
 			
+			
+		end
+		
 		fill_hist_st: begin 
 			
 			// first we_lut read the LUT 
@@ -279,8 +311,7 @@ localparam  DEPTH_LUT = 1<<`ADDR_WIDTH_LUT;
 			end	
 		end
 		
-		
-			
+				
 		 
 	 endcase
  end
