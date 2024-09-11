@@ -12,26 +12,29 @@ module oflow_MEM_buffer_tb #() ();
 //                  registers & wires
 // -----------------------------------------------------------  
 	
-	logic clk;
-	logic reset_N;
-	logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num;//the serial number of the current frame 0-255
-	logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] num_of_history_frames; // fallback number
-			
-	logic [`DATA_WIDTH-1:0] data_in_0;
-	logic [`DATA_WIDTH-1:0] data_in_1;
-	logic [`OFFSET_WIDTH-1:0] offset_0;
-	logic [`OFFSET_WIDTH-1:0] offset_1;
-			
-	logic we;
-	
-	
-	//input logic fe_enable,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       nable
-	
-	//outputs
-	logic [`DATA_WIDTH-1:0] data_out_0;
-	logic [`DATA_WIDTH-1:0] data_out_1;
-	   
-  
+		 logic clk;
+		 logic reset_N;
+		 logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num;//the serial number of the current frame 0-255
+		 logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] num_of_history_frames; // fallback number
+		
+		 logic [`DATA_WIDTH-1:0] data_in_0;
+		 logic [`DATA_WIDTH-1:0] data_in_1;
+		
+		 logic [`OFFSET_WIDTH-1:0] offset_0;
+		 logic [`OFFSET_WIDTH-1:0] offset_1;
+		 logic csb_0;
+		 logic csb_1;
+		 logic we;
+		 logic oeb;
+
+		
+		//input logic fe_enable,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       nable
+		
+		//outputs
+		 logic [`DATA_WIDTH-1:0] data_out_0;
+		 logic [`DATA_WIDTH-1:0] data_out_1 ;
+		
+
    
 
 // ----------------------------------------------------------------------
@@ -39,24 +42,27 @@ module oflow_MEM_buffer_tb #() ();
 // ----------------------------------------------------------------------
 
 	oflow_MEM_buffer oflow_MEM_buffer(  
-		.clk(clk),
-		.reset_N (reset_N)	,
-		
-		.frame_num (frame_num),
-		.num_of_history_frames (num_of_history_frames) ,
-		.data_in_0 (data_in_0),
-		.data_in_1 (data_in_1),
-		.offset_0 (offset_0),
-		.offset_1 (offset_1), 
-		.we (we),	
-		.data_out_0 (data_out_0),
-		.data_out_1 (data_out_1)
-		
-		);
-		 
-		  
+	
+			.clk (clk),
+			.reset_N (reset_N),
 
-
+			.frame_num(frame_num),
+			.num_of_history_frames(num_of_history_frames), 
+			
+			.data_in_0(data_in_0),
+			.data_in_1(data_in_1),
+			
+			.offset_0(offset_0),
+			.offset_1(offset_1),
+			.csb_0(csb_0),
+			.csb_1(csb_1),
+			.we(we),
+			.oeb(oeb),
+			
+			.data_out_0(data_out_0),
+			.data_out_1(data_out_1) 
+			);
+			 
 	
 	
 // ----------------------------------------------------------------------
