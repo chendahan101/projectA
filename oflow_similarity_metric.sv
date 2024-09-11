@@ -161,7 +161,7 @@ oflow_calc_iou oflow_calc_iou(
 	end
 //--------------------counter---------------------------------	
 	 always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N) counter <= #1 4'd0;
+		if (!reset_N || current_state == idle_st) counter <= #1 4'd0;
 		else if(next_state != current_state )	counter <= #1 4'd0;
 		else counter <= #1 counter + 1;
 		
