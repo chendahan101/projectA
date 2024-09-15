@@ -407,6 +407,7 @@ oflow_core_fsm_write oflow_core_fsm_write(
 	.clk (clk),
 	.reset_N (reset_N),
 	// global inputs
+	.num_of_sets (num_of_sets), 
 	.num_of_bbox_in_frame (num_of_bbox_in_frame), // TO POINT TO THE END OF THE FRAME MEM, SO WE WILL READ ONLY THE FULL CELL --- maybe to remove
 	
 	//from genreal fsm in core (after conflict_resolve done)
