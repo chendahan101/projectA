@@ -47,8 +47,9 @@ module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 10 ) (
 	output logic [`ROW_LEN-1:0] row_to_change, //for write to score_board
 	output logic [`PE_LEN-1:0] pe_to_change, //for write to score_board
 	output logic  data_to_score_board, // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
-	output logic  write_to_pointer //for write to score_board
+	output logic  write_to_pointer, //for write to score_board
 	
+	output logic csb
 
 );	
 
@@ -84,7 +85,8 @@ localparam  COUNTER_STATE = 2;
 	
 	logic [`PE_LEN-1:0] cur_pe_reg;
 	logic [`SCORE_LEN-1:0] cur_score_reg;
-	logic [`DATA_WIDTH_LUT-1:0] cur_data_lut_reg;
+	logic [`HALF_DATA_WIDTH_LUT-1:0] old_data_lut;
+	logic [`HALF_DATA_WIDTH_LUT-1:0] cur_data_lut_reg;
 	
 	logic update_hist;
 	logic th_conflict_flg;
@@ -164,12 +166,18 @@ always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N) cur_score_reg <= #1 0;
 		 else if (current_state ==  pe_sel_N_fill_lut_st) cur_score_reg <= #1 score_to_cr;
 		 
-	  end		  
+	  end	
+	 
+	 
 //--------------------cur_data_lut_reg---------------------------------	
-
+	assign old_data_lut = (column_lut)? data_out_lut_for_fsm[7:0] : data_out_lut_for_fsm[15:8]  ;
+	
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N ) cur_data_lut_reg <= #1 0;
-		 else  if( current_state ==  pe_sel_N_fill_lut_st) cur_data_lut_reg <= #1 (data_out_lut_for_fsm & mask_lut) ? data_out_lut_for_fsm : counter_hist + 1 ;
+		 else  if( current_state ==  pe_sel_N_fill_lut_st) begin
+			 //old_data_lut = (mask_flag)? data_out_lut_for_fsm[7:0] : data_out_lut_for_fsm[15:8]  ;
+			 cur_data_lut_reg <= #1 (data_out_flag & mask_flag) ? old_data_lut : counter_hist + 1 ;
+		 end
 		 
 	  end	
 	  
@@ -178,14 +186,14 @@ always_ff @(posedge clk or negedge reset_N) begin
 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st) counter_hist <= #1 0;
-		 else  if( current_state ==  pe_sel_N_fill_lut_st && !(data_out_lut_for_fsm & mask_lut)) counter_hist <= #1 counter_hist + 1 ;
+		 else  if( current_state ==  pe_sel_N_fill_lut_st && !(data_out_flag & mask_flag) && (counter_state == 1) ) counter_hist <= #1 counter_hist + 1 ;
 		 
 	  end	
 //--------------------hist_reg_instances---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st) begin
-			for (int i=0; i<`MAX_BBOXES_PER_FRAME; i+=1) begin hist_reg_instances[i] <= #1 0; 	end
+			 hist_reg_instances <= #1 '{default: 0}; 	
 		end
 		else  if( current_state ==  fill_hist_st) hist_reg_instances[cur_data_lut_reg -1] <= #1 hist_reg_instances[cur_data_lut_reg -1] + 1 ;
 			
@@ -195,7 +203,7 @@ always_ff @(posedge clk or negedge reset_N) begin
 
 	  always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st) begin
-			for (int i=0; i<`MAX_BBOXES_PER_FRAME; i+=1) begin hist_reg_pe[i] <= #1 0; 	end
+			hist_reg_pe <= #1 '{default: 0};
 		end
 		else  if( current_state ==  fill_hist_st && update_hist) hist_reg_pe[cur_data_lut_reg -1] <= #1 cur_pe_reg ;
 			
@@ -205,7 +213,7 @@ always_ff @(posedge clk or negedge reset_N) begin
 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st) begin
-			for (int i=0; i<`MAX_BBOXES_PER_FRAME; i+=1) begin hist_reg_row[i] <= #1 0; 	end
+			 hist_reg_row <= #1 '{default: 0};
 		end
 		else  if( current_state ==  fill_hist_st && update_hist) hist_reg_row[cur_data_lut_reg -1] <= #1 counter_row_sel ;
 			
@@ -215,7 +223,7 @@ always_ff @(posedge clk or negedge reset_N) begin
 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st) begin
-			for (int i=0; i<`MAX_BBOXES_PER_FRAME; i+=1) begin hist_reg_min_score[i] <= #1 {`SCORE_LEN{1'b1}}; 	end
+			 hist_reg_min_score <= #1 '{default: {`SCORE_LEN{1'b1}}} ; 
 		end
 		else  if( current_state ==  fill_hist_st && update_hist) hist_reg_min_score[cur_data_lut_reg -1] <= #1 cur_score_reg ;
 			
@@ -228,12 +236,14 @@ always_ff @(posedge clk or negedge reset_N) begin
 	done_cr = 1'b0;
 	we_lut = 1'b0;
 	update_hist = 1'b0;
+	data_to_score_board = 1'b0; //*****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
 	write_to_pointer = 1'b0;
 	row_to_change = counter_row_sel;
 	pe_to_change = cur_pe_reg;
-	data_in_lut = data_out_lut_for_fsm;
+	//data_in_lut = data_out_lut_for_fsm;
+	data_in_lut = 1'b0;
 	th_conflict_flg = 1'b0;
-	data_to_score_board = 1'b0; //*****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+	csb = 1'b1;
 	
 	 case (current_state)
 		 idle_st: begin
@@ -258,12 +268,13 @@ always_ff @(posedge clk or negedge reset_N) begin
  
 		pe_sel_N_fill_lut_st: begin 
 			
+			csb = 1'b0;
 			if (!id_to_cr) begin 
 				done_cr = 1'b1;
 				next_state = idle_st;
 			end
 			else begin
-					if (counter_pe_sel == `PE_NUM) begin
+					/*if (counter_pe_sel == `PE_NUM) begin
 						next_state = row_sel_st; 
 					end
 					else  begin
@@ -272,34 +283,67 @@ always_ff @(posedge clk or negedge reset_N) begin
 						if(!(data_out_flag & mask_flag)) begin
 							
 							data_in_flag =  (data_out_flag & ~mask_flag) | (( 2'b11) & mask_flag); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
-							we_lut = 1'b1;
+							
 							
 							the_mask_side = (!data_out_flag) ? 0: (data_out_lut_for_fsm & ~mask_lut);
 							
 							data_in_lut =  (the_mask_side) | ((counter_hist+1)<<( (column_lut) ? 0 : 8 ) & mask_lut); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
 						end	
 						//next_state = fill_hist_st; 
-						
+						//we_lut = 1'b1;
 					end
 					if (counter_state==1) begin 
+						we_lut = 1'b1;
 						next_state = fill_hist_st; 
 					end
-			end
+					*/
+
+		
 			
+				if(!(data_out_flag & mask_flag)) begin
+					
+					if (counter_state==1) begin 
+						we_lut = 1'b1;
+						next_state = fill_hist_st; 
+					end
+						
+						data_in_flag =  (data_out_flag & ~mask_flag) | (( 2'b11) & mask_flag); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
+						
+						
+						
+						the_mask_side = (!data_out_flag) ? 0: (data_out_lut_for_fsm & ~mask_lut);
+						
+						data_in_lut =  (the_mask_side) | ((counter_hist+1)<<( (column_lut) ? 0 : 8 ) & mask_lut); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
+				end	
+					//next_state = fill_hist_st; 
+					//we_lut = 1'b1;
+				else next_state = fill_hist_st;
+				
+			end
 			
 		end
 		
 		fill_hist_st: begin 
 			
-			// first we_lut read the LUT 
-			if(cur_score_reg < hist_reg_min_score[cur_data_lut_reg-1]) begin
-				update_hist = 1'b1;
-				// row_to_change = counter_row_sel;
-				// pe_to_change = cur_pe_reg;
-				write_to_pointer = 1'b1;
-				data_to_score_board = 1'b1;
-			end
 			
+			
+			if( hist_reg_instances[cur_data_lut_reg-1] != 0 ) begin
+					
+				// first we_lut read the LUT 
+				if(cur_score_reg < hist_reg_min_score[cur_data_lut_reg-1]) begin
+					update_hist = 1'b1;
+					row_to_change = hist_reg_row[cur_data_lut_reg -1];
+					pe_to_change = hist_reg_pe[cur_data_lut_reg -1];
+					write_to_pointer = 1'b1;
+					data_to_score_board = 1'b1;
+				end
+				else begin
+					write_to_pointer = 1'b1;
+					data_to_score_board = 1'b1;
+				end
+			
+				
+			end	
 			if( hist_reg_instances[cur_data_lut_reg -1] >= MAX_CONFLICTS_TH ) begin
 				done_cr = 1'b1;
 				th_conflict_flg = 1'b1;
@@ -307,8 +351,10 @@ always_ff @(posedge clk or negedge reset_N) begin
 			end
 			else begin
 				we_lut = 1'b0;
-				next_state = pe_sel_N_fill_lut_st;
+				if(counter_pe_sel == `PE_NUM) next_state = row_sel_st; 
+				else next_state = pe_sel_N_fill_lut_st;
 			end	
+		
 		end
 		
 				

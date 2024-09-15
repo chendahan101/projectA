@@ -43,6 +43,7 @@ module oflow_conflict_resolve #() (
 	logic [`ADDR_WIDTH_LUT-1:0] address_lut; 
 	logic [`DATA_WIDTH_LUT-1:0] data_in_lut;
 	logic we_lut;
+	logic csb;
 	logic [`FLAG_REG_WIDTH-1:0] flag [2<<`ADDR_WIDTH_LUT];
 
 
@@ -104,17 +105,18 @@ oflow_conflict_resolve_fsm #(
 		.row_to_change(row_to_change),
 		.pe_to_change(pe_to_change),
 		.data_to_score_board(data_to_score_board),
-		.write_to_pointer(write_to_pointer)
+		.write_to_pointer(write_to_pointer),
 		
+		.csb(csb)
 	);
 	
  
 // Instantiate of the LUT
 
 dpram2048x16_CB dpram2048x16_CB(
-	.A1(address_lut), .A2(address_lut), .CEB1(clk), .CEB2(clk), .WEB1(~we_lut), .WEB2(~we_lut),
-	.OEB1(1'b0), .OEB2(1'b0), .CSB1(1'b0), .CSB2(1'b0),
-	.I1(data_in_lut), .I2(0), .O1(data_out_lut_for_fsm), .O2(data_out_dont_care_lut_for_fsm)
+	.A1(address_lut), .A2(address_lut), .CEB1(clk), .CEB2(clk), .WEB1(~we_lut), .WEB2(1'b1),
+	.OEB1(1'b1), .OEB2(1'b0), .CSB1(csb && ~we_lut), .CSB2(csb && we_lut),
+	.I1(data_in_lut), .I2(0), .O1(data_out_dont_care_lut_for_fsm), .O2(data_out_lut_for_fsm)
 /*
 		.clk(clk)
 		.reset_N(reset_N),
