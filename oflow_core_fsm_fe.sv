@@ -1,10 +1,11 @@
 /*------------------------------------------------------------------------------
- * File          : oflow_fsm_read.sv
+ * File          : oflow_core_fsm_fe.sv
  * Project       : RTL
  * Author        : epchof
- * Creation date : Jun 30, 2024
+ * Creation date : Sep 20, 2024
  * Description   :
  *------------------------------------------------------------------------------*/
+
 
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 
@@ -22,7 +23,7 @@ module oflow_core_fsm_fe #() (
 	input logic [`REMAIN_BBOX_LEN-1:0] counter_of_remain_bboxes, // will help us to choose how many pe to activate because sometimes current #bboxes_in_set < 24
 	input logic new_set, // will help to know if new_set in the frame is waiting
 	//output logic [`SET_LEN] counter_set_fe - need to check if need this because we draw it in module but we forgot
-	output logic [`SET_LEN-1:0] counter_set_fe; // for counter_of_remain_bboxes in core_fsm_top
+	output logic [`SET_LEN-1:0] counter_set_fe, // for counter_of_remain_bboxes in core_fsm_top
 	
 	//oflow_core_fsm_registration
 	input logic done_registration,
@@ -30,21 +31,19 @@ module oflow_core_fsm_fe #() (
 	
 	
 	// pe's
-	input logic done_fe_i [`PE_NUM],
-	output logic start_fe_i [`PE_NUM]
+	input logic [`PE_NUM] done_fe_i,
+	output logic [`PE_NUM] start_fe_i 
 	
 	
 );
 
 
 
-
-
 // -----------------------------------------------------------       
-//                  logicisters & Wires
+//                  logics
 // -----------------------------------------------------------  
 
-
+logic [`PE_NUM-1:0] num_of_bbox_to_compare;
 logic generate_done_fe;
 	
 typedef enum {idle_st,fe_st,wait_st} sm_type; 
@@ -71,18 +70,18 @@ assign done_fe = generate_done_fe;
 	 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st ) counter_set_fe <= #1 0;
-		 else if (cur_state ==  wait_st && next_state == fe_st) counter_set_fe <= #1 counter_set_fe + 1;
+		 else if (current_state ==  wait_st && next_state == fe_st) counter_set_fe <= #1 counter_set_fe + 1;
 		 
 	  end
 
-	 	 
+		 
  // -----------------------------------------------------------       
  //						FSM – Async Logic
  // -----------------------------------------------------------	
  always_comb begin
 	 next_state = current_state;
 	 generate_done_fe = 1'b0; 
-	 start_fe_i = 1'b0;
+	 start_fe_i = 0;
 
 	 case (current_state)
 		 idle_st: begin
@@ -108,12 +107,16 @@ assign done_fe = generate_done_fe;
  
 		wait_st: begin 
 			
-				if( counter_set_fe == num_of_sets - 1 )
-					generate_done_fe = (start_fe_i[counter_of_remain_bboxes-1:0] == done_fe_i[counter_of_remain_bboxes-1:0]);
+				if( counter_set_fe == num_of_sets - 1 ) begin
+					num_of_bbox_to_compare = {`PE_NUM{1'b1}} >> (`PE_NUM-counter_of_remain_bboxes);
+					generate_done_fe = (num_of_bbox_to_compare == done_fe_i);
+					
+					//generate_done_fe = (start_fe_i[counter_of_remain_bboxes-1:0] == done_fe_i[counter_of_remain_bboxes-1:0]);
+				end	
 				else generate_done_fe = ( done_fe_i == {`PE_NUM{1'b1}} );
 				
 				if ( generate_done_fe && ( done_registration || counter_set_fe == 1'b0) ) begin
-			     next_state = fe_st;
+				 next_state = fe_st;
 				end
 		end
 		
