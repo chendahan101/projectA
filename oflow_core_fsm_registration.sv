@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------
- * File          : oflow_fsm_read.sv
+ * File          : oflow_core_fsm_registration.sv
  * Project       : RTL
  * Author        : epchof
  * Creation date : Jun 30, 2024
@@ -29,8 +29,8 @@ module oflow_core_fsm_registration #() (
 	
 	
 	// pe's
-	input logic done_registration_i [`PE_NUM],
-	output logic start_registration_i [`PE_NUM],
+	input logic [`PE_NUM] done_registration_i,
+	output logic [`PE_NUM] start_registration_i,
 	
 	// oflow_core_fsm_read
 	output logic [`SET_LEN-1:0] counter_set_registration
@@ -46,7 +46,7 @@ module oflow_core_fsm_registration #() (
 // -----------------------------------------------------------  
 
 
-
+logic [`PE_NUM-1:0] num_of_bbox_to_compare;
 
 logic generate_done_registration;
 	
@@ -74,11 +74,11 @@ assign done_pe = (counter_set_registration == num_of_sets);
 	 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st ) counter_set_registration <= #1 0;
-		 else if (cur_state ==  wait_st && next_state == registration_st_st) counter_set_registration <= #1 counter_set_registration + 1;
+		 else if (current_state ==  wait_st && next_state == registration_st) counter_set_registration <= #1 counter_set_registration + 1;
 		 
 	  end
 
-	 	 
+		 
  // -----------------------------------------------------------       
  //						FSM – Async Logic
  // -----------------------------------------------------------	
@@ -88,7 +88,7 @@ assign done_pe = (counter_set_registration == num_of_sets);
 	 start_registration_i = 1'b0;
 	 case (current_state)
 		 idle_st: begin
-			 next_state = done_fe ? registration_st_st: idle_st;	
+			 next_state = done_fe ? registration_st: idle_st;	
 			 
 		 end
 		 
@@ -103,19 +103,22 @@ assign done_pe = (counter_set_registration == num_of_sets);
 				
 			end
 		
-			else next_state = idle_st;
+			else if(counter_set_registration == num_of_sets) next_state = idle_st;
 			
 		 end
 		 
  
 		wait_st: begin 
 			
-				if( counter_set_registration == num_of_sets - 1 )
-					generate_done_registration = (start_registration_i[counter_of_remain_bboxes-1:0] == done_registration_i[counter_of_remain_bboxes-1:0]);
+				if( counter_set_registration == num_of_sets - 1 ) begin
+					num_of_bbox_to_compare = {`PE_NUM{1'b1}} >> (`PE_NUM-counter_of_remain_bboxes);
+					generate_done_registration = (num_of_bbox_to_compare == done_registration_i);
+				end
+					//generate_done_registration = (start_registration_i[counter_of_remain_bboxes-1:0] == done_registration_i[counter_of_remain_bboxes-1:0]);
 				else generate_done_registration = ( done_registration_i == {`PE_NUM{1'b1}} );
 				
-				if ( generate_done_registration && ( done_registration || counter_set_registration == 1'b0) ) begin
-			     next_state = registration_st;
+				if ( generate_done_registration || counter_set_registration == 1'b0)  begin
+				 next_state = registration_st;
 				end
 		end
 		
