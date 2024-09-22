@@ -6,11 +6,15 @@
  * Description   :
  *------------------------------------------------------------------------------*/
 
+`include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
+`include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
+
+
 module oflow_core_fsm_top_tb #() ();
 
 
- logic clk,
-		 logic reset_N ;
+ 		logic clk;
+		 logic reset_N;
 		
 		// globals inputs and outputs
 		 logic start;// from top
@@ -75,7 +79,9 @@ begin
 	// initiate	
 	initiate_all ();   // Initiates all input signals to '0' and open necessary files
 	#50
-	three_sets_not_full ();
+	@(posedge clk);
+	#1
+	two_frames_without_th_conflicts ();
 
 	
 	#50 $finish;  
@@ -104,25 +110,30 @@ task initiate_all ();        // sets all oflow inputs to '0'.
 	clk = 1'b0;
 	reset_N = 1'b0;
 	
+	// globals inputs and outputs
+	 start = 1'b0; // from top
+	 new_set_from_dma = 1'b0; // dma ready with new feature extraction set
+	 new_frame_from_dma =1'b0;
 	
-	
-	start = 1'b0; 
-	 new_set_from_dma =1'b0; 
-	 new_frame_from_dma = 1'b0;
-	
+	// oflow_reg_file
 	 num_of_history_frames = 0;
-	 num_of_bbox_in_frame = 0; 
-	
-	counter_set_fe = 0; 
-	
-	 done_pe = 1'b0;
-	
-	 done_write = 1'b0;
+	 num_of_bbox_in_frame = 0; // TO POINT TO THE END OF THE FRAME MEM, SO WE WILL READ ONLY THE FULL CELL --- maybe to remove
 
-	 done_cr = 1'b0; 
-	 conflict_counter_th = 1'b0;
+	//oflow_core_fsm_fe
+	counter_set_fe = 0; // for counter_of_remain_bboxes in core_fsm_top
+
+	//oflow_core_fsm_registration
+	done_pe = 1'b0;
 	
+	// oflow_MEM_buffer_wrapper
+	done_write = 1'b0;
+
+	//oflow_conflict_resolve
+	done_cr = 1'b0;
+	conflict_counter_th = 1'b0;
+
 	
+
 	#10
 	reset_N = 1'b1;
    
@@ -131,59 +142,69 @@ task initiate_all ();        // sets all oflow inputs to '0'.
 endtask
 
 
-task three_sets_not_full ();
+task two_frames_without_th_conflicts ();
 begin
 	
-	// first set
-	num_of_sets = `SET_LEN'd3;
-	counter_of_remain_bboxes = `REMAIN_BBOX_LEN'd70;
-	start_pe=1'b1;
+	// first frame : frame_num == 0
+	start = 1'b1;
+	new_frame_from_dma = 1'b1;
+	num_of_history_frames = 3;
+	num_of_bbox_in_frame = 3;
 	@(posedge clk);
-	start_pe=1'b0;
-	new_set = 1'b1;
-	@(posedge clk);
-	new_set = 1'b0;
-	@(posedge clk);
-	done_fe_i = {`PE_NUM{1'b1}};
+	#1
+	start = 1'b0;
+	new_frame_from_dma = 1'b0;
+	repeat (3) @(posedge clk);
+	new_set_from_dma = 1'b1;
 	
-	// second set
-	counter_of_remain_bboxes = `REMAIN_BBOX_LEN'd46;
 	@(posedge clk);
-	new_set = 1'b1;
-	@(posedge clk);
-	new_set = 1'b0;
-	done_fe_i = {`PE_NUM{1'b0}};
-	@(posedge clk);
-	done_fe_i = {`PE_NUM{1'b1}};
-	@(posedge clk);
-   
-   
-   
-   repeat (39) @(posedge clk);
-   done_registration_i = {`PE_NUM{1'b1}};
-   @(posedge clk);
-   done_registration_i = {`PE_NUM{1'b0}};
-   
-   
-   
-   // third set
+	new_set_from_dma = 1'b0;
 	
-   counter_of_remain_bboxes = `REMAIN_BBOX_LEN'd22;
-   
-   new_set = 1'b1;
-   @(posedge clk);
-   new_set = 1'b0;
-   @(posedge clk);
-   done_fe_i = {`PE_NUM{1'b0}};
-   @(posedge clk);
-   done_fe_i = {(`PE_NUM-2){1'b1}};
-  
-  
-  repeat (39) @(posedge clk);
-  done_registration_i = {(`PE_NUM-2){1'b1}};
-  @(posedge clk);
-  done_registration_i = {(`PE_NUM-2){1'b0}};
+	repeat (3) @(posedge clk);
 	
+	done_pe = 1'b1;
+	@(posedge clk);
+	done_pe = 1'b0;
+	repeat (3) @(posedge clk);
+	done_write = 1'b1;
+	@(posedge clk);
+	done_write = 1'b0;
+
+
+	// second frame : frame_num == 1
+	//start = 1'b1;
+	new_frame_from_dma = 1'b1;
+	num_of_history_frames = 3;
+	num_of_bbox_in_frame = 36;
+	@(posedge clk);
+	start = 1'b0;
+	new_frame_from_dma = 1'b0;
+	repeat (3) @(posedge clk);
+	new_set_from_dma = 1'b1;
+	@(posedge clk);
+	counter_set_fe = 0;
+	new_set_from_dma = 1'b0;
+	repeat (26) @(posedge clk);
+	new_set_from_dma = 1'b1;
+	@(posedge clk);
+	counter_set_fe = 1;
+	new_set_from_dma = 1'b0;
+	repeat (26) @(posedge clk);
+	counter_set_fe = 2;
+	@(posedge clk);
+	counter_set_fe = 0;
+	done_pe = 1'b1;
+	@(posedge clk);
+	done_pe = 1'b0;
+	repeat (20) @(posedge clk);
+	done_cr = 1'b1;
+	@(posedge clk);
+	done_cr = 1'b0;
+	
+	repeat (20) @(posedge clk);
+	done_write = 1'b1;
+	@(posedge clk);
+	done_write = 1'b0;
    
 	
 	

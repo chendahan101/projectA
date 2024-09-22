@@ -76,10 +76,15 @@ module oflow_core_fsm_top #() (
 
 logic start_DW_div_seq;
 logic done_DW_div_seq;
+logic done_DW_div_seq_prev;
+
 logic divide_by_0;
-logic [`SET_LEN-1:0] div_result;
-logic [`SET_LEN-1:0] rem_result;
-	
+logic [`SET_LEN-1:0] div_result, div_result_reg;
+logic [`SET_LEN-1:0] rem_result, rem_result_reg;
+
+logic [`SET_LEN-1:0]	counter_set_fe_prev;
+logic done_DW_div_seq_derivative;
+
 typedef enum {idle_st,set_variables_st, pe_st, conflict_resolve_st, write_st } sm_type; 
 sm_type current_state;
 sm_type next_state;
@@ -98,8 +103,13 @@ sm_type next_state;
 //                  Assignments
 // -----------------------------------------------------------  
 
+//assign start_DW_div_seq = new_frame_from_dma; // second option is to create a register that will raise to '1' for one cycle when moving from idle_st to set_variables_st
 assign new_set = new_set_from_dma;
 assign rnw_st = (current_state == write_st) ? 0 : 1 ;
+
+assign num_of_sets = (rem_result) ? div_result_reg + 1 : div_result_reg;
+assign num_of_bbox_in_last_set_div_4 = rem_result >> 2;
+assign num_of_bbox_in_last_set_remainder_4 = rem_result[1:0];
 
 // -----------------------------------------------------------       
 //                FSM synchronous procedural block.	
@@ -109,7 +119,39 @@ assign rnw_st = (current_state == write_st) ? 0 : 1 ;
 		else current_state <= #1 next_state;
 	
 	end
+
+//--------------------done_DW_div_seq_next---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N ) done_DW_div_seq_prev <= #1 1'b0;
+	else   done_DW_div_seq_prev <= #1 done_DW_div_seq;
 	
+end
+
+//--------------------done_DW_div_seq_derivative---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N ) done_DW_div_seq_derivative <= #1 1'b0;
+	else  if(done_DW_div_seq == 1'b1 && done_DW_div_seq_prev == 1'b0) done_DW_div_seq_derivative <= #1 1'b1;
+	else done_DW_div_seq_derivative <= #1 1'b0;
+	
+end	
+
+//--------------------div_result_reg---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N || current_state ==  idle_st ) div_result_reg <= #1 0;
+	else  if( current_state == set_variables_st && next_state == pe_st) div_result_reg <= #1 div_result;
+	
+ end	
+
+//--------------------rem_result_reg---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N || current_state ==  idle_st ) rem_result_reg <= #1 0;
+	else  if( current_state == set_variables_st && next_state == pe_st) rem_result_reg <= #1 rem_result;
+	
+ end	
 //--------------------counter_set_fe_prev---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
@@ -128,23 +170,51 @@ assign rnw_st = (current_state == write_st) ? 0 : 1 ;
 
 	 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || (current_state ==  idle_st && start == 1) ) frame_num <= #1 0;
-		 else if (current_state ==  write_st && next_state == set_variables_st) frame_num <= #1 frame_num + 1;
+		 if (!reset_N || (current_state ==  idle_st && start == 1) || (current_state == conflict_resolve_st && next_state == idle_st)) frame_num <= #1 0;
+		 else if (current_state ==  write_st  && next_state == idle_st) frame_num <= #1 frame_num + 1;
 	  end
-		 
+
+ //--------------------start_DW_div_seq---------------------------------	
+
+ 
+ always_ff @(posedge clk or negedge reset_N) begin
+	 if (!reset_N ) start_DW_div_seq <= #1 1'b0;
+	 else if (current_state ==  idle_st && next_state == set_variables_st) start_DW_div_seq <= #1  1'b1;
+	 else start_DW_div_seq <= #1 1'b0;
+  end
+
+ //--------------------ready_new_set---------------------------------	
+
+ 
+ always_ff @(posedge clk or negedge reset_N) begin
+	 if (!reset_N ) ready_new_set <= #1 1'b0;
+	 else if (( current_state ==  set_variables_st && next_state == pe_st) || ( counter_set_fe != counter_set_fe_prev && counter_of_remain_bboxes >= `PE_NUM)) ready_new_set <= #1 1'b1;
+	 else ready_new_set <= #1 1'b0;  
+ end
+ 
+ //--------------------valid_id---------------------------------	
+
+ 
+ always_ff @(posedge clk or negedge reset_N) begin
+	 if (!reset_N || current_state ==  idle_st ) valid_id <= #1 1'b0;
+	 else if (current_state != write_st && next_state == write_st) valid_id <= #1  1'b1;
+	 else valid_id <= #1 1'b0; 
+  end
+		
+		
  // -----------------------------------------------------------       
  //						FSM – Async Logic
  // -----------------------------------------------------------	
  always_comb begin
 	 next_state = current_state;
 	 start_pe = 1'b0; 
-	 new_set = 1'b0;
-	 ready_new_set = 1'b0;
+	 //new_set = 1'b0;
+	 //ready_new_set = 1'b0;
 	 start_cr = 1'b0;
 	 //start_write_score = 1'b0;
 	 start_write_mem = 1'b0;
 	 ready_new_frame = 1'b0;
-	 valid_id = 1'b0;
+	 //valid_id = 1'b0;
 	
 	 case (current_state)
 		 idle_st: begin
@@ -156,12 +226,12 @@ assign rnw_st = (current_state == write_st) ? 0 : 1 ;
 		 set_variables_st: begin
 			 
 			//num_of_sets =  (num_of_bbox_in_frame%PE_NUM) ? num_of_bbox_in_frame/PE_NUM + 1: num_of_bbox_in_frame/PE_NUM;
-			num_of_sets = (rem_result) ? div_result + 1: div_result;
-			num_of_bbox_in_last_set_div_4 = rem_result >> 2;
-			num_of_bbox_in_last_set_remainder_4 = rem_result[1:0];
-			if(done_DW_div_seq) begin
+			//num_of_sets = (rem_result) ? div_result + 1: div_result;
+			//num_of_bbox_in_last_set_div_4 = rem_result >> 2;
+			//num_of_bbox_in_last_set_remainder_4 = rem_result[1:0];
+			if(done_DW_div_seq_derivative) begin
 				start_pe = 1;
-				ready_new_set = 1'b1;
+				//ready_new_set = 1'b1;
 				next_state = pe_st;
 			end
 			
@@ -170,13 +240,13 @@ assign rnw_st = (current_state == write_st) ? 0 : 1 ;
  
 		pe_st: begin 
 			
-				if ( counter_set_fe != counter_set_fe_prev &&  counter_of_remain_bboxes >= `PE_NUM)
-					ready_new_set = 1'b1;
+				//if ( counter_set_fe != counter_set_fe_prev &&  counter_of_remain_bboxes >= `PE_NUM)
+					//ready_new_set = 1'b1;
 				if( done_pe && frame_num == 0) begin
 					start_write_mem =1'b1;
 					//start_write_score = 1'b1 ;
 					next_state = write_st;
-					valid_id = 1'b1;
+					//valid_id = 1'b1;
 				end	
 				else if  (done_pe && frame_num != 0) begin
 					start_cr = 1'b1;
@@ -193,7 +263,7 @@ assign rnw_st = (current_state == write_st) ? 0 : 1 ;
 				start_write_mem = 1'b1;
 				//start_write_score = 1'b1;
 				next_state = write_st;
-				valid_id = 1'b1;
+				//valid_id = 1'b1;
 
 			end
 			
