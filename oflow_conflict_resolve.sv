@@ -29,7 +29,9 @@ module oflow_conflict_resolve #() (
 	output logic [`ROW_LEN-1:0] row_to_change, //for write to score_board
 	output logic [`PE_LEN-1:0] pe_to_change, //for write to score_board
 	output logic  data_to_score_board, // for write to score_board. *****if we_lut will want to change the fallbacks, we_lut need to change the size of this signal*******
-	output logic  write_to_pointer //for write to score_board
+	output logic  write_to_pointer, //for write to score_board
+	
+	output logic conflict_counter_th
 );
  
 
@@ -107,7 +109,9 @@ oflow_conflict_resolve_fsm #(
 		.data_to_score_board(data_to_score_board),
 		.write_to_pointer(write_to_pointer),
 		
-		.csb(csb)
+		.csb(csb),
+		
+		.conflict_counter_th(conflict_counter_th)
 	);
 	
  

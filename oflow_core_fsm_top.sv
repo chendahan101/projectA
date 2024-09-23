@@ -252,14 +252,14 @@ always_ff @(posedge clk or negedge reset_N) begin
 					start_cr = 1'b1;
 					next_state = conflict_resolve_st;
 				end	
-
+ 
 		end
 		
 		conflict_resolve_st: begin
 
 			if(conflict_counter_th)
 				next_state = idle_st;
-			 if(done_cr) begin
+			else if(done_cr ) begin
 				start_write_mem = 1'b1;
 				//start_write_score = 1'b1;
 				next_state = write_st;

@@ -81,7 +81,7 @@ begin
 	#50
 	@(posedge clk);
 	#1
-	two_frames_without_th_conflicts ();
+	two_frames_with_th_conflicts ();
 
 	
 	#50 $finish;  
@@ -206,11 +206,80 @@ begin
 	@(posedge clk);
 	done_write = 1'b0;
    
-	
-	
+		
 end  
 endtask
 
 
+task two_frames_with_th_conflicts ();
+	begin
+		
+		// first frame : frame_num == 0
+		start = 1'b1;
+		new_frame_from_dma = 1'b1;
+		num_of_history_frames = 3;
+		num_of_bbox_in_frame = 3;
+		@(posedge clk);
+		#1
+		start = 1'b0;
+		new_frame_from_dma = 1'b0;
+		repeat (3) @(posedge clk);
+		new_set_from_dma = 1'b1;
+		
+		@(posedge clk);
+		new_set_from_dma = 1'b0;
+		
+		repeat (3) @(posedge clk);
+		
+		done_pe = 1'b1;
+		@(posedge clk);
+		done_pe = 1'b0;
+		repeat (3) @(posedge clk);
+		done_write = 1'b1;
+		@(posedge clk);
+		done_write = 1'b0;
+
+
+		// second frame : frame_num == 1
+		//start = 1'b1;
+		new_frame_from_dma = 1'b1;
+		num_of_history_frames = 3;
+		num_of_bbox_in_frame = 36;
+		@(posedge clk);
+		start = 1'b0;
+		new_frame_from_dma = 1'b0;
+		repeat (3) @(posedge clk);
+		new_set_from_dma = 1'b1;
+		@(posedge clk);
+		counter_set_fe = 0;
+		new_set_from_dma = 1'b0;
+		repeat (26) @(posedge clk);
+		new_set_from_dma = 1'b1;
+		@(posedge clk);
+		counter_set_fe = 1;
+		new_set_from_dma = 1'b0;
+		repeat (26) @(posedge clk);
+		counter_set_fe = 2;
+		@(posedge clk);
+		counter_set_fe = 0;
+		done_pe = 1'b1;
+		@(posedge clk);
+		done_pe = 1'b0;
+		repeat (15) @(posedge clk);
+		conflict_counter_th = 1'b1;
+		done_cr = 1'b1;
+		@(posedge clk);
+		conflict_counter_th = 1'b0;
+		done_cr = 1'b0;
+		
+		repeat (20) @(posedge clk);
+		done_write = 1'b1;
+		@(posedge clk);
+		done_write = 1'b0;
+	   
+		
+		
+	end  
+	endtask
 
 endmodule

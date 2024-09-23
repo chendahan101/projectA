@@ -49,8 +49,9 @@ module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 10 ) (
 	output logic  data_to_score_board, // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
 	output logic  write_to_pointer, //for write to score_board
 	
-	output logic csb
+	output logic csb,
 
+	output logic conflict_counter_th
 );	
 
 
@@ -102,7 +103,8 @@ localparam  COUNTER_STATE = 2;
 	assign  row_sel = counter_row_sel;
 	assign  pe_sel  = counter_pe_sel; 
 	assign address_flag = address_lut;
-
+	
+	assign conflict_counter_th = th_conflict_flg;
 	
 	always_comb begin
 		column_lut = (id_to_cr / DEPTH_LUT); // suppose to be one bit. Eg. while (id_to_cr/2048)!=0 
