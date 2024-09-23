@@ -1,12 +1,12 @@
 /*------------------------------------------------------------------------------
- * File          : oflow_PE.sv
+ * File          : oflow_pe.sv
  * Project       : RTL
  * Author        : epchof
  * Creation date : Jan 13, 2024
  * Description   :	
  *------------------------------------------------------------------------------*/
-`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
-`include "/users/epchof/Project/design/work/include_files/oflow_feature_extraction_define.sv"
+//`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
+//`include "/users/epchof/Project/design/work/include_files/oflow_feature_extraction_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
 
@@ -51,7 +51,7 @@ module  oflow_pe(
 			// conflict_resolve
 
 			//IDs
-			output logic ['ID_LEN-1:0] id_out ['MAX_ROWS_IN_SCORE_BOARD-1:0],
+			output logic [`ID_LEN-1:0] id_out [`MAX_ROWS_IN_SCORE_BOARD-1:0],
 			
 			
 			//interface between pe to cr
@@ -60,7 +60,7 @@ module  oflow_pe(
 			input logic [`ROW_LEN-1:0] row_sel_to_pe_from_cr,  //which row to read from score board
 			input logic  write_to_pointer_to_pe , //for write to score_board
 			input logic  data_to_score_board_to_pe, // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
-			input logic [`ROW_LEN-1:0] row_to_change_to_pe, //for write to score_board
+			input logic [`ROW_LEN-1:0] row_to_change_to_pe //for write to score_board
 
 	
 			);
@@ -81,11 +81,6 @@ module  oflow_pe(
 	
 	
 	
-	
-	
-	
-	
-	
 
 
 // -----------------------------------------------------------       
@@ -102,72 +97,71 @@ oflow_feature_extraction oflow_feature_extraction(
 	
 	// dma
 	.bbox (bboxes_from_dma),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     nable
-	
+ 
 	// outputs to registration
 	.cm_concate(cm_concate),
 	.position_concate(position_concate),
 	.width(width),
 	.height(height),
 	.color1(color1),
-	.color2(color2),
+	.color2(color2)
 	//.d_history(d_history)
 	);
 
 
 oflow_registration oflow_registration( 
-			.clk(clk),
-			.reset_N(reset_N), 
-			
+	.clk(clk),
+	.reset_N(reset_N), 
+	
+
+	// reg_file
+	.iou_weight(iou_weight),
+	.w_weight(w_weight),
+	.h_weight(h_weight),
+	.color1_weight(color1_weight),
+	.color2_weight(color2_weight),
+	.dhistory_weight(dhistory_weight),
+
+	//core
+	.num_of_pe(num_of_pe),
+	// core_fsm
+	.ready_new_frame(ready_new_frame),
+	.num_of_sets(num_of_sets),
+	.frame_num(frame_num),
+	.start_registration(start_registration),
+	.done_registration(done_registration), 
+	.control_for_read_new_line(control_for_read_new_line), // we want to start read new line after 2 cycles before the end
+
+	// interface between buffer&pe
+	.done_read (done_read_to_pe),
+	.data_to_similarity_metric_0(data_to_pe_0),// we will change the d_history_field 
+	.data_to_similarity_metric_1(data_to_pe_1),// we will change the d_history_field
+	.row_sel_to_pe(row_sel_to_pe),
+	.data_out_pe(data_out_pe), // for write to mem the features
+	
+	// inputs from feature_extraction
+	.cm_concate_cur(cm_concate),
+	.position_concate_cur(position_concate),
+	.width_cur(width),
+	.height_cur(height),
+	.color1_cur(color1),
+	.color2_cur(color2),
+	//.d_history(d_history), 
+
+	//IDs
+	.id_out(id_out),
+	
+	
 		
-			// reg_file
-			.iou_weight(iou_weight),
-			.w_weight(w_weight),
-			.h_weight(h_weight),
-			.color1_weight(color1_weight),
-			.color2_weight(color2_weight),
-			.dhistory_weight(dhistory_weight),
-
-			//core
-			.num_of_pe(num_of_pe),
-			// core_fsm
-			.ready_new_frame(ready_new_frame),
-			.num_of_sets(num_of_sets),
-			.frame_num(frame_num),
-			.start_registration(start_registration),
-			.done_registration(done_registration), 
-			.control_for_read_new_line(control_for_read_new_line), // we want to start read new line after 2 cycles before the end
-
-			// interface between buffer&pe
-			.done_read (done_read_to_pe),
-			.data_to_similarity_metric_0(data_to_pe_0),// we will change the d_history_field 
-			.data_to_similarity_metric_1(data_to_pe_1),// we will change the d_history_field
-			.row_sel_to_pe(row_sel_to_pe),
-			.data_out_from_scoreboard(data_out_pe) // for write to mem the features
-			
-			// inputs from feature_extraction
-			.cm_concate(cm_concate),
-			.position_concate(position_concate),
-			.width(width),
-			.height(height),
-			.color1(color1),
-			.color2(color2),
-			//.d_history(d_history), 
-
-			//IDs
-			.id_out(id_out),
-			
-			
-				
-			//cr
-			.score_to_cr_from_pe(score_to_cr_from_pe) ,  
-			.id_to_cr_from_pe(id_to_cr_from_pe),  
-			.row_sel_to_pe_from_cr(row_sel_to_pe_from_cr),  //which row to read from score board
-			.write_to_pointer_to_pe(write_to_pointer_to_pe) , //for write to score_board
-			.data_to_score_board_to_pe(data_to_score_board_to_pe), // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
-			.row_to_change_to_pe(row_to_change_to_pe) //for write to score_board
-			
-			);
+	//cr
+	.score_to_cr_from_pe(score_to_cr_from_pe) ,  
+	.id_to_cr_from_pe(id_to_cr_from_pe),  
+	.row_sel_to_pe_from_cr(row_sel_to_pe_from_cr),  //which row to read from score board
+	.write_to_pointer_to_pe(write_to_pointer_to_pe) , //for write to score_board
+	.data_to_score_board_to_pe(data_to_score_board_to_pe), // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+	.row_to_change_to_pe(row_to_change_to_pe) //for write to score_board
+	
+	);
 
 
 

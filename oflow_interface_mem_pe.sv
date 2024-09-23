@@ -7,7 +7,7 @@
  *------------------------------------------------------------------------------*/
 `include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
-`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
+//`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
 
 
 
@@ -67,7 +67,7 @@ module oflow_interface_mem_pe #() (
 //                  logicisters & Wires
 // -----------------------------------------------------------  
 
-	logic [`FEATURE_OF_PREV_LEN-1:0] data_out [`DATA_OUT_NUM],
+	logic [`FEATURE_OF_PREV_LEN-1:0] data_out [`DATA_OUT_NUM];
 	
 
 
@@ -94,7 +94,7 @@ module oflow_interface_mem_pe #() (
 		 end
 		 
 		 1: begin
-			 data_in_for_buffer_mem_0 = {data_out[0],`FEATURE_OF_PREV_LEN{1'b0}};
+			 data_in_for_buffer_mem_0 = {data_out[0],{`FEATURE_OF_PREV_LEN{1'b0}}};
 			 data_in_for_buffer_mem_1 = 0;
 			
 		 end
@@ -106,21 +106,21 @@ module oflow_interface_mem_pe #() (
 		 
 		 3: begin 
 			 data_in_for_buffer_mem_0 = {data_out[0],data_out[1]};
-			 data_in_for_buffer_mem_1 = {data_out[2],`FEATURE_OF_PREV_LEN{1'b0}}; 
+			 data_in_for_buffer_mem_1 = {data_out[2],{`FEATURE_OF_PREV_LEN{1'b0}}}; 
 		 end
 		 
 	 endcase
  end
 	  
 	  
-assign row_sel_to_pe = row_sel_from_core_fsm;
+	assign row_sel_to_pe = row_sel_from_core_fsm;
+		
 	
-
-//for read	
- 
-assign data_to_pe_0 = {data_out_from_buffer_mem[`DATA_WIDTH-1:`DATA_WIDTH-`FEATURE_OF_PREV_LEN+`ID_LEN],counter_of_history_frame_to_interface,data_out_from_buffer_mem[`DATA_WIDTH-`FEATURE_OF_PREV_LEN+`ID_LEN-1-:`ID_LEN]};
-assign data_to_pe_1 = {data_out_from_buffer_mem[`DATA_WIDTH-`FEATURE_OF_PREV_LEN-1:`ID_LEN],counter_of_history_frame_to_interface,data_out_from_buffer_mem[`ID_LEN-1:0]} 
-assign done_read_to_pe = done_read; 
-	
+	//for read	
+	 
+	assign data_to_pe_0 = {data_out_from_buffer_mem[`DATA_WIDTH-1:`DATA_WIDTH-`FEATURE_OF_PREV_LEN+`ID_LEN],counter_of_history_frame_to_interface,data_out_from_buffer_mem[`DATA_WIDTH-`FEATURE_OF_PREV_LEN+`ID_LEN-1-:`ID_LEN]};
+	assign data_to_pe_1 = {data_out_from_buffer_mem[`DATA_WIDTH-`FEATURE_OF_PREV_LEN-1:`ID_LEN],counter_of_history_frame_to_interface,data_out_from_buffer_mem[`ID_LEN-1:0]};
+	assign done_read_to_pe = done_read; 
+		
 	 
 endmodule

@@ -6,6 +6,7 @@
  * Description   :
  *------------------------------------------------------------------------------*/
 `include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
+`include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
 
 module oflow_similarity_metric_tb #() ();
 
@@ -24,7 +25,7 @@ module oflow_similarity_metric_tb #() ();
 		logic [`COLOR_LEN-1:0] color2_cur;
 		//logic [`D_HISTORY_LEN-1:0] d_history_cur; 
 			
-		logic [`FEATURE_OF_PREV_LEN-1:0] features_of_prev;
+		logic [`DATA_TO_PE_WIDTH-1:0] features_of_prev;
 		
 		logic [`WEIGHT_LEN-1:0] iou_weight;
 		logic [`WEIGHT_LEN-1:0] w_weight;
@@ -107,6 +108,7 @@ begin
   insert_curr_data({11'd30,11'd55}, {11'd50,11'd10,11'd60,11'd110}, 10, 100, {8'd128,8'd127,8'd78}, {8'd204,8'd205,8'd209}); 
   //  [`CM_CONCATE_LEN-1:0] [`POSITION_CONCATE_LEN-1:0] [`WIDTH_LEN-1:0]  [`HEIGHT_LEN-1:0][`COLOR_LEN-1:0]  [`COLOR_LEN-1:0] [`D_HISTORY_LEN-1:0] [`ID_LEN-1:0]
   insert_prev_data({11'd40,11'd54}, {11'd70,11'd8,11'd80,11'd108}, 10, 100, {8'd130,8'd122,8'd90}, {8'd220,8'd80,8'd200}, 1, 12);
+  @(posedge clk); 
   #10 start = 1;
   #30
 	 start = 0;

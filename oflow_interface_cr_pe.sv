@@ -7,7 +7,7 @@
  *------------------------------------------------------------------------------*/
 `include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
-`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
+//`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
 
 
 
@@ -46,7 +46,7 @@ module interface_cr_pe #() (
  
 
 assign score_to_cr = score_to_cr_from_pe[pe_sel_from_cr];
-assign id_to_cr = score_to_cr_from_pe[id_to_cr_from_pe];
+assign id_to_cr = id_to_cr_from_pe[pe_sel_from_cr];
 
 assign row_to_change_to_pe = row_to_change;
 assign row_sel_to_pe = row_sel_from_cr;
