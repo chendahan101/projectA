@@ -91,7 +91,7 @@ assign done_fe = generate_done_fe;
 		 
 		 fe_st: begin
 			 
-			 if((counter_set_fe < num_of_sets)&& new_set) begin
+			 if((counter_set_fe < num_of_sets)&& (new_set || counter_set_fe==0) ) begin
 				
 				//if( counter_of_remain_bboxes < `PE_NUM )
 				if( counter_set_fe == num_of_sets - 1 )
@@ -100,7 +100,7 @@ assign done_fe = generate_done_fe;
 				next_state = wait_st;
 			end
 		
-			else next_state = idle_st;
+			else if(counter_set_fe == num_of_sets) next_state = idle_st;
 			
 		 end
 		 
@@ -110,7 +110,9 @@ assign done_fe = generate_done_fe;
 				if( counter_set_fe == num_of_sets - 1 ) begin
 					num_of_bbox_to_compare = {`PE_NUM{1'b1}} >> (`PE_NUM-counter_of_remain_bboxes);
 					generate_done_fe = (num_of_bbox_to_compare == done_fe_i);
-					
+					if (generate_done_fe) begin 				
+						next_state = idle_st;
+					 end 
 					//generate_done_fe = (start_fe_i[counter_of_remain_bboxes-1:0] == done_fe_i[counter_of_remain_bboxes-1:0]);
 				end	
 				else generate_done_fe = ( done_fe_i == {`PE_NUM{1'b1}} );

@@ -32,7 +32,7 @@ module  oflow_pe(
 			// core_fsm
 			input logic ready_new_frame,
 			input logic [`SET_LEN-1:0] num_of_sets, 
-			input logic frame_num,
+			input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num,
 			input logic start_fe,
 			input logic start_registration,
 			input logic done_pe,

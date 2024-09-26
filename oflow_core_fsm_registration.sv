@@ -113,6 +113,10 @@ assign done_pe = (counter_set_registration == num_of_sets);
 				if( counter_set_registration == num_of_sets - 1 ) begin
 					num_of_bbox_to_compare = {`PE_NUM{1'b1}} >> (`PE_NUM-counter_of_remain_bboxes);
 					generate_done_registration = (num_of_bbox_to_compare == done_registration_i);
+					if (generate_done_registration) begin 
+						next_state = idle_st;
+
+					end
 				end
 					//generate_done_registration = (start_registration_i[counter_of_remain_bboxes-1:0] == done_registration_i[counter_of_remain_bboxes-1:0]);
 				else generate_done_registration = ( done_registration_i == {`PE_NUM{1'b1}} );

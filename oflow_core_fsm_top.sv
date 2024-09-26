@@ -74,13 +74,15 @@ module oflow_core_fsm_top #() (
 //                  logics & Wires
 // -----------------------------------------------------------  
 
+localparam [`PE_LEN-1:0] PE_NUM_5_BITS= `PE_NUM;
+
 logic start_DW_div_seq;
 logic done_DW_div_seq;
 logic done_DW_div_seq_prev;
 
 logic divide_by_0;
 logic [`SET_LEN-1:0] div_result, div_result_reg;
-logic [`SET_LEN-1:0] rem_result, rem_result_reg;
+logic [`PE_LEN-1:0] rem_result, rem_result_reg;
 
 logic [`SET_LEN-1:0]	counter_set_fe_prev;
 logic done_DW_div_seq_derivative;
@@ -95,7 +97,7 @@ sm_type next_state;
 // -----------------------------------------------------------  
    
    DW_div_seq # ( .a_width(`REMAIN_BBOX_LEN), .b_width(`PE_LEN) ) DW_div_seq ( .clk(clk) , .rst_n(reset_N), .hold(1'b0)
-	   , .start(start_DW_div_seq), .a(num_of_bbox_in_frame),   .b(`PE_NUM) , .complete(done_DW_div_seq), .divide_by_0(divide_by_0), .quotient(div_result), .remainder(rem_result) );
+	   , .start(start_DW_div_seq), .a(num_of_bbox_in_frame),   .b(PE_NUM_5_BITS) , .complete(done_DW_div_seq), .divide_by_0(divide_by_0), .quotient(div_result), .remainder(rem_result) );
    
    
 
@@ -188,7 +190,8 @@ always_ff @(posedge clk or negedge reset_N) begin
  
  always_ff @(posedge clk or negedge reset_N) begin
 	 if (!reset_N ) ready_new_set <= #1 1'b0;
-	 else if (( current_state ==  set_variables_st && next_state == pe_st) || ( counter_set_fe != counter_set_fe_prev && counter_of_remain_bboxes >= `PE_NUM)) ready_new_set <= #1 1'b1;
+//	 else if (( current_state ==  set_variables_st && next_state == pe_st) || ( counter_set_fe != counter_set_fe_prev && counter_of_remain_bboxes >= `PE_NUM)) ready_new_set <= #1 1'b1;
+	 else if (( counter_set_fe != counter_set_fe_prev && counter_of_remain_bboxes >= `PE_NUM)) ready_new_set <= #1 1'b1;
 	 else ready_new_set <= #1 1'b0;  
  end
  

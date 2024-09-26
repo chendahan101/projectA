@@ -14,6 +14,7 @@
 
 
 
+
 module oflow_core #() (
 	//inputs
 	input logic clk,
@@ -64,7 +65,7 @@ module oflow_core #() (
 //              Logics
 // -----------------------------------------------------------  
 
-
+	localparam MAX_J_IN_LAST_SET = 15;
 
 
 	// logics for outputs of buffer_wrapper
@@ -79,7 +80,7 @@ module oflow_core #() (
 	logic [`PE_NUM] done_registration_i; 
 	logic [`PE_NUM] control_for_read_new_line_i;
 	logic [`FEATURE_OF_PREV_LEN -1:0 ]data_out_pe [`PE_NUM];
-	logic [`ID_LEN-1:0] id_out[`MAX_ROWS_IN_SCORE_BOARD][`PE_NUM];
+	logic [`ID_LEN-1:0] id_out[`PE_NUM][`MAX_ROWS_IN_SCORE_BOARD];
 		
 	// logics for outputs of interface
 	logic done_read_to_pe;	
@@ -163,21 +164,28 @@ genvar r,j;
 generate 
 	for  ( r=0; r < `MAX_ROWS_IN_SCORE_BOARD; r+=1) begin :row
 		for  ( j=0; j < `PE_NUM; j+=1) begin : pe
-			assign ids[(r*(`PE_NUM))+j] = id_out[r][j];
+			if(r == ((`MAX_ROWS_IN_SCORE_BOARD)-1) && j > MAX_J_IN_LAST_SET) begin
+				//do nothing 
+			end
+			else assign ids[(r*(`PE_NUM))+j] = id_out[j][r];
 		end
 	end
 endgenerate
 
 
 // -----------------------------------------------------------       
-//                Instantiations
+//                Instantiationslogic [`ID_LEN-1:0] id_out [`MAX_ROWS_IN_SCORE_BOARD-1:0] [`PE_NUM-1:0];
 // -----------------------------------------------------------  
 
 
-genvar i;
-generate for  ( i=0; i < `PE_NUM; i++)  
-begin : pe_inst
-   oflow_pe oflow_pe( 
+genvar i,row_i;
+generate
+	//for  ( row_i=0; row_i < `MAX_ROWS_IN_SCORE_BOARD; row_i++) 
+	begin : row_inst
+	 
+		 for  ( i=0; i < `PE_NUM; i++) 
+		begin : pe_inst
+   			oflow_pe oflow_pe( 
 			.clk (clk),
 			.reset_N (reset_N),
 			
@@ -213,7 +221,7 @@ begin : pe_inst
 			 .data_out_pe (data_out_pe[i]),
 			 .done_read_to_pe (done_read_to_pe),
 			//IDs
-			 .id_out( id_out[`MAX_ROWS_IN_SCORE_BOARD][i]),
+			 .id_out( id_out[i]),
 			//interface between conflict resolve and PE
 			.score_to_cr_from_pe(score_to_cr_from_pe [i]), 
 			.id_to_cr_from_pe(id_to_cr_from_pe [i]),  
@@ -223,7 +231,9 @@ begin : pe_inst
 			.row_to_change_to_pe(row_to_change_to_pe) //for write to score_board
 
 			
-	   );
+	  	 );
+		end
+	
 end
 endgenerate
 

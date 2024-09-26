@@ -55,6 +55,9 @@ module oflow_core_tb #() ();
 	  logic [`ID_LEN-1:0] ids [`MAX_BBOXES_PER_FRAME]; 
 
 
+	//check
+	logic signal;
+
 // ----------------------------------------------------------------------
 //                   Instantiation
 // ----------------------------------------------------------------------
@@ -75,6 +78,7 @@ begin
 	#50
 
 	insert_weight(10'b1000000000,10'b0010000000,10'b0010000000,10'b0001010101,10'b0001010101,10'b0001010101);
+	
 	two_frames();
 
 	
@@ -109,9 +113,8 @@ task initiate_all ();        // sets all oflow inputs to '0'.
 	 // globals inputs and outputs (DMA)
 	  set_of_bboxes_from_dma = '{default: 0};
 	  new_set_from_dma =0; // dma ready with new feature extraction set
-	  ready_new_set =0; // fsm_core_top ready for new_set from DMA
-	  ready_new_frame =0; // fsm_core_top ready for new_frame from DMA
-	  conflict_counter_th=0; // fsm_core_top ready for new_frame from DMA
+	  
+	 
 	 
 	 // reg_file
 	  iou_weight=0;
@@ -128,9 +131,11 @@ task initiate_all ();        // sets all oflow inputs to '0'.
 	  num_of_history_frames=0; // fallback number
 	  num_of_bbox_in_frame=0; // TO POINT TO THE END OF THE FRAME MEM, SO WE WILL READ ONLY THE FULL CELL --- maybe to remove
 	
+	//check
+	  //signal = 0;
 	  #10
 	  reset_N = 1'b1;
-   
+   		//signal = ready_new_set;
   end  
 endtask
 
@@ -138,68 +143,77 @@ endtask
 task two_frames ();
 begin
 	
+	//==================== START================
 	@(posedge clk);
 	// first frame : frame_num = 0
 	start = 1'b1;
-	
+	@(posedge clk);
+	start = 1'b0;
+	//====================================
+
+	//==================== START FRAME 0================
+
 	num_of_history_frames = 3;
-	num_of_bbox_in_frame = 50;
-	while(!ready_new_frame) begin
-		
-	end
-	set_of_bboxes(5);
+	num_of_bbox_in_frame = 72;
+	
+
+	//====================================
+
+	//==================== START SET 0================
+
+	set_of_bboxes(12);
 	new_frame = 1'b1;
 	@(posedge clk);
 	new_frame = 1'b0;
-	start = 1'b0;
+	
+	@(posedge ready_new_set);
+	//====================================
 
 	
-	//repeat (3) @(posedge clk);
-	while(!ready_new_set) begin
-		
-	end
-	
-	new_set_from_dma = 1'b1;
-	@(posedge clk);
-	new_set_from_dma = 1'b0;
-	//repeat (3) @(posedge clk);
-	while(!ready_new_set) begin
-		
-	end
+	//==================== START SET 1================
+
 	set_of_bboxes(6);
+	//@(posedge clk);
 	new_set_from_dma = 1'b1;
 	@(posedge clk);
 	new_set_from_dma = 1'b0;
-	//repeat (3) @(posedge clk);
-	while(!ready_new_set) begin
-		
-	end
+
+	@(posedge ready_new_set);
+	//====================================
+
+
+
+	//==================== START SET 2================
+
 	set_of_bboxes(7);
+	//@(posedge clk);
 	new_set_from_dma = 1'b1;
 	@(posedge clk);
 	new_set_from_dma = 1'b0;
-	//repeat (3) @(posedge clk);
 	
+	//====================================
+
+
+
+	//==================== START FRAME 1================
+
+	num_of_bbox_in_frame = 24;
+	wait(ready_new_frame) ;
+	//wait(@(posedge ready_new_frame));	
 	
-	
-	
-	// second_frame: frame_num = 1
-	num_of_bbox_in_frame = 50;
-	while(!ready_new_frame) begin
-		
-	end
 	set_of_bboxes(8);
 	new_frame = 1'b1;
 	@(posedge clk);
 	new_frame = 1'b0;
-	//repeat (3) @(posedge clk);
-	while(!ready_new_set) begin
-		
-	end
 	
-	new_set_from_dma = 1'b1;
-	@(posedge clk);
-	new_set_from_dma = 1'b0;
+	//repeat (3) @(posedge clk);
+	//wait(ready_new_set);
+		
+	
+	
+	//new_set_from_dma = 1'b1;
+	//@(posedge clk);
+	//new_set_from_dma = 1'b0;
    
 		
 end  
