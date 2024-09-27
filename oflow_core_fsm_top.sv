@@ -21,7 +21,7 @@ module oflow_core_fsm_top #() (
 	input logic start, // from top
 	input logic new_set_from_dma, // dma ready with new feature extraction set
 	input logic new_frame_from_dma,
-	output logic ready_new_set, // fsm_core_top ready for new_set from DMA
+	//output logic ready_new_set, // fsm_core_top ready for new_set from DMA
 	output logic ready_new_frame, // fsm_core_top ready for new_frame_from_dma from DMA
 	
 	
@@ -32,6 +32,7 @@ module oflow_core_fsm_top #() (
 	// input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] num_of_total_frames,//the serial number of the current frame 0-255 ; we add ready_new_frame, change the FSM
 
 	//oflow_core_fsm_fe
+	input logic control_ready_new_set,
 	input logic [`SET_LEN-1:0] counter_set_fe, // for counter_of_remain_bboxes in core_fsm_top
 	output logic start_pe,
 	output logic new_set, // will help to know if new_set in the frame is waiting
@@ -165,7 +166,7 @@ always_ff @(posedge clk or negedge reset_N) begin
 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  set_variables_st ) counter_of_remain_bboxes <= #1 num_of_bbox_in_frame;
-		 else if (current_state ==  pe_st && counter_set_fe != counter_set_fe_prev && counter_of_remain_bboxes >= `PE_NUM) counter_of_remain_bboxes <= #1 counter_of_remain_bboxes - `PE_NUM; 
+		 else if (current_state ==  pe_st && control_ready_new_set && counter_of_remain_bboxes >= `PE_NUM) counter_of_remain_bboxes <= #1 counter_of_remain_bboxes - `PE_NUM; 
 	  end
 
 //--------------------frame_num---------------------------------	
@@ -185,6 +186,7 @@ always_ff @(posedge clk or negedge reset_N) begin
 	 else start_DW_div_seq <= #1 1'b0;
   end
 
+ /*
  //--------------------ready_new_set---------------------------------	
 
  
@@ -197,6 +199,7 @@ always_ff @(posedge clk or negedge reset_N) begin
  
  //--------------------valid_id---------------------------------	
 
+*/
  
  always_ff @(posedge clk or negedge reset_N) begin
 	 if (!reset_N || current_state ==  idle_st ) valid_id <= #1 1'b0;

@@ -109,9 +109,9 @@ sm_type next_state;
 		 select_row_st: begin
 			 next_state = select_pe_st;
 			 
-			 if (counter_row == (num_of_sets-1) && num_of_bbox_in_last_set_div_4 == 0) begin 
+			 if (counter_row == (num_of_sets-1) && num_of_bbox_in_last_set_div_4 == 0 && num_of_bbox_in_last_set_remainder_4 > 0) begin 
 				 case(num_of_bbox_in_last_set_remainder_4) 
-					 0: next_state = idle_st;
+					 //0: next_state = idle_st;
 					 1: next_state = select_pe1_st;
 					 2: next_state = select_pe2_st;
 					 3: next_state = select_pe3_st;

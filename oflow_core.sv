@@ -108,13 +108,14 @@ module oflow_core #() (
 	logic [`SET_LEN-1:0] counter_set_fe; // for counter_of_remain_bboxes in core_fsm_top	
 	logic done_fe; // done_fe of all fe's in use
 	logic [`PE_NUM] start_fe_i;
+	logic control_ready_new_set;
 	// core_fsm_registration
 	logic done_pe;
 	logic done_registration; // done_registration of all registration's in use
 	logic [`PE_NUM] start_registration_i;
 	logic [`SET_LEN-1:0] counter_set_registration;
 	// core_fsm_write
-	logic start_write;
+	
 	logic [`PE_LEN-1:0] num_of_bbox_in_last_set_div_4;
 	logic [`PE_LEN-1:0] num_of_bbox_in_last_set_remainder_4;
 	logic ready_from_core; // send from fsm core to fsm buffer
@@ -174,7 +175,7 @@ endgenerate
 
 
 // -----------------------------------------------------------       
-//                Instantiationslogic [`ID_LEN-1:0] id_out [`MAX_ROWS_IN_SCORE_BOARD-1:0] [`PE_NUM-1:0];
+//                Instantiations
 // -----------------------------------------------------------  
 
 
@@ -402,7 +403,7 @@ oflow_core_fsm_write oflow_core_fsm_write(
 	.num_of_bbox_in_last_set_remainder_4(num_of_bbox_in_last_set_remainder_4),
 	
 	//from genreal fsm in core (after conflict_resolve done)
-	.start_write (start_write),
+	.start_write (start_write_mem),
 	//from buffer 
 	//input logic done_write_buffer,//only after core fsm ready to fetch us the next 2 line of data ; we are going to add a wait state to cure this. the wait state has to be sure the buffer is done to writes 2 rows and now we can change the PE's
 
@@ -434,8 +435,10 @@ oflow_core_fsm_fe oflow_core_fsm_fe(
 	
 	// pe's
 	.done_fe_i (done_fe_i),
-	.start_fe_i (start_fe_i)
+	.start_fe_i (start_fe_i),
 	
+	.ready_new_set(ready_new_set),
+	.control_ready_new_set(control_ready_new_set)
 	);
 	
 oflow_core_fsm_registration oflow_core_fsm_registration(
@@ -470,7 +473,7 @@ oflow_core_fsm_top oflow_core_fsm_top(
 	.start (start), // from top
 	.new_set_from_dma (new_set_from_dma), // dma ready with new feature extraction set
 	.new_frame_from_dma (new_frame),
-	.ready_new_set (ready_new_set), // fsm_core_top ready for new_set from DMA
+	//.ready_new_set (ready_new_set), // fsm_core_top ready for new_set from DMA
 	.ready_new_frame (ready_new_frame), // fsm_core_top ready for new_frame from DMA
 	
 	
@@ -483,9 +486,11 @@ oflow_core_fsm_top oflow_core_fsm_top(
 	.num_of_bbox_in_last_set_remainder_4(num_of_bbox_in_last_set_remainder_4),
 	
 	//oflow_core_fsm_fe
+	.control_ready_new_set(control_ready_new_set),
 	.counter_set_fe (counter_set_fe), // for counter_of_remain_bboxes in core_fsm_top
 	.start_pe (start_pe),
 	.new_set (new_set), // will help to know if new_set in the frame is waiting
+	
 	
 	//oflow_core_fsm_registration
 	.done_pe (done_pe),

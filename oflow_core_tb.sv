@@ -197,8 +197,9 @@ begin
 
 	//==================== START FRAME 1================
 
+
+	@(posedge ready_new_frame);
 	num_of_bbox_in_frame = 24;
-	wait(ready_new_frame) ;
 	//wait(@(posedge ready_new_frame));	
 	
 	set_of_bboxes(8);
@@ -214,7 +215,8 @@ begin
 	//new_set_from_dma = 1'b1;
 	//@(posedge clk);
 	//new_set_from_dma = 1'b0;
-   
+	@(posedge ready_new_frame);
+	
 		
 end  
 endtask

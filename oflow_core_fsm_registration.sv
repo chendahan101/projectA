@@ -74,7 +74,7 @@ assign done_pe = (counter_set_registration == num_of_sets);
 	 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st ) counter_set_registration <= #1 0;
-		 else if (current_state ==  wait_st && next_state == registration_st) counter_set_registration <= #1 counter_set_registration + 1;
+		 else if (current_state ==  wait_st && (next_state == registration_st || next_state == idle_st)) counter_set_registration <= #1 counter_set_registration + 1;
 		 
 	  end
 
@@ -119,11 +119,14 @@ assign done_pe = (counter_set_registration == num_of_sets);
 					end
 				end
 					//generate_done_registration = (start_registration_i[counter_of_remain_bboxes-1:0] == done_registration_i[counter_of_remain_bboxes-1:0]);
-				else generate_done_registration = ( done_registration_i == {`PE_NUM{1'b1}} );
-				
-				if ( generate_done_registration || counter_set_registration == 1'b0)  begin
-				 next_state = registration_st;
+				else begin
+					generate_done_registration = ( done_registration_i == {`PE_NUM{1'b1}} );
+					if ( generate_done_registration || counter_set_registration == 0)  begin
+						next_state = registration_st;
+					 end
 				end
+				
+			
 		end
 		
 		 

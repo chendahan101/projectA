@@ -32,7 +32,9 @@ module oflow_core_fsm_fe #() (
 	
 	// pe's
 	input logic [`PE_NUM] done_fe_i,
-	output logic [`PE_NUM] start_fe_i 
+	output logic [`PE_NUM] start_fe_i,
+	output logic ready_new_set,
+	output logic control_ready_new_set
 	
 	
 );
@@ -45,6 +47,7 @@ module oflow_core_fsm_fe #() (
 
 logic [`PE_NUM-1:0] num_of_bbox_to_compare;
 logic generate_done_fe;
+logic control_ready_new_set;
 	
 typedef enum {idle_st,fe_st,wait_st} sm_type; 
 sm_type current_state;
@@ -74,6 +77,15 @@ assign done_fe = generate_done_fe;
 		 
 	  end
 
+	 //--------------------ready_new_set---------------------------------	
+
+	 
+	 always_ff @(posedge clk or negedge reset_N) begin
+		 if (!reset_N ) ready_new_set <= #1 1'b0;
+	//	 else if (( current_state ==  set_variables_st && next_state == pe_st) || ( counter_set_fe != counter_set_fe_prev && counter_of_remain_bboxes >= `PE_NUM)) ready_new_set <= #1 1'b1;
+		 else if (( control_ready_new_set && counter_of_remain_bboxes >= `PE_NUM)) ready_new_set <= #1 1'b1;
+		 else ready_new_set <= #1 1'b0;  
+	 end
 		 
  // -----------------------------------------------------------       
  //						FSM – Async Logic
@@ -82,7 +94,7 @@ assign done_fe = generate_done_fe;
 	 next_state = current_state;
 	 generate_done_fe = 1'b0; 
 	 start_fe_i = 0;
-
+	 control_ready_new_set = 1'b0;
 	 case (current_state)
 		 idle_st: begin
 			 next_state = start_pe ? fe_st: idle_st;	
@@ -115,11 +127,14 @@ assign done_fe = generate_done_fe;
 					 end 
 					//generate_done_fe = (start_fe_i[counter_of_remain_bboxes-1:0] == done_fe_i[counter_of_remain_bboxes-1:0]);
 				end	
-				else generate_done_fe = ( done_fe_i == {`PE_NUM{1'b1}} );
-				
-				if ( generate_done_fe && ( done_registration || counter_set_fe == 1'b0) ) begin
-				 next_state = fe_st;
+				else begin	
+					generate_done_fe = ( done_fe_i == {`PE_NUM{1'b1}} );
+					if ( (generate_done_fe && ( done_registration || counter_set_fe == 0))) begin
+						control_ready_new_set =1'b1;
+						next_state = fe_st;
+					 end
 				end
+				
 		end
 		
 		 
