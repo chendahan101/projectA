@@ -57,7 +57,7 @@ output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_inte
 	logic csb_1;
 	logic oeb;
 
-
+	logic read_new_line_reg;
  // fsm mem logic
 	logic start_new_frame;
 	logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_to_read;
@@ -99,6 +99,18 @@ always_ff @(posedge clk or negedge reset_N) begin
 		else csb_1 <= #1 (!rnw_st) ? !(ready_from_core) : 1'b1;
 end
 */	
+
+	always_ff @(posedge clk or negedge reset_N) begin
+		if (!reset_N) read_new_line_reg <= #1 0;
+		else read_new_line_reg <= #1 (read_new_line);
+	end
+	
+
+
+
+
+
+
 // -----------------------------------------------------------       
 //              Assign
 // -----------------------------------------------------------  
@@ -111,8 +123,29 @@ end
 	// assign valid_read_data = (!clk )& (!we);
 	
 	
-	assign csb_0 = (~rnw_st) ? ~(ready_from_core) : ~(read_new_line | start_read);// we add not cause csb is active low
+	//assign csb_0 = (~rnw_st) ? ~(ready_from_core) : ~(read_new_line | start_read);// we add not cause csb is active low
+	//assign csb_1 = (~rnw_st) ? ~(ready_from_core) : 1'b1;
+	assign csb_0 = (~rnw_st) ? ~(ready_from_core) : ~(read_new_line_reg | start_read);// we add not cause csb is active low
 	assign csb_1 = (~rnw_st) ? ~(ready_from_core) : 1'b1;
+
+
+
+/*	
+	always_ff @(posedge clk or negedge reset_N) begin
+		if (!reset_N) csb_0 <= #1 0;
+		else if(~rnw_st)	csb_0 <= #1 ~(ready_from_core);
+		else   csb_0 <= #1  ~(read_new_line | start_read); 
+	 end
+	
+	always_ff @(posedge clk or negedge reset_N) begin
+		if (!reset_N) csb_1 <= #1 0;
+		else if(~rnw_st)	csb_1 <= #1 ~(ready_from_core);
+		else   csb_1 <= #1   1'b1; 
+	 end
+	*/
+	
+	
+	
 	assign oeb = ~rnw_st;
 // -----------------------------------------------------------       
 //                Instantiations

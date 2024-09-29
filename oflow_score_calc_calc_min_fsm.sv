@@ -76,7 +76,7 @@ sm_type next_state;
 //                			last REG	
 // -----------------------------------------------------------
 	always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N) last <= #1 0;
+		if (!reset_N ) last <= #1 0;
 		else if (done_read) last <= #1 1;
 		else if (done_calc_min && last ) last <= #1 0;
 	end

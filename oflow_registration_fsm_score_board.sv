@@ -112,7 +112,7 @@ sm_type next_state;
 		end
 		
 		wait_first_frame_st: begin 
-			if (done_score_board && counter_first_frame_sets < num_of_sets-1) begin 
+			if (start_registration&& counter_first_frame_sets < num_of_sets-1) begin 
 				//start_score_board  =1'b1;
 				next_state = score_board_first_frame_st;
 			end

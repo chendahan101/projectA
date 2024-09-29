@@ -94,7 +94,7 @@ assign done_pe = (counter_set_registration == num_of_sets);
 		 
 		 registration_st: begin
 			 
-			 if((counter_set_registration < num_of_sets)&& (counter_set_registration==0||done_fe)) begin
+			 if((counter_set_registration < num_of_sets)&& (counter_set_registration==0||done_fe||(counter_set_registration == num_of_sets - 1 ))) begin
 				if( counter_set_registration == num_of_sets - 1 )
 					start_registration_i = {`PE_NUM{1'b1}} >> (`PE_NUM-counter_of_remain_bboxes);
 				else start_registration_i = {`PE_NUM{1'b1}};
@@ -121,7 +121,7 @@ assign done_pe = (counter_set_registration == num_of_sets);
 					//generate_done_registration = (start_registration_i[counter_of_remain_bboxes-1:0] == done_registration_i[counter_of_remain_bboxes-1:0]);
 				else begin
 					generate_done_registration = ( done_registration_i == {`PE_NUM{1'b1}} );
-					if ( generate_done_registration || counter_set_registration == 0)  begin
+					if ( generate_done_registration )  begin
 						next_state = registration_st;
 					 end
 				end

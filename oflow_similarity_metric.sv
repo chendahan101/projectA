@@ -91,7 +91,8 @@ module  oflow_similarity_metric(
 
 	logic [`COUNTER_SIZE-1:0] counter;
 	logic [`SCORE_LEN-1:0] score_reg;
-	
+	logic [`ID_LEN-1:0] id_reg;
+
 	logic [`AVG_WIDTH_AFTER_OF-1:0] color1_mult;
 	logic [`AVG_WIDTH_AFTER_OF-1:0] color2_mult;
 	logic [`AVG_WIDTH_AFTER_OF-1:0] iou_mult;
@@ -132,7 +133,7 @@ module  oflow_similarity_metric(
 	assign d_history_metric_pad = {d_history_metric, {10{1'b0}}}; // the len of metric will be +1 the feature:q6.10	
 
 	assign score = score_reg;
-	assign id = features_of_prev[`ID_LEN-1:0];
+	assign id = id_reg ;
 // -----------------------------------------------------------       
 //				Instantiation
 // -----------------------------------------------------------  
@@ -172,7 +173,11 @@ oflow_calc_iou oflow_calc_iou(
 		 if (!reset_N) score_reg <= #1 0;
 		 else if(valid)	score_reg <= #1 avg_similarity_metric[`AVG_INDEX];	// q  26.6
 	end			
-	 
+//--------------------id_reg---------------------------------	
+	 always_ff @(posedge clk or negedge reset_N) begin
+		 if (!reset_N) id_reg <= #1 0;
+		 else if(current_state == calc_st)	id_reg <= #1 		features_of_prev[`ID_LEN-1:0];	// q  26.6
+	end		 
  /*//--------------------start iou---------------------------------	
 		  always_ff @(posedge clk or negedge reset_N) begin
 			  if (!reset_N) start_iou <= #1 1'b0;

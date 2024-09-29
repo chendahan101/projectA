@@ -381,7 +381,7 @@ oflow_core_fsm_read oflow_core_fsm_read(
 		
 		.done_read (done_read), 
 		.done_registration (done_registration), 
-		.start_read_mem_for_first_set (!counter_set_registration), 
+		.start_read_mem_for_first_set (!counter_set_registration && (frame_num !=0 )), //in the first frame we don't need to read
 		.control_for_read_new_line (control_for_read_new_line_i),
 		
 		
