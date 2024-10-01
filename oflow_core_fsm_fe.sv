@@ -47,7 +47,7 @@ module oflow_core_fsm_fe #() (
 
 logic [`PE_NUM-1:0] num_of_bbox_to_compare;
 logic generate_done_fe;
-logic control_ready_new_set;
+//logic control_ready_new_set;
 	
 typedef enum {idle_st,fe_st,wait_st} sm_type; 
 sm_type current_state;

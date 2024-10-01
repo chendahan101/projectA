@@ -144,7 +144,7 @@ always_ff @(posedge clk or negedge reset_N) begin
 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st ) counter_row_sel <= #1 0;
-		 else  if( current_state == pe_sel_N_fill_lut_st && next_state == row_sel_st) counter_row_sel <= #1 counter_row_sel + 1 ;
+		 else  if( current_state == fill_hist_st && next_state == row_sel_st) counter_row_sel <= #1 counter_row_sel + 1 ;
 		 
 	  end	
 
@@ -336,8 +336,10 @@ always_ff @(posedge clk or negedge reset_N) begin
 					update_hist = 1'b1;
 					row_to_change = hist_reg_row[cur_data_lut_reg -1];
 					pe_to_change = hist_reg_pe[cur_data_lut_reg -1];
-					write_to_pointer = 1'b1;
-					data_to_score_board = 1'b1;
+					// if( hist_reg_min_score[cur_data_lut_reg-1] != {`SCORE_LEN{1'b1}} ) begin
+						write_to_pointer = 1'b1;
+						data_to_score_board = 1'b1;
+					// end	
 				end
 				else begin
 					write_to_pointer = 1'b1;
