@@ -188,6 +188,7 @@ begin
 	@(posedge clk);
 	new_set_from_dma = 1'b0;
 	
+	
 	//====================================
 
 
@@ -195,6 +196,7 @@ begin
 
 	//==================== START FRAME 1================
 
+	@(posedge ready_new_frame);
 	num_of_history_frames = 3;
 	num_of_bbox_in_frame = 70;
 	
@@ -238,6 +240,7 @@ begin
 	
 	//==================== START FRAME 2================
 
+	@(posedge ready_new_frame);
 	num_of_history_frames = 3;
 	num_of_bbox_in_frame = 72;
 	
@@ -281,6 +284,7 @@ begin
 	
 	//==================== START FRAME 3================
 
+	@(posedge ready_new_frame);
 	num_of_history_frames = 3;
 	num_of_bbox_in_frame = 74;
 	
@@ -383,7 +387,7 @@ endtask
 task set_of_bboxes_unfull_sets (input logic [`CM_CONCATE_LEN/2-1:0 ] x, input logic [`CM_CONCATE_LEN/2-1:0 ] num_of_bboxes_of_unfull_set);
 	begin
 	
-		for (i=0;i<24;i++) begin 
+		for (int i=0;i<24;i++) begin 
 			if( i == num_of_bboxes_of_unfull_set)
 				break;
 			set_of_bboxes_from_dma[i] = bbox(x,58+i,10,20,130,200);	

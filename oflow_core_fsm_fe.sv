@@ -33,6 +33,7 @@ module oflow_core_fsm_fe #() (
 	// pe's
 	input logic [`PE_NUM] done_fe_i,
 	output logic [`PE_NUM] start_fe_i,
+	//output logic [`PE_NUM] not_start_fe_i,
 	output logic ready_new_set,
 	output logic control_ready_new_set
 	
@@ -94,6 +95,7 @@ assign done_fe = generate_done_fe;
 	 next_state = current_state;
 	 generate_done_fe = 1'b0; 
 	 start_fe_i = 0;
+	 not_start_fe_i = 0;
 	 control_ready_new_set = 1'b0;
 	 case (current_state)
 		 idle_st: begin

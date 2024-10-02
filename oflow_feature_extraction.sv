@@ -25,6 +25,7 @@ module oflow_feature_extraction (
 	output logic [`COLOR_LEN-1:0] color2,
 	
 	// core_fsm
+	//input logic[`PE_LEN-1:0] num_of_pe,
 	input logic done_pe,
 	input logic start_fe,
 	output logic done_fe
@@ -65,12 +66,12 @@ module oflow_feature_extraction (
 	
 	always_comb 
 	begin
-	 position_tl = bbox[`BBOX_VECTOR_SIZE-1:`BBOX_VECTOR_SIZE-`POSTION_TL_LEN];
-	 position_br = {position_tl[`POSTION_TL_LEN-1:`POSTION_TL_LEN-`CM_LEN] + width_tmp, position_tl[`POSTION_TL_LEN-`CM_LEN-1:0] + height_tmp};
-	 x_cm = position_br[`POSTION_BR_LEN-1:`POSTION_BR_LEN-`CM_LEN] >> 1;
-	 y_cm = position_br[`POSTION_BR_LEN-`CM_LEN-1:0] >> 1;
-	 position_concate_tmp = {position_tl, position_br} ;
-	 cm_concate_tmp = {x_cm, y_cm};
+		 position_tl = bbox[`BBOX_VECTOR_SIZE-1:`BBOX_VECTOR_SIZE-`POSTION_TL_LEN];
+		 position_br = {position_tl[`POSTION_TL_LEN-1:`POSTION_TL_LEN-`CM_LEN] + width_tmp, position_tl[`POSTION_TL_LEN-`CM_LEN-1:0] + height_tmp};
+		 x_cm = position_br[`POSTION_BR_LEN-1:`POSTION_BR_LEN-`CM_LEN] >> 1;
+		 y_cm = position_br[`POSTION_BR_LEN-`CM_LEN-1:0] >> 1;
+		 position_concate_tmp = {position_tl, position_br} ;
+		 cm_concate_tmp = {x_cm, y_cm};
 	end	
 	
 	assign color1_tmp = bbox[`COLOR1_MSB_IN_BBOX-1:`COLOR1_MSB_IN_BBOX-`COLOR_LEN];

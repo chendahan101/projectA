@@ -107,12 +107,12 @@ module oflow_core #() (
 	// core_fsm_fe
 	logic [`SET_LEN-1:0] counter_set_fe; // for counter_of_remain_bboxes in core_fsm_top	
 	logic done_fe; // done_fe of all fe's in use
-	logic [`PE_NUM] start_fe_i;
+	logic [`PE_NUM-1:0] start_fe_i;
 	logic control_ready_new_set;
 	// core_fsm_registration
 	logic done_pe;
 	logic done_registration; // done_registration of all registration's in use
-	logic [`PE_NUM] start_registration_i;
+	logic [`PE_NUM-1:0] start_registration_i;
 	logic [`SET_LEN-1:0] counter_set_registration;
 	// core_fsm_write
 	
@@ -517,4 +517,5 @@ oflow_core_fsm_top oflow_core_fsm_top(
 	.valid_id(valid_id)
 	
 	);
+
 endmodule
