@@ -76,9 +76,10 @@ module oflow_core #() (
 	logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frame_to_interface;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 	
 	// logics for outputs of PE
-	logic [`PE_NUM] done_fe_i;
-	logic [`PE_NUM] done_registration_i; 
-	logic [`PE_NUM] control_for_read_new_line_i;
+	logic [`PE_NUM-1:0] done_fe_i;
+	logic [`PE_NUM-1:0] done_registration_i;
+	logic [`PE_NUM-1:0] done_score_calc_i; // for parallel score_calc & score_board
+	logic [`PE_NUM-1:0] control_for_read_new_line_i;
 	logic [`FEATURE_OF_PREV_LEN -1:0 ]data_out_pe [`PE_NUM];
 	logic [`ID_LEN-1:0] id_out[`PE_NUM][`MAX_ROWS_IN_SCORE_BOARD];
 		
@@ -108,14 +109,16 @@ module oflow_core #() (
 	logic [`SET_LEN-1:0] counter_set_fe; // for counter_of_remain_bboxes in core_fsm_top	
 	logic done_fe; // done_fe of all fe's in use
 	logic [`PE_NUM-1:0] start_fe_i;
+	logic [`PE_NUM-1:0] not_start_fe_i;
 	logic control_ready_new_set;
 	// core_fsm_registration
 	logic done_pe;
 	logic done_registration; // done_registration of all registration's in use
+	logic done_score_calc; // for parallel score_calc & score_board
 	logic [`PE_NUM-1:0] start_registration_i;
+	logic [`PE_NUM-1:0] not_start_registration_i;
 	logic [`SET_LEN-1:0] counter_set_registration;
 	// core_fsm_write
-	
 	logic [`PE_LEN-1:0] num_of_bbox_in_last_set_div_4;
 	logic [`PE_LEN-1:0] num_of_bbox_in_last_set_remainder_4;
 	logic ready_from_core; // send from fsm core to fsm buffer
@@ -208,10 +211,13 @@ generate
 			.num_of_sets (num_of_sets), 
 			.frame_num(frame_num),
 			.start_fe (start_fe_i[i]),
+			.not_start_fe(not_start_fe_i[i]),
 			.start_registration(start_registration_i[i]),
+			.not_start_registration(not_start_registration_i[i]),
 			.done_pe (done_pe),
 			.done_fe (done_fe_i[i]),
 			.done_registration (done_registration_i[i]), 
+			.done_score_calc (done_score_calc_i[i]), // for parallel score_calc & score_board
 			.control_for_read_new_line (control_for_read_new_line_i[i]), // we want to start read new line after 2 cycles before the end; control_for_read_new_line_0 && ( control_for_read_new_line_1  || (~ |ID1)) 
 			
 
@@ -381,7 +387,8 @@ oflow_core_fsm_read oflow_core_fsm_read(
 		
 		.done_read (done_read), 
 		.done_registration (done_registration), 
-		.start_read_mem_for_first_set (!counter_set_registration && (frame_num !=0 )), //in the first frame we don't need to read
+		.done_score_calc(done_score_calc),
+		.start_read_mem_for_first_set (!counter_set_registration && (frame_num !=0 ) && (start_pe)), //in the first frame we don't need to read
 		.control_for_read_new_line (control_for_read_new_line_i),
 		
 		
@@ -425,17 +432,20 @@ oflow_core_fsm_fe oflow_core_fsm_fe(
 	.start_pe (start_pe),
 	.counter_of_remain_bboxes (counter_of_remain_bboxes), // will help us to choose how many pe to activate because sometimes current #bboxes_in_set < 24
 	.new_set (new_set), // will help to know if new_set in the frame is waiting
+	.frame_num(frame_num),
 	//output logic [`SET_LEN] counter_set_fe - need to check if need this because we draw it in module but we forgot
 	.counter_set_fe (counter_set_fe), // for counter_of_remain_bboxes in core_fsm_top
 	
 	//oflow_core_fsm_registration
 	.done_registration (done_registration),
+	.done_score_calc (done_score_calc),
 	.done_fe (done_fe), // done_fe of all fe's in use
 	
 	
 	// pe's
 	.done_fe_i (done_fe_i),
 	.start_fe_i (start_fe_i),
+	.not_start_fe_i(not_start_fe_i),
 	
 	.ready_new_set(ready_new_set),
 	.control_ready_new_set(control_ready_new_set)
@@ -448,17 +458,19 @@ oflow_core_fsm_registration oflow_core_fsm_registration(
 	//fsm_core_top
 	.num_of_sets (num_of_sets), 
 	.counter_of_remain_bboxes (counter_of_remain_bboxes), // will help us to choose how many pe to activate because sometimes current #bboxes_in_set < 24
+	.frame_num(frame_num),
 	.done_pe (done_pe),
 	
 	
 	//oflow_core_fsm_fe
 	.done_fe (done_fe),
 	.done_registration (done_registration), // done_registration of all registration's in use
-	
+	.done_score_calc(done_score_calc),
 	// pe's
 	.done_registration_i (done_registration_i),
+	.done_score_calc_i(done_score_calc_i),
 	.start_registration_i (start_registration_i),
-	
+	.not_start_registration_i(not_start_registration_i),
 	// oflow_core_fsm_read
 	.counter_set_registration (counter_set_registration)	
 

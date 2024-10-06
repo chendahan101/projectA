@@ -34,10 +34,14 @@ module  oflow_pe(
 			input logic [`SET_LEN-1:0] num_of_sets, 
 			input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num,
 			input logic start_fe,
+			input logic not_start_fe,
+			
 			input logic start_registration,
+			input logic not_start_registration,
 			input logic done_pe,
 			output logic done_fe,
-			output logic done_registration, 
+			output logic done_registration,
+			output logic done_score_calc,
 			output logic control_for_read_new_line, // the similarity_metric will update this to AND of similarity_metric_0 & similarity_metric_1 in the registration
 			
 
@@ -93,6 +97,7 @@ oflow_feature_extraction oflow_feature_extraction(
 	
 	.done_pe(done_pe),
 	.start_fe (start_fe), // feature_extraction enable 
+	.not_start_fe(not_start_fe), // for not full sets
 	.done_fe   (done_fe),
 	
 	// dma
@@ -129,7 +134,9 @@ oflow_registration oflow_registration(
 	.num_of_sets(num_of_sets),
 	.frame_num(frame_num),
 	.start_registration(start_registration),
+	.not_start_registration(not_start_registration),
 	.done_registration(done_registration), 
+	.done_score_calc(done_score_calc),
 	.control_for_read_new_line(control_for_read_new_line), // we want to start read new line after 2 cycles before the end
 
 	// interface between buffer&pe

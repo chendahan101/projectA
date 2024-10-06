@@ -28,6 +28,7 @@ module oflow_core_fsm_read #() (
 	//control signals
 	input logic done_read, // from fsm buffer read
 	input logic done_registration, // from registration (after set done)
+	input logic done_score_calc,
 	input logic start_read_mem_for_first_set, //its not enough to know that this is the first set of the frame, we also need to know that the similarity_metric is starting
 	input logic  [`PE_NUM-1:0] control_for_read_new_line,//from all similarity_metrics (to read new line)
 
@@ -109,7 +110,7 @@ sm_type next_state;
 		end_read_st: begin 
 		
 			stop_counter = num_of_sets;
-			 if ((counter_set_registration < stop_counter-1) && done_registration) begin 
+			 if ((counter_set_registration < stop_counter-1) && done_score_calc) begin 
 				 next_state = start_read_st;
 			end
 			else if(counter_set_registration == stop_counter-1) next_state = idle_st;			

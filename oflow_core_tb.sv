@@ -286,7 +286,7 @@ begin
 
 	@(posedge ready_new_frame);
 	num_of_history_frames = 3;
-	num_of_bbox_in_frame = 74;
+	num_of_bbox_in_frame = 70;
 	
 
 	//====================================
@@ -321,7 +321,9 @@ begin
 	new_set_from_dma = 1'b0;
 	
 	//====================================
-		
+	
+	@(posedge ready_new_frame);
+	
 end  
 endtask
 

@@ -28,6 +28,7 @@ module oflow_feature_extraction (
 	//input logic[`PE_LEN-1:0] num_of_pe,
 	input logic done_pe,
 	input logic start_fe,
+	input logic not_start_fe,
 	output logic done_fe
 	
 	);
@@ -170,8 +171,11 @@ sm_type next_state, current_state;
  
 		wait_st: begin 
 			done_fe = 1'b1;
-			 if (start_fe)  next_state = fe_st;
-			 else if (done_pe)  next_state = idle_st;
+			 if (start_fe) begin
+				 next_state = fe_st;
+				 //done_fe = 1'b1;
+			 end
+			 else if (done_pe || not_start_fe)  next_state = idle_st;
 
 			
 		 end

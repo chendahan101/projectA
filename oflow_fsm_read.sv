@@ -42,6 +42,7 @@ module oflow_fsm_read #() (
 
 logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] counter_of_history_frames_reg;
 logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] max_frames_to_read;
+logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_to_read_reg;
 
 logic [`OFFSET_WIDTH-1:0] counter_offset;
 logic new_frame_to_read;
@@ -52,7 +53,11 @@ sm_type current_state;
 sm_type next_state;
 
 
+// -----------------------------------------------------------       
+//                 Assignments
+// -----------------------------------------------------------  
 
+assign frame_to_read = frame_to_read_reg;
 
 // -----------------------------------------------------------       
 //                FSM synchronous procedural block.	
@@ -75,8 +80,13 @@ sm_type next_state;
 	 else if(current_state ==  idle_st || new_frame_to_read)	counter_offset <= #1 0;
 	 else if (current_state ==  offset_st && similarity_metric_flag_ready_to_read_new_line ) counter_offset <= #1 counter_offset + 1; 
   end
-	  
-	 
+
+ //--------------------frame_to_read_reg---------------------------------		  
+ always_ff @(posedge clk or negedge reset_N) begin
+	 if (!reset_N ) frame_to_read_reg <= #1 0;
+	 else if(current_state ==  idle_st) frame_to_read_reg <= frame_num - 1;
+	 else  frame_to_read_reg <= (counter_offset ==  end_pointers[frame_to_read_reg % num_of_history_frames]) ? (frame_num - (counter_of_history_frames_reg+1) - 1) :  (frame_num - counter_of_history_frames_reg - 1);
+  end	 
 	 
  // -----------------------------------------------------------       
  //						FSM – Async Logic
@@ -84,7 +94,7 @@ sm_type next_state;
  always_comb begin
 	 next_state = current_state;
 	 new_frame_to_read = 0;
-	 frame_to_read = frame_num-1;
+	// frame_to_read = frame_num-1;
 	 done_read = 0;
 	 case (current_state)
 		 idle_st: begin
@@ -109,9 +119,9 @@ sm_type next_state;
 
 		 
 		 offset_st: begin 
-			 frame_to_read =  (counter_offset ==  end_pointers[frame_to_read % num_of_history_frames]) ? (frame_num - (counter_of_history_frames_reg+1) - 1) :  (frame_num - counter_of_history_frames_reg - 1);
+			 //frame_to_read =  (counter_offset ==  end_pointers[frame_to_read % num_of_history_frames]) ? (frame_num - (counter_of_history_frames_reg+1) - 1) :  (frame_num - counter_of_history_frames_reg - 1);
 			 
-			 if ( (counter_offset == end_pointers[frame_to_read % num_of_history_frames])  ||  (end_pointers[frame_to_read % num_of_history_frames]==0)) begin //end to read one frame
+			 if ( (counter_offset == (end_pointers[frame_to_read_reg % num_of_history_frames] ))  ||  (end_pointers[frame_to_read_reg % num_of_history_frames]==0)) begin //end to read one frame
 				 next_state = frame_st;
 				 new_frame_to_read = 1;
 			end
@@ -122,7 +132,7 @@ sm_type next_state;
 	 endcase
  end
 	  
-	assign offset_0 = (counter_offset < end_pointers[frame_to_read % num_of_history_frames]) ? counter_offset : 0;
+	assign offset_0 = (counter_offset < end_pointers[frame_to_read_reg % num_of_history_frames]) ? counter_offset : 0;
 	assign offset_1 = 0;
 	assign counter_of_history_frame_to_interface = counter_of_history_frames_reg;
 	//assign we = 0;

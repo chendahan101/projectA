@@ -20,6 +20,7 @@ module oflow_registration_fsm_score_calc #() (
 
 	//fsm core registration
 	input logic start_registration,// 
+	input logic not_start_registration,
 	//score calc
 	input logic done_score_calc,
 	output logic start_score_calc,
@@ -80,7 +81,7 @@ sm_type next_state;
 		 end
 		 
 		 score_calc_st: begin
-		
+			
 			next_state = wait_st;
 			start_score_calc = 1'b1; 
 		 end
@@ -88,11 +89,11 @@ sm_type next_state;
  
 		wait_st: begin 
 			
-			if ( done_score_calc && counter_of_sets < num_of_sets - 1) begin 
-				
+			//if ( done_score_calc && counter_of_sets < num_of_sets - 1) begin 
+			if (start_registration) begin
 				next_state = score_calc_st;
 			end
-			else if ( done_score_calc && counter_of_sets == num_of_sets - 1 ) begin 
+			else if ( (done_score_calc && counter_of_sets == num_of_sets - 1) || not_start_registration) begin 
 					next_state = idle_st;
 			end 
 

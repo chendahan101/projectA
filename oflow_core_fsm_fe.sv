@@ -22,18 +22,20 @@ module oflow_core_fsm_fe #() (
 	input logic start_pe,
 	input logic [`REMAIN_BBOX_LEN-1:0] counter_of_remain_bboxes, // will help us to choose how many pe to activate because sometimes current #bboxes_in_set < 24
 	input logic new_set, // will help to know if new_set in the frame is waiting
+	input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num,
 	//output logic [`SET_LEN] counter_set_fe - need to check if need this because we draw it in module but we forgot
 	output logic [`SET_LEN-1:0] counter_set_fe, // for counter_of_remain_bboxes in core_fsm_top
 	
 	//oflow_core_fsm_registration
 	input logic done_registration,
+	input logic done_score_calc,
 	output logic done_fe, // done_fe of all fe's in use
 	
 	
 	// pe's
-	input logic [`PE_NUM] done_fe_i,
-	output logic [`PE_NUM] start_fe_i,
-	//output logic [`PE_NUM] not_start_fe_i,
+	input logic [`PE_NUM-1:0] done_fe_i,
+	output logic [`PE_NUM-1:0] start_fe_i,
+	output logic [`PE_NUM-1:0] not_start_fe_i,
 	output logic ready_new_set,
 	output logic control_ready_new_set
 	
@@ -108,9 +110,14 @@ assign done_fe = generate_done_fe;
 			 if((counter_set_fe < num_of_sets)&& (new_set || counter_set_fe==0) ) begin
 				
 				//if( counter_of_remain_bboxes < `PE_NUM )
-				if( counter_set_fe == num_of_sets - 1 )
+				if( counter_set_fe == num_of_sets - 1 ) begin
 					start_fe_i = {`PE_NUM{1'b1}} >> (`PE_NUM-counter_of_remain_bboxes);
-				else start_fe_i = {`PE_NUM{1'b1}};
+					not_start_fe_i = ~ start_fe_i;
+				end	
+				else begin 
+					start_fe_i = {`PE_NUM{1'b1}};
+					//not_start_fe_i = {`PE_NUM{1'b0}};
+				end	
 				next_state = wait_st;
 			end
 		
@@ -131,7 +138,7 @@ assign done_fe = generate_done_fe;
 				end	
 				else begin	
 					generate_done_fe = ( done_fe_i == {`PE_NUM{1'b1}} );
-					if ( (generate_done_fe && ( done_registration || counter_set_fe == 0))) begin
+					if ( (generate_done_fe && ( ( (done_registration&&frame_num==0)||(done_score_calc&&frame_num!=0) )  || counter_set_fe == 0))) begin
 						control_ready_new_set =1'b1;
 						next_state = fe_st;
 					 end

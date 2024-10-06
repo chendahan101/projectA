@@ -17,7 +17,7 @@
 `define INSTANCES_LEN 4
 
 
-module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 10 ) (
+module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 100 ) (
 	
 	input logic clk,
 	input logic reset_N,
@@ -172,7 +172,7 @@ always_ff @(posedge clk or negedge reset_N) begin
 	 
 	 
 //--------------------cur_data_lut_reg---------------------------------	
-	assign old_data_lut = (column_lut)? data_out_lut_for_fsm[7:0] : data_out_lut_for_fsm[15:8]  ;
+	assign old_data_lut = (column_lut)? data_out_lut_for_fsm[7:0] : data_out_lut_for_fsm[15:8] ;
 	
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N ) cur_data_lut_reg <= #1 0;

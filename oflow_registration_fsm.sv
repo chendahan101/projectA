@@ -23,6 +23,7 @@ module oflow_registration_fsm #() (
 	input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num, // counter for frame_num
 	input logic [`SET_LEN-1:0] num_of_sets, 
 	input logic  start_registration,
+	input logic not_start_registration,
 
 	//score calc
 	input logic done_score_calc,
@@ -87,6 +88,7 @@ oflow_registration_fsm_score_calc oflow_registration_fsm_score_calc(
 	.num_of_sets(num_of_sets), 
 	
 	.start_registration(start_registration), 
+	.not_start_registration(not_start_registration),
 	.done_score_calc(done_score_calc),
 	.start_score_calc(start_score_calc),
 	

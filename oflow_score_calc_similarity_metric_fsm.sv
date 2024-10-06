@@ -106,11 +106,17 @@ sm_type next_state;
 		 end
 		 
 		 similarity_metric_st: begin
-			if (flg_start_similarity_metric) begin
-				 start_similarity_metric_0 = 1;
-				 start_similarity_metric_1 = |(id_1);
-			end	 
-			next_state = wait_st;
+			 if (last) begin 
+				 //done_score_calc = 1;
+				 next_state = idle_st;			
+			end
+			else begin
+				 if (flg_start_similarity_metric) begin
+					 start_similarity_metric_0 = 1;
+					 start_similarity_metric_1 = |(id_1);
+				end	 
+				next_state = wait_st;
+			end
 			
 		 end
 		 
@@ -120,7 +126,7 @@ sm_type next_state;
 			
 				next_state = similarity_metric_st;			
 			end
-			else if (done_similarity_metric && last) begin 
+			else if (done_similarity_metric && last) begin // for backup condition to idle
 				//done_score_calc = 1;
 				next_state = idle_st;			
 			end

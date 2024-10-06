@@ -65,7 +65,9 @@ module  oflow_registration(
 	input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num, // counter for frame_num
 	input logic [`SET_LEN-1:0] num_of_sets, 
 	input logic  start_registration,
+	input logic not_start_registration,
 	output logic done_registration, 
+	output logic done_score_calc,
 	
 	//PE
 	input logic [`PE_LEN-1:0] num_of_pe,
@@ -96,7 +98,7 @@ module  oflow_registration(
 	 logic [`ID_LEN-1:0] min_id_0; // id_0 of min score_0 
 	 logic [`SCORE_LEN-1:0] min_score_1; // min_score_1
 	 logic [`ID_LEN-1:0] min_id_1; // id_1 of min score_1
-	 logic done_score_calc;
+	// logic done_score_calc;
 	 logic start_score_calc;
 	 
 
@@ -125,6 +127,15 @@ module  oflow_registration(
 	logic [`FEATURE_EXTRACTION_ONLY-1:0] data_out;
 	//logic [`FEATURE_OF_PREV_LEN-1:0] data_out_1;
 	
+	
+	// fe registers
+	 logic [`CM_CONCATE_LEN-1:0] cm_concate_cur_reg;
+	 logic [`POSITION_CONCATE_LEN-1:0] position_concate_cur_reg;
+	 logic [`WIDTH_LEN-1:0] width_cur_reg;
+	 logic [`HEIGHT_LEN-1:0] height_cur_reg;
+	 logic [`COLOR_LEN-1:0] color1_cur_reg;
+	 logic [`COLOR_LEN-1:0] color2_cur_reg;
+			
 // -----------------------------------------------------------       
 //				Assignments
 // ----------------------------------------------------------- 
@@ -135,29 +146,75 @@ assign min_score_1_to_score_board = (frame_num) ? min_score_1 : 0;
 assign min_id_1_to_score_board = (frame_num) ? min_id_1 : 0;
 
 assign data_out_pe = {data_out, id_to_buffer};
-assign data_in = {cm_concate_cur, position_concate_cur, width_cur, height_cur,
-					color1_cur, color2_cur};
+assign data_in = {cm_concate_cur_reg, position_concate_cur_reg, width_cur_reg, height_cur_reg,
+		color1_cur_reg, color2_cur_reg};
 
-assign we = start_registration;
+//assign we = start_registration;
+assign we = start_score_board;
 //assign oe_0 = ~we; 					
 				
 assign addr = (we) ? row_sel_by_set : row_sel_to_pe;	
 
 assign done_registration = done_score_board;			
+
+
+//--------------------cm_concate_cur---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N ) cm_concate_cur_reg <= #1 0;
+	else  if( start_registration) cm_concate_cur_reg <= #1 cm_concate_cur ;
+	
+ end	
+
+//--------------------position_concate_cur---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N ) position_concate_cur_reg <= #1 0;
+	else  if( start_registration) position_concate_cur_reg <= #1 position_concate_cur ;
+	
+ end		
+//--------------------width_cur---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N ) width_cur_reg <= #1 0;
+	else  if( start_registration) width_cur_reg <= #1 width_cur ;
+	
+ end		
+//--------------------height_cur---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N ) height_cur_reg <= #1 0;
+	else  if( start_registration) height_cur_reg <= #1 height_cur ;
+	
+ end		
+//--------------------color1_cur---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N ) color1_cur_reg <= #1 0;
+	else  if( start_registration) color1_cur_reg <= #1 color1_cur ;
+	
+ end	
+//--------------------color2_cur---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N ) color2_cur_reg <= #1 0;
+	else  if( start_registration) color2_cur_reg <= #1 color2_cur ;
+	
+ end	
 // -----------------------------------------------------------       
-//				Instanciation
+//				Instantiation
 // ----------------------------------------------------------- 
  
 oflow_score_calc oflow_score_calc (
 	.clk(clk),
 	.reset_N(reset_N),
 	.start_score_calc(start_score_calc),
-	.cm_concate_cur(cm_concate_cur),
-	.position_concate_cur(position_concate_cur),
-	.width_cur(width_cur),
-	.height_cur(height_cur),
-	.color1_cur(color1_cur),
-	.color2_cur(color2_cur),
+	.cm_concate_cur(cm_concate_cur_reg),
+	.position_concate_cur(position_concate_cur_reg),
+	.width_cur(width_cur_reg),
+	.height_cur(height_cur_reg),
+	.color1_cur(color1_cur_reg),
+	.color2_cur(color2_cur_reg),
 	.done_read(done_read),
 	.data_to_similarity_metric_0(data_to_similarity_metric_0),
 	.data_to_similarity_metric_1(data_to_similarity_metric_1),
@@ -204,6 +261,7 @@ oflow_registration_fsm oflow_registration_fsm (
 	.frame_num(frame_num),
 	.num_of_sets(num_of_sets),
 	.start_registration(start_registration),
+	.not_start_registration(not_start_registration),
 	.done_score_calc(done_score_calc),
 	.start_score_calc(start_score_calc),
 	.done_score_board(done_score_board),
