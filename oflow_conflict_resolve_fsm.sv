@@ -276,32 +276,7 @@ always_ff @(posedge clk or negedge reset_N) begin
 				next_state = idle_st;
 			end
 			else begin
-					/*if (counter_pe_sel == `PE_NUM) begin
-						next_state = row_sel_st; 
-					end
-					else  begin
-						
-					
-						if(!(data_out_flag & mask_flag)) begin
-							
-							data_in_flag =  (data_out_flag & ~mask_flag) | (( 2'b11) & mask_flag); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
-							
-							
-							the_mask_side = (!data_out_flag) ? 0: (data_out_lut_for_fsm & ~mask_lut);
-							
-							data_in_lut =  (the_mask_side) | ((counter_hist+1)<<( (column_lut) ? 0 : 8 ) & mask_lut); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
-						end	
-						//next_state = fill_hist_st; 
-						//we_lut = 1'b1;
-					end
-					if (counter_state==1) begin 
-						we_lut = 1'b1;
-						next_state = fill_hist_st; 
-					end
-					*/
-
-		
-			
+				
 				if(!(data_out_flag & mask_flag)) begin
 					
 					if (counter_state==1) begin 
@@ -309,13 +284,13 @@ always_ff @(posedge clk or negedge reset_N) begin
 						next_state = fill_hist_st; 
 					end
 						
-						data_in_flag =  (data_out_flag & ~mask_flag) | (( 2'b11) & mask_flag); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
-						
-						
-						
-						the_mask_side = (!data_out_flag) ? 0: (data_out_lut_for_fsm & ~mask_lut);
-						
-						data_in_lut =  (the_mask_side) | ((counter_hist+1)<<( (column_lut) ? 0 : 8 ) & mask_lut); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
+					data_in_flag =  (data_out_flag & ~mask_flag) | (( 2'b11) & mask_flag); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
+					
+					
+					
+					the_mask_side = (!data_out_flag) ? 0: (data_out_lut_for_fsm & ~mask_lut);
+					
+					data_in_lut =  (the_mask_side) | ((counter_hist+1)<<( (column_lut) ? 0 : 8 ) & mask_lut); // we_lut add 1 to hist_counter because it doesnt update yet. and we_lut dont want start from 0 because it indicate that this is the first time this id
 				end	
 					//next_state = fill_hist_st; 
 					//we_lut = 1'b1;
@@ -326,8 +301,6 @@ always_ff @(posedge clk or negedge reset_N) begin
 		end
 		
 		fill_hist_st: begin 
-			
-			
 			
 			if( hist_reg_instances[cur_data_lut_reg-1] != 0 ) begin
 					
@@ -345,9 +318,11 @@ always_ff @(posedge clk or negedge reset_N) begin
 					write_to_pointer = 1'b1;
 					data_to_score_board = 1'b1;
 				end
-			
-				
+					
 			end	
+			else update_hist = 1'b1;
+			
+			
 			if( hist_reg_instances[cur_data_lut_reg -1] >= MAX_CONFLICTS_TH ) begin
 				done_cr = 1'b1;
 				th_conflict_flg = 1'b1;

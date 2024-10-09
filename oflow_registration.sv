@@ -63,7 +63,10 @@ module  oflow_registration(
 	//fsm registration
 	// core
 	input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num, // counter for frame_num
+	input logic ready_new_set, //for sampled the outputs of feature_extraction for the registration
+	input logic flg_for_sampling_last_set, //for sampled the outputs of feature_extraction for the registration
 	input logic [`SET_LEN-1:0] num_of_sets, 
+	input logic done_fe,
 	input logic  start_registration,
 	input logic not_start_registration,
 	output logic done_registration, 
@@ -135,6 +138,8 @@ module  oflow_registration(
 	 logic [`HEIGHT_LEN-1:0] height_cur_reg;
 	 logic [`COLOR_LEN-1:0] color1_cur_reg;
 	 logic [`COLOR_LEN-1:0] color2_cur_reg;
+	 
+	 logic sample_feature_extraction_data_out; //for sampled the outputs of feature_extraction for the registration
 			
 // -----------------------------------------------------------       
 //				Assignments
@@ -155,6 +160,7 @@ assign we = start_score_board;
 				
 assign addr = (we) ? row_sel_by_set : row_sel_to_pe;	
 
+assign sample_feature_extraction_data_out =( ( (frame_num == 0) && start_registration) ) || ( (frame_num != 0) && ( ready_new_set || (flg_for_sampling_last_set&&start_registration) ) );
 assign done_registration = done_score_board;			
 
 
@@ -162,7 +168,7 @@ assign done_registration = done_score_board;
 
 always_ff @(posedge clk or negedge reset_N) begin
 	if (!reset_N ) cm_concate_cur_reg <= #1 0;
-	else  if( start_registration) cm_concate_cur_reg <= #1 cm_concate_cur ;
+	else  if( sample_feature_extraction_data_out ) cm_concate_cur_reg <= #1 cm_concate_cur ;
 	
  end	
 
@@ -170,35 +176,35 @@ always_ff @(posedge clk or negedge reset_N) begin
 
 always_ff @(posedge clk or negedge reset_N) begin
 	if (!reset_N ) position_concate_cur_reg <= #1 0;
-	else  if( start_registration) position_concate_cur_reg <= #1 position_concate_cur ;
+	else  if( sample_feature_extraction_data_out ) position_concate_cur_reg <= #1 position_concate_cur ;
 	
  end		
 //--------------------width_cur---------------------------------	
 
 always_ff @(posedge clk or negedge reset_N) begin
 	if (!reset_N ) width_cur_reg <= #1 0;
-	else  if( start_registration) width_cur_reg <= #1 width_cur ;
+	else  if( sample_feature_extraction_data_out ) width_cur_reg <= #1 width_cur ;
 	
  end		
 //--------------------height_cur---------------------------------	
 
 always_ff @(posedge clk or negedge reset_N) begin
 	if (!reset_N ) height_cur_reg <= #1 0;
-	else  if( start_registration) height_cur_reg <= #1 height_cur ;
+	else  if( sample_feature_extraction_data_out ) height_cur_reg <= #1 height_cur ;
 	
  end		
 //--------------------color1_cur---------------------------------	
 
 always_ff @(posedge clk or negedge reset_N) begin
 	if (!reset_N ) color1_cur_reg <= #1 0;
-	else  if( start_registration) color1_cur_reg <= #1 color1_cur ;
+	else  if( sample_feature_extraction_data_out ) color1_cur_reg <= #1 color1_cur ;
 	
  end	
 //--------------------color2_cur---------------------------------	
 
 always_ff @(posedge clk or negedge reset_N) begin
 	if (!reset_N ) color2_cur_reg <= #1 0;
-	else  if( start_registration) color2_cur_reg <= #1 color2_cur ;
+	else  if( sample_feature_extraction_data_out ) color2_cur_reg <= #1 color2_cur ;
 	
  end	
 // -----------------------------------------------------------       

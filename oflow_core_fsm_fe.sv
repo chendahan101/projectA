@@ -37,8 +37,9 @@ module oflow_core_fsm_fe #() (
 	output logic [`PE_NUM-1:0] start_fe_i,
 	output logic [`PE_NUM-1:0] not_start_fe_i,
 	output logic ready_new_set,
-	output logic control_ready_new_set
+	output logic control_ready_new_set,
 	
+	output logic flg_for_sampling_last_set // for sampling the outputs of feature_extraction to be stable while registration
 	
 );
 
@@ -51,6 +52,7 @@ module oflow_core_fsm_fe #() (
 logic [`PE_NUM-1:0] num_of_bbox_to_compare;
 logic generate_done_fe;
 //logic control_ready_new_set;
+logic flg_for_sampling_last_set_prev;
 	
 typedef enum {idle_st,fe_st,wait_st} sm_type; 
 sm_type current_state;
@@ -62,6 +64,7 @@ sm_type next_state;
 
 assign done_fe = generate_done_fe;
 
+//assign flg_for_sampling_last_set = (current_state == idle_st);
 
 // -----------------------------------------------------------       
 //                FSM synchronous procedural block.	
@@ -80,16 +83,33 @@ assign done_fe = generate_done_fe;
 		 
 	  end
 
-	 //--------------------ready_new_set---------------------------------	
+ //--------------------ready_new_set---------------------------------	
 
-	 
+ 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N ) ready_new_set <= #1 1'b0;
 	//	 else if (( current_state ==  set_variables_st && next_state == pe_st) || ( counter_set_fe != counter_set_fe_prev && counter_of_remain_bboxes >= `PE_NUM)) ready_new_set <= #1 1'b1;
 		 else if (( control_ready_new_set && counter_of_remain_bboxes >= `PE_NUM)) ready_new_set <= #1 1'b1;
 		 else ready_new_set <= #1 1'b0;  
 	 end
+	 
+ //--------------------flg_for_sampling_last_set_prev---------------------------------	
+
+ 
+	 always_ff @(posedge clk or negedge reset_N) begin
+		 if (!reset_N || current_state ==  idle_st && next_state == fe_st) flg_for_sampling_last_set_prev <= #1 1'b0;
+		 else if (current_state ==  wait_st && next_state == idle_st) flg_for_sampling_last_set_prev <= #1   1'b1;
 		 
+	  end
+
+ //--------------------flg_for_sampling_last_set---------------------------------	
+
+	 
+		 always_ff @(posedge clk or negedge reset_N) begin
+			 if (!reset_N) flg_for_sampling_last_set <= #1 1'b0;
+			 else  flg_for_sampling_last_set <= #1  flg_for_sampling_last_set_prev;
+			 
+		  end
  // -----------------------------------------------------------       
  //						FSM – Async Logic
  // -----------------------------------------------------------	

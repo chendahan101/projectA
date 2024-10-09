@@ -102,7 +102,8 @@ assign done_pe = (counter_set_registration == num_of_sets);
 		 
 		 registration_st: begin
 			 
-			 if((counter_set_registration < num_of_sets)&& (counter_set_registration==0||done_fe||(counter_set_registration == num_of_sets - 1 ))) begin
+			 if((counter_set_registration < num_of_sets)&& (counter_set_registration==0||(done_fe&&(frame_num!=0))||(frame_num==0)||(counter_set_registration == num_of_sets - 1 ))) begin
+				
 				if( counter_set_registration == num_of_sets - 1 ) begin
 					start_registration_i = {`PE_NUM{1'b1}} >> (`PE_NUM-counter_of_remain_bboxes);
 					not_start_registration_i = ~ start_registration_i;

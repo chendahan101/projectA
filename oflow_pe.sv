@@ -31,6 +31,8 @@ module  oflow_pe(
 			input logic[`PE_LEN-1:0] num_of_pe,
 			// core_fsm
 			input logic ready_new_frame,
+			input logic ready_new_set,
+			input logic flg_for_sampling_last_set,
 			input logic [`SET_LEN-1:0] num_of_sets, 
 			input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num,
 			input logic start_fe,
@@ -131,8 +133,11 @@ oflow_registration oflow_registration(
 	.num_of_pe(num_of_pe),
 	// core_fsm
 	.ready_new_frame(ready_new_frame),
+	.ready_new_set(ready_new_set),
+	.flg_for_sampling_last_set(flg_for_sampling_last_set),
 	.num_of_sets(num_of_sets),
 	.frame_num(frame_num),
+	.done_fe(done_fe),
 	.start_registration(start_registration),
 	.not_start_registration(not_start_registration),
 	.done_registration(done_registration), 

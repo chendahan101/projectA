@@ -155,7 +155,9 @@ module oflow_core #() (
 	logic [`SCORE_LEN-1:0] score_to_cr; //arrives from score_board
 	logic [`ID_LEN-1:0] id_to_cr; //arrives from score_board
 
-
+	
+	
+	logic flg_for_sampling_last_set;
 
 
 
@@ -208,6 +210,8 @@ generate
 			
 			// core_fsm
 			.ready_new_frame(ready_new_frame),
+			.ready_new_set(ready_new_set),
+			.flg_for_sampling_last_set(flg_for_sampling_last_set),
 			.num_of_sets (num_of_sets), 
 			.frame_num(frame_num),
 			.start_fe (start_fe_i[i]),
@@ -448,7 +452,9 @@ oflow_core_fsm_fe oflow_core_fsm_fe(
 	.not_start_fe_i(not_start_fe_i),
 	
 	.ready_new_set(ready_new_set),
-	.control_ready_new_set(control_ready_new_set)
+	.control_ready_new_set(control_ready_new_set),
+	
+	.flg_for_sampling_last_set(flg_for_sampling_last_set)
 	);
 	
 oflow_core_fsm_registration oflow_core_fsm_registration(

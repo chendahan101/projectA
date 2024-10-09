@@ -171,7 +171,7 @@ begin
 
 	//==================== START SET 1================
 
-	set_of_bboxes(6);
+	set_of_bboxes(5);
 	//@(posedge clk);
 	new_set_from_dma = 1'b1;
 	@(posedge clk);
@@ -192,13 +192,13 @@ begin
 	//====================================
 
 
-
+	
 
 	//==================== START FRAME 1================
 
 	@(posedge ready_new_frame);
 	num_of_history_frames = 3;
-	num_of_bbox_in_frame = 70;
+	num_of_bbox_in_frame = 72;
 	
 
 	//====================================
@@ -215,7 +215,7 @@ begin
 	
 	//==================== START SET 1================
 
-	set_of_bboxes(5);
+	set_of_bboxes(6);
 	//@(posedge clk);
 	new_set_from_dma = 1'b1;
 	@(posedge clk);
@@ -383,8 +383,39 @@ begin
 		set_of_bboxes_from_dma[23] = bbox(x,81,10,20,130,200);
 	
 end
-endtask	
+endtask
+/*
+task set_of_bboxes (input logic [`CM_CONCATE_LEN/2-1:0 ] x);
+	begin
 
+			set_of_bboxes_from_dma[0] = bbox(1,2,10,20,130,200);
+			set_of_bboxes_from_dma[1] = bbox(6,400,10,20,130,200);
+			set_of_bboxes_from_dma[2] = bbox(x,60,10,20,130,200);
+			set_of_bboxes_from_dma[3] = bbox(x,70,10,20,130,200);
+			set_of_bboxes_from_dma[4] = bbox(x,80,10,20,130,200);
+			set_of_bboxes_from_dma[5] = bbox(x,90,10,20,130,200);
+			set_of_bboxes_from_dma[6] = bbox(x,100,10,20,130,200);
+			set_of_bboxes_from_dma[7] = bbox(x,110,10,20,130,200);
+			set_of_bboxes_from_dma[8] = bbox(x,120,10,20,130,200);
+			set_of_bboxes_from_dma[9] = bbox(x,130,10,20,130,200);
+			set_of_bboxes_from_dma[10] = bbox(x,140,10,20,130,200);
+			set_of_bboxes_from_dma[11] = bbox(x,150,10,20,130,200);
+			set_of_bboxes_from_dma[12] = bbox(x,160,10,20,130,200);
+			set_of_bboxes_from_dma[13] = bbox(x,170,10,20,130,200);
+			set_of_bboxes_from_dma[14] = bbox(x,180,10,20,130,200);
+			set_of_bboxes_from_dma[15] = bbox(x,190,10,20,130,200);
+			set_of_bboxes_from_dma[16] = bbox(x,200,10,20,130,200);
+			set_of_bboxes_from_dma[17] = bbox(x,210,10,20,130,200);
+			set_of_bboxes_from_dma[18] = bbox(x,220,10,20,130,200);
+			set_of_bboxes_from_dma[19] = bbox(x,230,10,20,130,200);
+			set_of_bboxes_from_dma[20] = bbox(x,240,10,20,130,200);
+			set_of_bboxes_from_dma[21] = bbox(x,250,10,20,130,200);
+			set_of_bboxes_from_dma[22] = bbox(x,260,10,20,130,200);
+			set_of_bboxes_from_dma[23] = bbox(x,270,10,20,130,200);
+		
+	end
+endtask	
+*/
 
 task set_of_bboxes_unfull_sets (input logic [`CM_CONCATE_LEN/2-1:0 ] x, input logic [`CM_CONCATE_LEN/2-1:0 ] num_of_bboxes_of_unfull_set);
 	begin
