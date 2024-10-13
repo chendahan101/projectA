@@ -140,7 +140,7 @@ oflow_conflict_resolve_fsm #(
 dpram2048x16_CB dpram2048x16_CB(
 	.A1(address_lut), .A2(address_lut), .CEB1(clk), .CEB2(clk), .WEB1(~we_lut), .WEB2(1'b1),
 	.OEB1(1'b1), .OEB2(1'b0), .CSB1(csb && ~we_lut), .CSB2(csb && we_lut),
-	.I1(data_in_lut), .I2(16'd0), .O1(data_out_dont_care_lut_for_fsm), .O2(data_out_lut_for_fsm)
+	.I1(data_in_lut), .I2(16'b0), .O1(data_out_dont_care_lut_for_fsm), .O2(data_out_lut_for_fsm)
 /*
 		.clk(clk)
 		.reset_N(reset_N),
