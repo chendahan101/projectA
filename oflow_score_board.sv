@@ -29,10 +29,12 @@ module  oflow_score_board(
 			
 			
 			//conflict resolve
-			input logic  data_from_cr, // pointer
+			input logic  data_from_cr_pointer, // pointer
+			input logic [(`ID_LEN)-1:0] data_from_cr_id, // id ( new bbox)
 			input logic [`ROW_LEN-1:0] row_sel_from_cr,
 			input logic [`ROW_LEN-1:0] row_to_change, // for change the pointer	
 			input logic write_to_pointer,//flag indicate we need to write to pointer
+			input logic write_to_id,//flag indicate we need to write to id (new bbox)
 			output logic [(`SCORE_LEN)-1:0] score_to_cr,// we insert score0&score1
 			output logic [(`ID_LEN)-1:0] id_to_cr,// we insert id0&id1
 			
@@ -50,21 +52,7 @@ module  oflow_score_board(
 			//from interface
 			input logic [`ROW_LEN-1:0] row_sel_to_pe
 
-			);
-			
-
-			
-
-			
-
-
-
-			
-			
-			
-
-			
-		
+			);	
 			
 // -----------------------------------------------------------       
 //                  logicisters & Wires
@@ -78,10 +66,7 @@ module  oflow_score_board(
 	/*//conflict resolve
 	logic [(`SCORE_LEN*2)-1:0] score_to_cr;
 	logic [(`ID_LEN*2)-1:0] id_to_cr;*/
-	
-	
-	
-	
+		
 	
 // -----------------------------------------------------------       
 //                 synchronous procedural block.	
@@ -89,7 +74,7 @@ module  oflow_score_board(
 
 
 // -----------------------------------------------------------       
-//						write to internal reg
+//						write to internal regs
 // -----------------------------------------------------------
 
 	always_ff @(posedge clk or negedge reset_N) begin
@@ -107,6 +92,7 @@ module  oflow_score_board(
 			ids_reg <= #1 '{default: 0};
 		end	
 		else if  (start_score_board)  ids_reg[row_sel_by_set] <= #1 {min_id_0,min_id_1};
+		else if (write_to_id) ids_reg[row_to_change] <= #1 {data_from_cr_id,min_id_1};
 	end	
 	
 	always_ff @(posedge clk or negedge reset_N) begin
@@ -114,7 +100,7 @@ module  oflow_score_board(
 			//for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin pointers_reg[i] <= #1 '0; end
 			pointers_reg <= #1 '{default: 0};
 		end	
-		else if  (write_to_pointer)  pointers_reg[row_to_change] <= #1 data_from_cr;
+		else if  (write_to_pointer)  pointers_reg[row_to_change] <= #1 data_from_cr_pointer;
 	end	
 	
 	always_ff @(posedge clk or negedge reset_N) begin

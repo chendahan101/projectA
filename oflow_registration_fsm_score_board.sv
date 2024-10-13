@@ -91,7 +91,7 @@ sm_type next_state;
 		 score_board_st: begin
 		
 			 //start_score_board = 1'b1;		
-			if (counter_of_sets == num_of_sets) next_state = idle_st;
+			if (counter_of_sets == num_of_sets-1) next_state = idle_st;
 			else next_state = wait_st;
 
 			

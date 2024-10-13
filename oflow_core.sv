@@ -24,6 +24,8 @@ module oflow_core #() (
 	// globals inputs and outputs (DMA)
 	input logic [`BBOX_VECTOR_SIZE-1:0] set_of_bboxes_from_dma [`PE_NUM],
 	input logic new_set_from_dma, // dma ready with new feature extraction set
+	input logic start, // from top
+	input logic new_frame,
 	output logic ready_new_set, // fsm_core_top ready for new_set from DMA
 	output logic ready_new_frame, // fsm_core_top ready for new_frame from DMA
 	output logic conflict_counter_th, // fsm_core_top ready for new_frame from DMA
@@ -35,9 +37,9 @@ module oflow_core #() (
 	input logic [`WEIGHT_LEN-1:0] color1_weight,
 	input logic [`WEIGHT_LEN-1:0] color2_weight,
 	input logic [`WEIGHT_LEN-1:0] dhistory_weight,
+	input logic [`SCORE_LEN-1:0] score_th_for_new_bbox,
 	
-	input logic start, // from top
-	input logic new_frame,
+	
 	
 	//input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] num_of_total_frames,//the serial number of the current frame 0-255
 	input logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0] num_of_history_frames, // fallback number
@@ -45,18 +47,11 @@ module oflow_core #() (
 	 
 	 //input logic [`BBOX_VECTOR_SIZE-1:0] bboxes_array_per_frame [`MAX_BBOXES_PER_FRAME-1:0],			//size 
 	 
-	 
-	 
-	 
 	 //input logic [31:0] apb_prdata,
 	 
 	 // outputs	
-	 
-	
-	 
 	
 	 output logic valid_id,
-	 output logic done_frame,
 	 output logic [`ID_LEN-1:0] ids [`MAX_BBOXES_PER_FRAME] );
 
 
@@ -140,8 +135,10 @@ module oflow_core #() (
 	logic [`SCORE_LEN-1:0] score_to_cr_from_pe [`PE_NUM]; 
 	logic [`ID_LEN-1:0] id_to_cr_from_pe [`PE_NUM];  
 	logic [`ROW_LEN-1:0] row_sel_to_pe_from_cr;  //which row to read from score board
-	logic  write_to_pointer_to_pe [`PE_NUM]; //for write to score_board
-	logic  data_to_score_board_to_pe; // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+	logic  write_to_pointer_to_pe [`PE_NUM]; //for write to score_board the pointer
+	logic  data_from_cr_pointer_to_pe; // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+	logic  write_to_id_to_pe [`PE_NUM]; //for write to score_board the id
+	logic [`ID_LEN-1:0] data_from_cr_id_to_pe;
 	logic [`ROW_LEN-1:0] row_to_change_to_pe; //for write to score_board
 
 
@@ -150,12 +147,16 @@ module oflow_core #() (
 	logic [`PE_LEN-1:0] pe_sel_from_cr; //for read from score_board
 	logic [`ROW_LEN-1:0] row_to_change; //for write to score_board
 	logic [`PE_LEN-1:0] pe_to_change; //for write to score_board
-	logic  data_to_score_board_from_cr; // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
-	logic  write_to_pointer_from_cr; //for write to score_board
+	logic  data_to_score_board_from_cr_pointer; // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+	logic  write_to_pointer_from_cr; //for write to score_board the pointer
+	logic [`ID_LEN-1:0] data_to_score_board_from_cr_id;
+	logic write_to_id_from_cr; //for write to score_board the id
+	
 	logic [`SCORE_LEN-1:0] score_to_cr; //arrives from score_board
 	logic [`ID_LEN-1:0] id_to_cr; //arrives from score_board
 
-	
+	logic initial_counter_for_new_bbox;
+	logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] total_bboxes_first_frame;
 	
 	logic flg_for_sampling_last_set;
 
@@ -178,7 +179,7 @@ generate
 	end
 endgenerate
 
-
+assign initial_counter_for_new_bbox = (frame_num == 1);
 // -----------------------------------------------------------       
 //                Instantiations
 // -----------------------------------------------------------  
@@ -238,7 +239,9 @@ generate
 			.id_to_cr_from_pe(id_to_cr_from_pe [i]),  
 			.row_sel_to_pe_from_cr(row_sel_to_pe_from_cr),  //which row to read from score board
 			.write_to_pointer_to_pe(write_to_pointer_to_pe [i]), //for write to score_board
-			.data_to_score_board_to_pe(data_to_score_board_to_pe), // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+			.data_from_cr_pointer_to_pe(data_from_cr_pointer_to_pe), // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+			.write_to_id_to_pe(write_to_id_to_pe [i]),
+			.data_from_cr_id_to_pe(data_from_cr_id_to_pe),
 			.row_to_change_to_pe(row_to_change_to_pe) //for write to score_board
 
 			
@@ -262,18 +265,22 @@ interface_cr_pe #() interface_cr_pe (
 	// PE outputs
 	.row_sel_to_pe(row_sel_to_pe_from_cr),
 	.write_to_pointer_to_pe(write_to_pointer_to_pe),
-	.data_to_score_board_to_pe(data_to_score_board_to_pe),
+	.data_from_cr_pointer_to_pe(data_from_cr_pointer_to_pe),
+	.write_to_id_to_pe(write_to_id_to_pe),
+	.data_from_cr_id_to_pe(data_from_cr_id_to_pe),
 	.row_to_change_to_pe(row_to_change_to_pe),
 
-	// Conflict Resolve inputs
+	// inputs from Conflict Resolve 
 	.row_sel_from_cr(row_sel_from_cr),
 	.pe_sel_from_cr(pe_sel_from_cr),
 	.row_to_change(row_to_change),
 	.pe_to_change(pe_to_change),
-	.data_to_score_board_from_cr(data_to_score_board_from_cr),
+	.data_to_score_board_from_cr_pointer(data_to_score_board_from_cr_pointer),
 	.write_to_pointer_from_cr(write_to_pointer_from_cr),
+	.data_to_score_board_from_cr_id(data_to_score_board_from_cr_id),
+	.write_to_id_from_cr(write_to_id_from_cr),
 	
-	// Conflict Resolve outputs
+	//  outputs to Conflict Resolve
 	.score_to_cr(score_to_cr),
 	.id_to_cr(id_to_cr)
 );
@@ -288,6 +295,11 @@ oflow_conflict_resolve #() oflow_conflict_resolve (
 	.start_cr(start_cr),
 	.done_cr(done_cr),
 	
+	// for new bbox 
+	.score_th_for_new_bbox(score_th_for_new_bbox), // from reg_file
+	.initial_counter_for_new_bbox(initial_counter_for_new_bbox),
+	.total_bboxes_first_frame(num_of_bbox_in_frame),
+	
 	// Interface between CR and PEs
 	.score_to_cr(score_to_cr),
 	.id_to_cr(id_to_cr),
@@ -295,11 +307,12 @@ oflow_conflict_resolve #() oflow_conflict_resolve (
 	.pe_sel_from_cr(pe_sel_from_cr),
 	.row_to_change(row_to_change),
 	.pe_to_change(pe_to_change),
-	.data_to_score_board(data_to_score_board_from_cr),
+	.data_to_score_board_from_cr_pointer(data_to_score_board_from_cr_pointer),
 	.write_to_pointer(write_to_pointer_from_cr),
+	.data_to_score_board_from_cr_id(data_to_score_board_from_cr_id),
+	.write_to_id(write_to_id_from_cr),
 	.conflict_counter_th(conflict_counter_th) 
 );
-
 
 
 

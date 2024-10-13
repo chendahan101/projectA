@@ -17,7 +17,7 @@
 `define INSTANCES_LEN 4
 
 
-module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 100 ) (
+module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 10 ) (
 	
 	input logic clk,
 	input logic reset_N,
@@ -25,6 +25,11 @@ module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 100 ) (
 	//CR
 	input logic start_cr,
 	output logic done_cr,
+	
+	// for new bbox 
+	input logic [`SCORE_LEN-1:0] score_th_for_new_bbox, // from reg_file
+	input logic initial_counter_for_new_bbox,
+	input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] total_bboxes_first_frame,
 	
 	//LUT 
 	input logic [`DATA_WIDTH_LUT-1:0] data_out_lut_for_fsm, 
@@ -46,8 +51,10 @@ module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 100 ) (
 	output logic [`PE_LEN-1:0] pe_sel, //for read from score_board
 	output logic [`ROW_LEN-1:0] row_to_change, //for write to score_board
 	output logic [`PE_LEN-1:0] pe_to_change, //for write to score_board
-	output logic  data_to_score_board, // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
-	output logic  write_to_pointer, //for write to score_board
+	output logic  data_to_score_board_from_cr_pointer, // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+	output logic  write_to_pointer, //for write to score_board the pointer
+	output logic [`ID_LEN-1:0] data_to_score_board_from_cr_id,
+	output logic  write_to_id, //for write to score_board the id
 	
 	output logic csb,
 
@@ -69,6 +76,7 @@ localparam  COUNTER_STATE = 2;
 	 logic [`PE_LEN-1:0] counter_pe_sel;
 	 logic [COUNTER_STATE-1:0] counter_state;
 	 logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] counter_hist; //count how many different ids in lut/hist
+     logic [`ID_LEN-1:0] counter_for_new_bbox;
 	
 	logic column_lut;
 	logic [`DATA_WIDTH_LUT-1:0] row_lut;
@@ -90,9 +98,11 @@ localparam  COUNTER_STATE = 2;
 	logic [`HALF_DATA_WIDTH_LUT-1:0] cur_data_lut_reg;
 	
 	logic update_hist;
+	logic new_bbox;
 	logic th_conflict_flg;
 	
-	typedef enum {idle_st, row_sel_st, pe_sel_N_fill_lut_st, fill_hist_st } sm_type; 
+	
+	typedef enum {idle_st, row_sel_st, pe_sel_N_fill_lut_st, fill_hist_st, new_bbox_st } sm_type; 
 	sm_type current_state;
 	sm_type next_state;
 
@@ -131,20 +141,29 @@ localparam  COUNTER_STATE = 2;
 	
 	end
 	
+//--------------------counter_for_new_bbox---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N ) counter_for_new_bbox <= #1 0;
+	else if (current_state  == idle_st && initial_counter_for_new_bbox) counter_for_new_bbox <= #1 total_bboxes_first_frame;
+	else if( new_bbox ) counter_for_new_bbox <= #1 counter_for_new_bbox + 1 ;
+	
+ end	
+	
 //--------------------counter_state---------------------------------	
 
 always_ff @(posedge clk or negedge reset_N) begin
 	if (!reset_N || current_state ==  idle_st || (current_state!= pe_sel_N_fill_lut_st  && next_state== pe_sel_N_fill_lut_st ) ) counter_state <= #1 0;
 	else  if( current_state == pe_sel_N_fill_lut_st ) counter_state <= #1 counter_state + 1 ;
 	
- end	
+ end
 	
 	
 //--------------------counter_row_sel---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st ) counter_row_sel <= #1 0;
-		 else  if( current_state == fill_hist_st && next_state == row_sel_st) counter_row_sel <= #1 counter_row_sel + 1 ;
+		 else  if( (current_state == fill_hist_st || current_state == new_bbox_st) && next_state == row_sel_st) counter_row_sel <= #1 counter_row_sel + 1 ;
 		 
 	  end	
 
@@ -152,7 +171,7 @@ always_ff @(posedge clk or negedge reset_N) begin
 
 	 always_ff @(posedge clk or negedge reset_N) begin
 		 if (!reset_N || current_state ==  idle_st || current_state ==  row_sel_st) counter_pe_sel <= #1 0;
-		 else  if( current_state ==  pe_sel_N_fill_lut_st && next_state == fill_hist_st) counter_pe_sel <= #1 counter_pe_sel + 1 ;
+		 else  if( current_state ==  pe_sel_N_fill_lut_st && (next_state == fill_hist_st || next_state == new_bbox_st) ) counter_pe_sel <= #1 counter_pe_sel + 1 ;
 		 
 	  end	
 //--------------------cur_pe_reg---------------------------------	
@@ -238,14 +257,18 @@ always_ff @(posedge clk or negedge reset_N) begin
 	done_cr = 1'b0;
 	we_lut = 1'b0;
 	update_hist = 1'b0;
-	data_to_score_board = 1'b0; //*****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+	data_to_score_board_from_cr_pointer = 1'b0; //*****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
 	write_to_pointer = 1'b0;
+	data_to_score_board_from_cr_id = 0;
+	write_to_id = 1'b0;
+	
 	row_to_change = counter_row_sel;
 	pe_to_change = cur_pe_reg;
 	//data_in_lut = data_out_lut_for_fsm;
 	data_in_lut = 1'b0;
 	th_conflict_flg = 1'b0;
 	csb = 1'b1;
+	new_bbox = 1'b0;
 	
 	 case (current_state)
 		 idle_st: begin
@@ -277,7 +300,12 @@ always_ff @(posedge clk or negedge reset_N) begin
 			end
 			else begin
 				
-				if(!(data_out_flag & mask_flag)) begin
+				if(score_to_cr >= score_th_for_new_bbox) begin
+					new_bbox = 1'b1;
+					next_state = new_bbox_st;
+				end
+				
+				else if(!(data_out_flag & mask_flag)) begin
 					
 					if (counter_state==1) begin 
 						we_lut = 1'b1;
@@ -311,12 +339,12 @@ always_ff @(posedge clk or negedge reset_N) begin
 					pe_to_change = hist_reg_pe[cur_data_lut_reg -1];
 					// if( hist_reg_min_score[cur_data_lut_reg-1] != {`SCORE_LEN{1'b1}} ) begin
 						write_to_pointer = 1'b1;
-						data_to_score_board = 1'b1;
+						data_to_score_board_from_cr_pointer = 1'b1;
 					// end	
 				end
 				else begin
 					write_to_pointer = 1'b1;
-					data_to_score_board = 1'b1;
+					data_to_score_board_from_cr_pointer = 1'b1;
 				end
 					
 			end	
@@ -336,6 +364,15 @@ always_ff @(posedge clk or negedge reset_N) begin
 		
 		end
 		
+		new_bbox_st: begin
+		
+			data_to_score_board_from_cr_id = counter_for_new_bbox;
+			write_to_id = 1'b1;
+			
+			we_lut = 1'b0;
+			if(counter_pe_sel == `PE_NUM) next_state = row_sel_st; 
+			else next_state = pe_sel_N_fill_lut_st;
+		end		
 				
 		 
 	 endcase

@@ -80,8 +80,10 @@ module  oflow_registration(
 	//interface between pe to cr
 	input logic [`ROW_LEN-1:0] row_sel_to_pe_from_cr,  //which row to read from score board
 	input logic  write_to_pointer_to_pe , //for write to score_board
-	input logic  data_to_score_board_to_pe, // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
+	input logic  data_from_cr_pointer_to_pe, // for write to score_board. *****if we_lut will want to change the fallbacks we_lut need to change the size of this signal*******
 	input logic [`ROW_LEN-1:0] row_to_change_to_pe, //for write to score_board
+	input logic write_to_id_to_pe, //flag indicate we need to write to id (new bbox)
+	input logic [(`ID_LEN)-1:0] data_from_cr_id_to_pe, // id ( new bbox)
 	output logic [`SCORE_LEN-1:0] score_to_cr_from_pe ,  
 	output logic [`ID_LEN-1:0] id_to_cr_from_pe  
 	
@@ -248,10 +250,12 @@ oflow_score_board oflow_score_board (
 	.min_id_0(min_id_0_to_score_board),
 	.min_score_1(min_score_1_to_score_board),
 	.min_id_1(min_id_1_to_score_board),
-	.data_from_cr(data_to_score_board_to_pe),
+	.data_from_cr_pointer(data_from_cr_pointer_to_pe),
+	.data_from_cr_id(data_from_cr_id_to_pe),
 	.row_sel_from_cr(row_sel_to_pe_from_cr),
 	.row_to_change(row_to_change_to_pe),
 	.write_to_pointer(write_to_pointer_to_pe),
+	.write_to_id(write_to_id_to_pe),
 	.score_to_cr(score_to_cr_from_pe),
 	.id_to_cr(id_to_cr_from_pe),
 	.id_to_buffer(id_to_buffer),

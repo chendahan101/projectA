@@ -21,6 +21,11 @@ module oflow_conflict_resolve #() (
 	input logic start_cr,
 	output logic done_cr,
 	
+	// for new bbox 
+	input logic [`SCORE_LEN-1:0] score_th_for_new_bbox, // from reg_file
+	input logic initial_counter_for_new_bbox,
+	input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] total_bboxes_first_frame,
+	
 	//interface_betwe_luten_conflict_resolve_and_pes
 	input logic [`SCORE_LEN-1:0] score_to_cr, //arrives from score_board
 	input logic [`ID_LEN-1:0] id_to_cr, //arrives from score_board
@@ -28,10 +33,13 @@ module oflow_conflict_resolve #() (
 	output logic [`PE_LEN-1:0] pe_sel_from_cr, //for read from score_board
 	output logic [`ROW_LEN-1:0] row_to_change, //for write to score_board
 	output logic [`PE_LEN-1:0] pe_to_change, //for write to score_board
-	output logic  data_to_score_board, // for write to score_board. *****if we_lut will want to change the fallbacks, we_lut need to change the size of this signal*******
+	output logic  data_to_score_board_from_cr_pointer, // for write to score_board. *****if we_lut will want to change the fallbacks, we_lut need to change the size of this signal*******
 	output logic  write_to_pointer, //for write to score_board
+	output logic [`ID_LEN-1:0] data_to_score_board_from_cr_id,
+	output logic  write_to_id, //for write to score_board the id
 	
 	output logic conflict_counter_th
+	
 );
  
 
@@ -84,9 +92,14 @@ oflow_conflict_resolve_fsm #(
 		.clk(clk),
 		.reset_N(reset_N),
 		
-		// Conflict Resolution
+		// Conflict Resolve
 		.start_cr(start_cr),
 		.done_cr(done_cr),
+		
+		// for new bbox 
+		.score_th_for_new_bbox(score_th_for_new_bbox), //  from reg_file
+		.initial_counter_for_new_bbox(initial_counter_for_new_bbox),
+		.total_bboxes_first_frame(total_bboxes_first_frame),
 		
 		// LUT
 		.data_out_lut_for_fsm(data_out_lut_for_fsm),
@@ -106,8 +119,10 @@ oflow_conflict_resolve_fsm #(
 		.pe_sel(pe_sel_from_cr),
 		.row_to_change(row_to_change),
 		.pe_to_change(pe_to_change),
-		.data_to_score_board(data_to_score_board),
+		.data_to_score_board_from_cr_pointer(data_to_score_board_from_cr_pointer),
+		.data_to_score_board_from_cr_id(data_to_score_board_from_cr_id),
 		.write_to_pointer(write_to_pointer),
+		.write_to_id(write_to_id),
 		
 		.csb(csb),
 		

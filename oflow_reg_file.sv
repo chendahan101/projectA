@@ -7,7 +7,6 @@
  *------------------------------------------------------------------------------*/
 
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
-`include "/users/epchof/Project/design/work/include_files/oflow_similarity_metric_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
 `include "/users/epchof/Project/design/work/include_files/oflow_reg_file_define.sv"
 
@@ -15,10 +14,11 @@ module oflow_reg_file #() (
 	// inputs
 	input logic clk,    			          
 	input logic reset_N	,
-	input logic [31:0] apb_pwdata,
 	
-	// APB Interface							
-			
+	
+	// APB Interface	
+	// inputs
+	input logic [31:0] apb_pwdata,		
 	input logic apb_pwrite,
 	input logic apb_psel, 
 	input logic apb_penable,
@@ -29,13 +29,14 @@ module oflow_reg_file #() (
 	// outputs
 	output logic apb_pready,      
 	output logic[31:0] apb_prdata, 
-	output logic [`WEIGHT_LEN-1:0] w_iou,
-	output logic [`WEIGHT_LEN-1:0] w_w,
-	output logic [`WEIGHT_LEN-1:0] w_h, 
-	output logic [`WEIGHT_LEN-1:0] w_color1, 
-	output logic [`WEIGHT_LEN-1:0] w_color2,
-	output logic [`WEIGHT_LEN-1:0] w_dhistory,
-	output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frame
+	output logic [`WEIGHT_LEN-1:0] iou_weight,
+	output logic [`WEIGHT_LEN-1:0] w_weight,
+	output logic [`WEIGHT_LEN-1:0] h_weight, 
+	output logic [`WEIGHT_LEN-1:0] color1_weight, 
+	output logic [`WEIGHT_LEN-1:0] color2_weight,
+	output logic [`WEIGHT_LEN-1:0] dhistory_weight,
+	output logic [`SCORE_LEN-1:0] score_th_for_new_bbox,
+	output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frames
 	);
 
 
@@ -50,6 +51,7 @@ module oflow_reg_file #() (
    logic [`WEIGHT_LEN-1:0] w_color2_reg;
    logic [`WEIGHT_LEN-1:0] w_dhistory_reg;
    
+   logic [`SCORE_LEN-1:0] score_th_for_new_bbox_reg;
    logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frame_reg;
    
    //logic [31:0] apb_prdata_reg;
@@ -65,14 +67,16 @@ module oflow_reg_file #() (
 	assign apb_pready = (time_to_write || time_to_read) && (apb_addr == `W_IOU_ADDR || apb_addr == `W_WIDTH_ADDR || apb_addr == `W_HEIGHT_ADDR ||  apb_addr == `W_COLOR1_ADDR ||apb_addr == `W_COLOR2_ADDR || 
 						 apb_addr == `NUM_OF_HISTORY_FRAMES_ADDR || apb_addr == `W_HISTORY_ADDR)  ;
 	
-	assign w_iou = w_iou_reg;
-	assign w_w = w_w_reg;
-	assign w_h = w_h_reg;
-	assign w_color1 = w_color1_reg;
-	assign w_color2 = w_color2_reg;
-	assign num_of_history_frame = num_of_history_frame_reg;
-	assign w_dhistory = w_dhistory_reg;
+	assign iou_weight = w_iou_reg;
+	assign w_weight = w_w_reg;
+	assign h_weight = w_h_reg;
+	assign color1_weight = w_color1_reg;
+	assign color2_weight = w_color2_reg;
+	assign dhistory_weight = w_dhistory_reg;
 	
+	assign score_th_for_new_bbox = score_th_for_new_bbox_reg;
+	assign num_of_history_frames = num_of_history_frame_reg;
+
 	//assign apb_prdata = apb_prdata_reg;
 // -----------------------------------------------------------       
 //            APB - Write to Registers 
@@ -122,6 +126,12 @@ module oflow_reg_file #() (
 
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
+		if(!reset_N) score_th_for_new_bbox_reg <= #1 3'd0; 
+		else if(time_to_write && (apb_addr == `SCORE_TH_FOR_NEW_BBOX_ADDR)) score_th_for_new_bbox_reg <= #1 apb_pwdata; 
+	end 
+	
+	always_ff @(posedge clk or negedge reset_N)   
+	begin 
 		if(!reset_N) num_of_history_frame_reg <= #1 3'd0; 
 		else if(time_to_write && (apb_addr == `NUM_OF_HISTORY_FRAMES_ADDR)) num_of_history_frame_reg <= #1 apb_pwdata; 
 	end 
@@ -135,7 +145,7 @@ module oflow_reg_file #() (
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
 		if(!reset_N) apb_prdata <= #1 0; 
-		else if(time_to_write && (apb_addr == `W_Iou)) apb_prdata <= #1 ()*w_iou + ()*w_m+
+		else if(time_to_write && (apb_addr == `iou_weight)) apb_prdata <= #1 ()*iou_weight + ()*w_m+
 	 */ 
 	 
 /*
@@ -172,6 +182,7 @@ module oflow_reg_file #() (
 					`W_COLOR1_ADDR: apb_prdata= w_color1_reg;
 					`W_COLOR2_ADDR:  apb_prdata= w_color2_reg;
 					`W_HISTORY_ADDR: apb_prdata= w_dhistory_reg;
+					`NUM_OF_HISTORY_FRAMES_ADDR: apb_prdata = score_th_for_new_bbox_reg;
 					`NUM_OF_HISTORY_FRAMES_ADDR: apb_prdata =  num_of_history_frame_reg;
 					default: apb_prdata = num_of_history_frame_reg; 	
 				endcase	
@@ -266,14 +277,14 @@ begin
 			
 			case(apb_addr)
 				
-			   `W_Iou: if (apb_pwrite)  w_iou <= apb_pwdata; else apb_prdata <=  w_iou; 
-			   `W_w: if (apb_pwrite)  w_w <= apb_pwdata; else apb_prdata <=  w_w;
-			   `W_h:if  (apb_pwrite)  w_h <= apb_pwdata; else apb_prdata <=  w_h;
-			   `W_color1:if  (apb_pwrite)  w_color1 <= apb_pwdata; else  apb_prdata <=  w_color1;
-			   `W_color2: if (apb_pwrite)  w_color2 <= apb_pwdata ;else  apb_prdata <=  w_color2;
-			   `W_dhistory:if  (apb_pwrite)  w_dhistory <= apb_pwdata; else  apb_prdata <=  w_dhistory;
+			   `iou_weight: if (apb_pwrite)  iou_weight <= apb_pwdata; else apb_prdata <=  iou_weight; 
+			   `w_weight: if (apb_pwrite)  w_weight <= apb_pwdata; else apb_prdata <=  w_weight;
+			   `h_weight:if  (apb_pwrite)  h_weight <= apb_pwdata; else apb_prdata <=  h_weight;
+			   `color1_weight:if  (apb_pwrite)  color1_weight <= apb_pwdata; else  apb_prdata <=  color1_weight;
+			   `color2_weight: if (apb_pwrite)  color2_weight <= apb_pwdata ;else  apb_prdata <=  color2_weight;
+			   `dhistory_weight:if  (apb_pwrite)  dhistory_weight <= apb_pwdata; else  apb_prdata <=  dhistory_weight;
 			   `TH_conflict_counter:if  (apb_pwrite)  th_conflict_counter <= apb_pwdata; else apb_prdata <=  th_conflict_counter;
-			   `NUM_of_history_frame:if (apb_pwrite)  num_of_history_frame <= apb_pwdata ;else  apb_prdata <=  num_of_history_frame;
+			   `num_of_history_frames:if (apb_pwrite)  num_of_history_frames <= apb_pwdata ;else  apb_prdata <=  num_of_history_frames;
 			   `DONE_for_dma: if (apb_pwrite)  done_for_dma <= apb_pwdata; else apb_prdata <=  done_for_dma;
 			   
 			endcase  
