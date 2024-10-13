@@ -44,6 +44,50 @@ module oflow_MEM_buffer #() (
 
 	//logic oe;
 
+/*
+
+	always_ff @(posedge clk or negedge reset_N)   
+	begin 
+		if(!reset_N) begin
+			pointers <=#1 '{0,0,0,0,0};
+		end
+		else begin 
+			if(frame_num==0) begin
+				case(num_of_history_frames) 
+					1: begin 
+							pointers[0] <=#1 0;
+						end
+					2: begin 
+						pointers[0] <=#1 0;
+						pointers[1] <=#1 64;
+					end
+					3: begin 
+						pointers[0] <=#1 0;
+						pointers[1] <=#1 42;
+						pointers[2] <=#1 84;
+					end
+					4: begin 
+						pointers[0] <=#1 0;
+						pointers[1] <=#1 32;
+						pointers[2] <=#1 64;
+						pointers[3] <=#1 96;
+	
+					end			
+					5: begin 
+						pointers[0] <=#1 0;
+						pointers[1] <=#1 25;
+						pointers[2] <=#1 50;
+						pointers[3] <=#1 75;
+						pointers[4] <=#1 100;
+					end	
+				endcase
+			end
+		end
+	end 
+
+
+*/
+
 
 	
 // -----------------------------------------------------------       
@@ -69,41 +113,48 @@ module oflow_MEM_buffer #() (
 	
 	
 	always_comb begin
-		if(!reset_N)
+		
+		if(!reset_N) begin
 			pointers = '{0,0,0,0,0};
-			
-		if(frame_num==0) begin
-			case(num_of_history_frames) 
-				
-				1: begin 
-						pointers[0] = 0;
-					end
-				2: begin 
-					pointers[0] = 0;
-					pointers[1] = 64;
-				end
-				3: begin 
-					pointers[0] = 0;
-					pointers[1] = 42;
-					pointers[2] = 84;
-				end
-				4: begin 
-					pointers[0] = 0;
-					pointers[1] = 32;
-					pointers[2] = 64;
-					pointers[3] = 96;
-
-				end			
-				5: begin 
-					pointers[0] = 0;
-					pointers[1] = 25;
-					pointers[2] = 50;
-					pointers[3] = 75;
-					pointers[4] = 100;
-				end	
-			endcase
 		end
-		//else begin
+		
+		
+			
+			if(frame_num==0) begin
+				case(num_of_history_frames) 
+					1: begin 
+							pointers[0] = 0;
+						end
+					2: begin 
+						pointers[0] = 0;
+						pointers[1] = 64;
+					end
+					3: begin 
+						pointers[0] = 0;
+						pointers[1] = 42;
+						pointers[2] = 84;
+					end
+					4: begin 
+						pointers[0] = 0;
+						pointers[1] = 32;
+						pointers[2] = 64;
+						pointers[3] = 96;
+	
+					end			
+					5: begin 
+						pointers[0] = 0;
+						pointers[1] = 25;
+						pointers[2] = 50;
+						pointers[3] = 75;
+						pointers[4] = 100;
+					end	
+				endcase
+			end
+			
+			
+			
+		
+		
 			case(frame_num%num_of_history_frames) 
 				0: begin 
 					addr_0 = pointers[0] + offset_0;
@@ -128,8 +179,10 @@ module oflow_MEM_buffer #() (
 					end	
 			endcase
 		//end
-	end
-	
+	end 
+		
+		
+ 
 	//assign oe = (we) ; // oe is active low 
 	
 
