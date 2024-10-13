@@ -79,9 +79,11 @@ assign done_pe = (counter_set_registration == num_of_sets);
 
 	 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st ) counter_set_registration <= #1 0;
-		 else if (current_state ==  wait_st && (next_state == registration_st || next_state == idle_st)) counter_set_registration <= #1 counter_set_registration + 1;
-		 
+		 if (!reset_N  ) counter_set_registration <= #1 0;
+		 else begin 
+			 if (current_state ==  idle_st ) counter_set_registration <= #1 0;
+			 else if (current_state ==  wait_st && (next_state == registration_st || next_state == idle_st)) counter_set_registration <= #1 counter_set_registration + 1;
+		 end 	 
 	  end
 
 		 

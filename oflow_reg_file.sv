@@ -172,6 +172,7 @@ module oflow_reg_file #() (
 
 	always_comb 
 	begin 
+		apb_prdata = num_of_history_frame_reg;
 		//apb_prdata = num_of_history_frame_reg;
 		 if(time_to_read) 
 			 begin 
@@ -182,9 +183,9 @@ module oflow_reg_file #() (
 					`W_COLOR1_ADDR: apb_prdata= w_color1_reg;
 					`W_COLOR2_ADDR:  apb_prdata= w_color2_reg;
 					`W_HISTORY_ADDR: apb_prdata= w_dhistory_reg;
-					`NUM_OF_HISTORY_FRAMES_ADDR: apb_prdata = score_th_for_new_bbox_reg;
+					`SCORE_TH_FOR_NEW_BBOX_ADDR: apb_prdata = score_th_for_new_bbox_reg;
 					`NUM_OF_HISTORY_FRAMES_ADDR: apb_prdata =  num_of_history_frame_reg;
-					default: apb_prdata = num_of_history_frame_reg; 	
+					//default: apb_prdata = num_of_history_frame_reg; 	
 				endcase	
 			end
 	end	

@@ -62,7 +62,7 @@ sm_type next_state;
 // -----------------------------------------------------------       
 //                FSM synchronous procedural block.	
 // -----------------------------------------------------------
-	always_ff @(posedge clk, posedge reset_N) begin
+	always_ff @(posedge clk or negedge reset_N) begin
 		if (!reset_N ) begin
 			current_state <= #1 idle_st;
 		end
@@ -71,13 +71,19 @@ sm_type next_state;
 		end
 	end
 //--------------------counter---------------------------------	
-	 always_ff @(posedge clk, posedge reset_N) begin
-		if (!reset_N  || next_state == idle_st || next_state != current_state) begin
+	 always_ff @(posedge clk or negedge reset_N) begin
+		if (!reset_N ) begin
 			counter <= #1 4'd0;
 		end
-		else begin
-			counter <= #1 counter + 1;
-		end
+		else begin 
+		
+			if (next_state == idle_st || next_state != current_state) begin
+				counter <= #1 4'd0;
+			end
+			else begin
+				counter <= #1 counter + 1;
+			end
+		end 
 	end
 	
 	

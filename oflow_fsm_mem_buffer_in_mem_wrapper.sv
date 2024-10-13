@@ -95,13 +95,13 @@ oflow_fsm_buffer_write oflow_fsm_buffer_write (
 // -----------------------------------------------------------       
 //              Registers
 // -----------------------------------------------------------
-/*
+
 always_ff @(posedge clk or negedge reset_N)   
 begin 
 	if(!reset_N) end_pointers  <=#1 '{0,0,0,0,0};
 	else if (start_write ) 	end_pointers[frame_num%num_of_history_frames] <=#1 max_row ;
 end 
-	*/
+	
 
 
 // -----------------------------------------------------------       
@@ -114,7 +114,7 @@ always_comb begin
 	max_row_remainder = num_of_bbox_in_frame[0];
 	max_row_integer = num_of_bbox_in_frame >>1;
 	max_row = (max_row_remainder) ? (max_row_integer+1) :(max_row_integer);
-	if (start_write ) 	end_pointers[frame_num%num_of_history_frames] = max_row ;
+	//if (start_write ) 	end_pointers[frame_num%num_of_history_frames] = max_row ;
 end
 
 //assign end_pointers[frame_num%num_of_history_frames] = num_of_bbox_in_frame ;

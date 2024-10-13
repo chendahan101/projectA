@@ -44,7 +44,7 @@ module oflow_MEM_buffer #() (
 
 	//logic oe;
 
-/*
+
 
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
@@ -86,7 +86,7 @@ module oflow_MEM_buffer #() (
 	end 
 
 
-*/
+
 
 
 	
@@ -114,47 +114,6 @@ module oflow_MEM_buffer #() (
 	
 	always_comb begin
 		
-		if(!reset_N) begin
-			pointers = '{0,0,0,0,0};
-		end
-		
-		
-			
-			if(frame_num==0) begin
-				case(num_of_history_frames) 
-					1: begin 
-							pointers[0] = 0;
-						end
-					2: begin 
-						pointers[0] = 0;
-						pointers[1] = 64;
-					end
-					3: begin 
-						pointers[0] = 0;
-						pointers[1] = 42;
-						pointers[2] = 84;
-					end
-					4: begin 
-						pointers[0] = 0;
-						pointers[1] = 32;
-						pointers[2] = 64;
-						pointers[3] = 96;
-	
-					end			
-					5: begin 
-						pointers[0] = 0;
-						pointers[1] = 25;
-						pointers[2] = 50;
-						pointers[3] = 75;
-						pointers[4] = 100;
-					end	
-				endcase
-			end
-			
-			
-			
-		
-		
 			case(frame_num%num_of_history_frames) 
 				0: begin 
 					addr_0 = pointers[0] + offset_0;
@@ -177,6 +136,10 @@ module oflow_MEM_buffer #() (
 					addr_0 = pointers[4] + offset_0;
 					addr_1 = pointers[4] + offset_1;
 					end	
+				default: begin 
+					addr_0 = 0;
+					addr_1 = 0;
+				end
 			endcase
 		//end
 	end 

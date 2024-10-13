@@ -185,10 +185,11 @@ assign initial_counter_for_new_bbox = (frame_num == 1);
 // -----------------------------------------------------------  
 
 
-genvar i,row_i;
+//genvar i,row_i;
+genvar i;
 generate
 	//for  ( row_i=0; row_i < `MAX_ROWS_IN_SCORE_BOARD; row_i++) 
-	begin : row_inst
+	//begin : row_inst
 	 
 		 for  ( i=0; i < `PE_NUM; i++) 
 		begin : pe_inst
@@ -248,7 +249,7 @@ generate
 	  	 );
 		end
 	
-end
+//end
 endgenerate
 
 

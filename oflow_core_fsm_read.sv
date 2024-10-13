@@ -81,10 +81,11 @@ sm_type next_state;
 */
 // ----------------start_read----------------------------------
 	  always_ff @(posedge clk or negedge reset_N) begin 
-	  
-		 if (next_state == start_read_st && (current_state == idle_st || current_state == end_read_st) ) start_read <= #1 1;
-		 else start_read <= #1 0;
-		 
+		 if (!reset_N) start_read <= #1 1'b0;
+		 else begin 
+			 if (next_state == start_read_st && (current_state == idle_st || current_state == end_read_st) ) start_read <= #1 1'b1;
+			 else start_read <= #1 1'b0;
+		 end 	 
 	  end
  // -----------------------------------------------------------       
  //						FSM – Async Logic

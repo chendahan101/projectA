@@ -7,7 +7,7 @@
  *------------------------------------------------------------------------------*/
 
 `include "/users/epchof/Project/design/work/include_files/oflow_core_define.sv"
-
+`include "/users/epchof/Project/design/work/include_files/oflow_MEM_buffer_define.sv"
 
 `define DATA_WIDTH_LUT 16
 `define HALF_DATA_WIDTH_LUT (`DATA_WIDTH_LUT)/2
@@ -153,26 +153,32 @@ always_ff @(posedge clk or negedge reset_N) begin
 //--------------------counter_state---------------------------------	
 
 always_ff @(posedge clk or negedge reset_N) begin
-	if (!reset_N || current_state ==  idle_st || (current_state!= pe_sel_N_fill_lut_st  && next_state== pe_sel_N_fill_lut_st ) ) counter_state <= #1 0;
-	else  if( current_state == pe_sel_N_fill_lut_st ) counter_state <= #1 counter_state + 1 ;
-	
+	if (!reset_N  ) counter_state <= #1 0;
+	else begin 
+		if (current_state ==  idle_st || (current_state!= pe_sel_N_fill_lut_st  && next_state== pe_sel_N_fill_lut_st ) ) counter_state <= #1 0;
+		else  if( current_state == pe_sel_N_fill_lut_st ) counter_state <= #1 counter_state + 1 ;
+	end 	
  end
 	
 	
 //--------------------counter_row_sel---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st ) counter_row_sel <= #1 0;
-		 else  if( (current_state == fill_hist_st || current_state == new_bbox_st) && next_state == row_sel_st) counter_row_sel <= #1 counter_row_sel + 1 ;
-		 
+		 if (!reset_N  ) counter_row_sel <= #1 0;
+		 else begin 
+			 if (current_state ==  idle_st ) counter_row_sel <= #1 0;
+			 else  if( (current_state == fill_hist_st || current_state == new_bbox_st) && next_state == row_sel_st) counter_row_sel <= #1 counter_row_sel + 1 ;
+		 end 
 	  end	
 
 //--------------------counter_pe_sel---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st || current_state ==  row_sel_st) counter_pe_sel <= #1 0;
-		 else  if( current_state ==  pe_sel_N_fill_lut_st && (next_state == fill_hist_st || next_state == new_bbox_st) ) counter_pe_sel <= #1 counter_pe_sel + 1 ;
-		 
+		 if (!reset_N ) counter_pe_sel <= #1 0;
+		 else begin  
+			 if (current_state ==  idle_st || current_state ==  row_sel_st) counter_pe_sel <= #1 0;
+			 else  if( current_state ==  pe_sel_N_fill_lut_st && (next_state == fill_hist_st || next_state == new_bbox_st) ) counter_pe_sel <= #1 counter_pe_sel + 1 ;
+		 end  
 	  end	
 //--------------------cur_pe_reg---------------------------------	
 
@@ -206,48 +212,66 @@ always_ff @(posedge clk or negedge reset_N) begin
 //--------------------counter_hist---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st) counter_hist <= #1 0;
-		 else  if( current_state ==  pe_sel_N_fill_lut_st && !(data_out_flag & mask_flag) && (counter_state == 1) ) counter_hist <= #1 counter_hist + 1 ;
-		 
+		 if (!reset_N ) counter_hist <= #1 0;
+		 else begin 
+			 if (current_state ==  idle_st) counter_hist <= #1 0;
+			 else  if( current_state ==  pe_sel_N_fill_lut_st && !(data_out_flag & mask_flag) && (counter_state == 1) ) counter_hist <= #1 counter_hist + 1 ;
+		 end
 	  end	
 //--------------------hist_reg_instances---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st) begin
+		 if (!reset_N ) begin
 			 hist_reg_instances <= #1 '{default: 0}; 	
-		end
-		else  if( current_state ==  fill_hist_st) hist_reg_instances[cur_data_lut_reg -1] <= #1 hist_reg_instances[cur_data_lut_reg -1] + 1 ;
-			
+		 end
+		 else begin 
+			 if (current_state ==  idle_st) begin
+				 hist_reg_instances <= #1 '{default: 0}; 	
+			 end
+			 else  if( current_state ==  fill_hist_st) hist_reg_instances[cur_data_lut_reg -1] <= #1 hist_reg_instances[cur_data_lut_reg -1] + 1 ;
+		 end 	
 	  end	
 
 //--------------------hist_reg_pe---------------------------------	
 
 	  always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st) begin
+		 if (!reset_N ) begin
 			hist_reg_pe <= #1 '{default: 0};
-		end
-		else  if( current_state ==  fill_hist_st && update_hist) hist_reg_pe[cur_data_lut_reg -1] <= #1 cur_pe_reg ;
-			
+		 end
+		 else begin 
+			 if (current_state ==  idle_st) begin
+				 hist_reg_pe <= #1 '{default: 0};
+			  end
+			 else  if( current_state ==  fill_hist_st && update_hist) hist_reg_pe[cur_data_lut_reg -1] <= #1 cur_pe_reg ;
+		 end 	
 	  end	
 
 //--------------------hist_reg_row---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st) begin
+		 if (!reset_N ) begin
 			 hist_reg_row <= #1 '{default: 0};
-		end
-		else  if( current_state ==  fill_hist_st && update_hist) hist_reg_row[cur_data_lut_reg -1] <= #1 counter_row_sel ;
-			
+		 end
+		 else begin 
+			 if (current_state ==  idle_st) begin
+				 hist_reg_row <= #1 '{default: 0};
+			 end
+			 else  if( current_state ==  fill_hist_st && update_hist) hist_reg_row[cur_data_lut_reg -1] <= #1 counter_row_sel ;
+		 end	
 	  end
 
 //--------------------hist_reg_min_score---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st) begin
+		 if (!reset_N ) begin
 			 hist_reg_min_score <= #1 '{default: {`SCORE_LEN{1'b1}}} ; 
-		end
-		else  if( current_state ==  fill_hist_st && update_hist) hist_reg_min_score[cur_data_lut_reg -1] <= #1 cur_score_reg ;
-			
+		 end
+		 else begin 
+			 if (current_state ==  idle_st) begin
+				 hist_reg_min_score <= #1 '{default: {`SCORE_LEN{1'b1}}} ; 
+			 end
+			 else  if( current_state ==  fill_hist_st && update_hist) hist_reg_min_score[cur_data_lut_reg -1] <= #1 cur_score_reg ;
+		 end 		
 	  end	  
  // -----------------------------------------------------------       
  //						FSM – Async Logic
@@ -261,11 +285,11 @@ always_ff @(posedge clk or negedge reset_N) begin
 	write_to_pointer = 1'b0;
 	data_to_score_board_from_cr_id = 0;
 	write_to_id = 1'b0;
-	
+	data_in_flag = 0;
 	row_to_change = counter_row_sel;
 	pe_to_change = cur_pe_reg;
 	//data_in_lut = data_out_lut_for_fsm;
-	data_in_lut = 1'b0;
+	data_in_lut = 0;
 	th_conflict_flg = 1'b0;
 	csb = 1'b1;
 	new_bbox = 1'b0;

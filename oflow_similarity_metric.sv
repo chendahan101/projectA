@@ -162,9 +162,16 @@ oflow_calc_iou oflow_calc_iou(
 	end
 //--------------------counter---------------------------------	
 	 always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N || current_state == idle_st) counter <= #1 4'd0;
-		else if(next_state != current_state )	counter <= #1 4'd0;
-		else counter <= #1 counter + 1;
+		if (!reset_N ) counter <= #1 4'd0;
+		else begin 
+			if (current_state == idle_st) counter <= #1 4'd0;
+			else if(next_state != current_state )	counter <= #1 4'd0;
+			else counter <= #1 counter + 1;
+		
+		end 
+		
+		
+		
 		
 	end
 	
@@ -196,7 +203,7 @@ always_comb begin
 	//score = 0;
 	case (current_state)
 		idle_st: begin
-			start_iou = start ? 1:0;
+			start_iou = start ? 1'b1:1'b0;
 			next_state = start ? calc_st:idle_st;	
 				
 		end
@@ -207,7 +214,7 @@ always_comb begin
 				h_metric = l1_distance(height_prev,height_cur);
 				color1_metric = l1_distance_for_rgb(color1_prev,color1_cur);
 				color2_metric = l1_distance_for_rgb(color2_prev,color2_cur);
-				d_history_metric = 1 << d_history_prev;
+				d_history_metric = `D_HISTORY_METRIC'd1 << d_history_prev;
 			
 			if(valid_iou)
 				next_state = avg_st;

@@ -108,7 +108,7 @@ sm_type next_state;
 
 //assign start_DW_div_seq = new_frame_from_dma; // second option is to create a register that will raise to '1' for one cycle when moving from idle_st to set_variables_st
 assign new_set = new_set_from_dma;
-assign rnw_st = (current_state == write_st) ? 0 : 1 ;
+assign rnw_st = (current_state == write_st) ? 1'b0 : 1'b1 ;
 
 assign num_of_sets = (rem_result) ? div_result_reg + 1 : div_result_reg;
 assign num_of_bbox_in_last_set_div_4 = rem_result >> 2;
@@ -143,38 +143,52 @@ end
 //--------------------div_result_reg---------------------------------	
 
 always_ff @(posedge clk or negedge reset_N) begin
-	if (!reset_N || current_state ==  idle_st ) div_result_reg <= #1 0;
-	else  if( current_state == set_variables_st && next_state == pe_st) div_result_reg <= #1 div_result;
-	
+	if (!reset_N ) div_result_reg <= #1 0;
+	else begin 
+		if (current_state ==  idle_st ) div_result_reg <= #1 0;
+		else  if( current_state == set_variables_st && next_state == pe_st) div_result_reg <= #1 div_result;
+	end 
  end	
 
 //--------------------rem_result_reg---------------------------------	
 
-always_ff @(posedge clk or negedge reset_N) begin
-	if (!reset_N || current_state ==  idle_st ) rem_result_reg <= #1 0;
-	else  if( current_state == set_variables_st && next_state == pe_st) rem_result_reg <= #1 rem_result;
-	
+/*always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N  ) rem_result_reg <= #1 0;
+	else begin 
+		if (current_state ==  idle_st ) rem_result_reg <= #1 0;
+		else  if( current_state == set_variables_st && next_state == pe_st) rem_result_reg <= #1 rem_result;
+	end 
  end	
+ 
 //--------------------counter_set_fe_prev---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  set_variables_st ) counter_set_fe_prev <= #1 0;
-		 else  if( current_state == pe_st) counter_set_fe_prev <= #1 counter_set_fe ;
-		 
+		 if (!reset_N  ) counter_set_fe_prev <= #1 0;
+		 else begin 
+			 if (current_state ==  set_variables_st ) counter_set_fe_prev <= #1 0;
+			 else  if( current_state == pe_st) counter_set_fe_prev <= #1 counter_set_fe ;
+		 end 
 	  end	
+	  */
 //--------------------counter_of_remain_bboxes---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  set_variables_st ) counter_of_remain_bboxes <= #1 num_of_bbox_in_frame;
-		 else if (current_state ==  pe_st && control_ready_new_set && counter_of_remain_bboxes >= `PE_NUM) counter_of_remain_bboxes <= #1 counter_of_remain_bboxes - `PE_NUM; 
+		 if (!reset_N  ) counter_of_remain_bboxes <= #1 num_of_bbox_in_frame;
+		 else begin 
+			 if (current_state ==  set_variables_st ) counter_of_remain_bboxes <= #1 num_of_bbox_in_frame;
+			 else if (current_state ==  pe_st && control_ready_new_set && counter_of_remain_bboxes >= `PE_NUM) counter_of_remain_bboxes <= #1 counter_of_remain_bboxes - `PE_NUM; 
+		 end 
 	  end
 
 //--------------------frame_num---------------------------------	
 
 	 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || (current_state ==  idle_st && start == 1) || (current_state == conflict_resolve_st && next_state == idle_st)) frame_num <= #1 0;
-		 else if (current_state ==  write_st  && next_state == idle_st) frame_num <= #1 frame_num + 1;
+		 if (!reset_N ) frame_num <= #1 0;
+		 else begin 
+			 if ((current_state ==  idle_st && start == 1) || (current_state == conflict_resolve_st && next_state == idle_st)) frame_num <= #1 0;
+			 else if (current_state ==  write_st  && next_state == idle_st) frame_num <= #1 frame_num + 1;
+		 end 
 	  end
 
  //--------------------start_DW_div_seq---------------------------------	
@@ -202,9 +216,12 @@ always_ff @(posedge clk or negedge reset_N) begin
 */
  
  always_ff @(posedge clk or negedge reset_N) begin
-	 if (!reset_N || current_state ==  idle_st ) valid_id <= #1 1'b0;
-	 else if (current_state != write_st && next_state == write_st) valid_id <= #1  1'b1;
-	 else valid_id <= #1 1'b0; 
+	 if (!reset_N  ) valid_id <= #1 1'b0;
+	 else begin 
+		 if (current_state ==  idle_st ) valid_id <= #1 1'b0;
+		 else if (current_state != write_st && next_state == write_st) valid_id <= #1  1'b1;
+		 else valid_id <= #1 1'b0;  
+	 end 	 
   end
 		
 		

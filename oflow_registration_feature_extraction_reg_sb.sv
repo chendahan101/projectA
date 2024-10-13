@@ -49,11 +49,12 @@ module oflow_registration_feature_extraction_reg_sb #() (
 // -----------------------------------------------------------
 
 	always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N || ready_new_frame) begin 
+		if (!reset_N ) begin 
 			
 			feature_extraction_reg <= #1 '{default: 0};
 
 		end	
+		else if (ready_new_frame) 	feature_extraction_reg <= #1 '{default: 0};
 		else if  (we)  feature_extraction_reg[addr] <= #1 data_in;
 	end	
 			

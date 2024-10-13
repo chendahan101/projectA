@@ -70,9 +70,13 @@ sm_type next_state;
 //                			last REG	
 // -----------------------------------------------------------
 	 always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N || current_state == idle_st) last <= #1 0;
-		else if (done_read) last <= #1 1;
-		else if (done_similarity_metric && last ) last <= #1 0;
+		if (!reset_N ) last <= #1 0;
+		else begin 
+			if (current_state == idle_st) last <= #1 0;
+			else if (done_read) last <= #1 1;
+			else if (done_similarity_metric && last ) last <= #1 0;
+		end 
+				
 	end
 
 

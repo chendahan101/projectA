@@ -49,7 +49,6 @@ module oflow_core_fsm_write #() (
 logic [`ROW_LEN-1:0] counter_row;
 logic [`PE_LEN-1:0] counter_pe;
 logic [`COUNTER_READY_SIZE-1:0] counter_for_ready_from_core;
-	
 typedef enum {idle_st,select_row_st,select_pe_st,select_pe0_st,select_pe1_st,select_pe2_st,select_pe3_st} sm_type; //select_pe0_st is that the remainder with 4 of the #bboxes%22 is 0, ...
 sm_type current_state;
 sm_type next_state;
@@ -69,28 +68,36 @@ sm_type next_state;
 
 	 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st ) counter_row <= #1 0;
-		 else if (next_state ==  select_row_st && current_state == select_pe_st) counter_row <= #1 counter_row + 1;
-		 
+		 if (!reset_N  ) counter_row <= #1 0;
+		 else begin 
+			 if (current_state ==  idle_st ) counter_row <= #1 0;
+			 else if (next_state ==  select_row_st && current_state == select_pe_st) counter_row <= #1 counter_row + 1;
+		 end  
 	  end
 
 //--------------------counter_pe---------------------------------	
 
 	 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st ) counter_pe <= #1 0;
-		 else if ((current_state == select_pe_st&& next_state == select_pe_st) && counter_for_ready_from_core == 2 ) counter_pe <= #1 counter_pe + 1;
-		 else if (current_state == select_pe_st && next_state == select_row_st ) counter_pe <= #1 0;
-		 else if ((current_state == select_pe0_st && (next_state == select_pe0_st|| next_state == select_pe1_st || next_state == select_pe2_st || next_state == select_pe3_st) )&& counter_for_ready_from_core == 2 ) counter_pe <= #1 counter_pe + 1;
-	  end	  
+		 if (!reset_N  ) counter_pe <= #1 0;
+		 else begin 
+			 if (current_state ==  idle_st ) counter_pe <= #1 0;
+			 else if ((current_state == select_pe_st&& next_state == select_pe_st) && counter_for_ready_from_core == 2 ) counter_pe <= #1 counter_pe + 1;
+			 else if (current_state == select_pe_st && next_state == select_row_st ) counter_pe <= #1 0;
+			 else if ((current_state == select_pe0_st && (next_state == select_pe0_st|| next_state == select_pe1_st || next_state == select_pe2_st || next_state == select_pe3_st) )&& counter_for_ready_from_core == 2 ) counter_pe <= #1 counter_pe + 1;
+		 end  
+	end	  
 
 //--------------------counter_for_ready_from_core---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st ) counter_for_ready_from_core <= #1 0;
-		 else if ( (current_state == select_pe_st || current_state == select_pe0_st || current_state == select_pe1_st || current_state == select_pe2_st || current_state == select_pe3_st)  && counter_for_ready_from_core < 2 ) counter_for_ready_from_core <= #1 counter_for_ready_from_core + 1;
-		else if ( (current_state == select_pe_st || current_state == select_pe0_st || current_state == select_pe1_st || current_state == select_pe2_st || current_state == select_pe3_st) && counter_for_ready_from_core == 2 ) counter_for_ready_from_core <= #1 0;
-	  end	  
+		 if (!reset_N  ) counter_for_ready_from_core <= #1 0;
+		 else begin 
+			 if (current_state ==  idle_st ) counter_for_ready_from_core <= #1 0;
+			 else if ( (current_state == select_pe_st || current_state == select_pe0_st || current_state == select_pe1_st || current_state == select_pe2_st || current_state == select_pe3_st)  && counter_for_ready_from_core < 2 ) counter_for_ready_from_core <= #1 counter_for_ready_from_core + 1;
+			 else if ( (current_state == select_pe_st || current_state == select_pe0_st || current_state == select_pe1_st || current_state == select_pe2_st || current_state == select_pe3_st) && counter_for_ready_from_core == 2 ) counter_for_ready_from_core <= #1 0;
+		 end  
+	end	  
 
 		 
  // -----------------------------------------------------------       
@@ -137,10 +144,9 @@ sm_type next_state;
 		
 			if (counter_for_ready_from_core == 2)  begin 
 				ready_from_core = 1'b1;
-				if (counter_pe == (( `PE_NUM/4)-1) ) begin 
+				if (counter_pe ==     (( (`PE_NUM)/4)-1)           ) begin 
 					next_state = select_row_st;
 			   end
-				
 			end 
 			else 	ready_from_core = 1'b0;
 		

@@ -60,9 +60,11 @@ sm_type next_state;
 	end
 	
 //--------------------counter_set_fe_prev---------------------------------	
-
+	//logic cond1 ;
+	//assign cond1 = (!reset_N )|| (current_state ==  idle_st); 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st ) counter_first_frame_sets <= #1 0;
+		 if ((!reset_N )) counter_first_frame_sets <= #1 0;
+		 else if ((current_state ==  idle_st) ) counter_first_frame_sets <= #1 0;
 		 else  if( current_state == wait_first_frame_st && next_state==score_board_first_frame_st) counter_first_frame_sets <= #1 counter_first_frame_sets+1 ;
 		 
 	  end	

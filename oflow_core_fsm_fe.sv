@@ -78,9 +78,11 @@ assign done_fe = generate_done_fe;
 
 	 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st ) counter_set_fe <= #1 0;
-		 else if (current_state ==  wait_st && next_state == fe_st) counter_set_fe <= #1 counter_set_fe + 1;
-		 
+		 if (!reset_N  ) counter_set_fe <= #1 0;
+		 else begin 
+			 if (current_state ==  idle_st ) counter_set_fe <= #1 0;
+			 else if (current_state ==  wait_st && next_state == fe_st) counter_set_fe <= #1 counter_set_fe + 1;
+		 end 
 	  end
 
  //--------------------ready_new_set---------------------------------	
@@ -97,9 +99,11 @@ assign done_fe = generate_done_fe;
 
  
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st && next_state == fe_st) flg_for_sampling_last_set_prev <= #1 1'b0;
-		 else if (current_state ==  wait_st && next_state == idle_st) flg_for_sampling_last_set_prev <= #1   1'b1;
-		 
+		 if (!reset_N ) flg_for_sampling_last_set_prev <= #1 1'b0;
+		 else begin 
+			 if (current_state ==  idle_st && next_state == fe_st) flg_for_sampling_last_set_prev <= #1 1'b0;
+			 else if (current_state ==  wait_st && next_state == idle_st) flg_for_sampling_last_set_prev <= #1   1'b1;
+		 end  
 	  end
 
  //--------------------flg_for_sampling_last_set---------------------------------	

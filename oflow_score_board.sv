@@ -78,34 +78,74 @@ module  oflow_score_board(
 // -----------------------------------------------------------
 
 	always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N || ready_new_frame) begin 
+		if (!reset_N ) begin 
 			//for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin scores_reg[i] <= #1 '0; end
 			 scores_reg <= #1 '{default: 0};
-
 		end	
-		else if  (start_score_board)  scores_reg[row_sel_by_set] <= #1 {min_score_0,min_score_1};
+		else begin  
+			if ( ready_new_frame) begin 
+				//for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin scores_reg[i] <= #1 '0; end
+				scores_reg <= #1 '{default: 0};
+			end
+			 else if  (start_score_board)  scores_reg[row_sel_by_set] <= #1 {min_score_0,min_score_1}; 
+		end 
+		
 	end	
 			
 	always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N || ready_new_frame) begin 
+		if (!reset_N ) begin 
 			//for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin ids_reg[i] <= #1 '0; end
 			ids_reg <= #1 '{default: 0};
 		end	
-		else if  (start_score_board)  ids_reg[row_sel_by_set] <= #1 {min_id_0,min_id_1};
-		else if (write_to_id) ids_reg[row_to_change] <= #1 {data_from_cr_id,min_id_1};
+		else begin 
+			if (ready_new_frame) begin 
+				//for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin ids_reg[i] <= #1 '0; end
+				ids_reg <= #1 '{default: 0};
+			end
+			else if  (start_score_board)  ids_reg[row_sel_by_set] <= #1 {min_id_0,min_id_1};
+			else if (write_to_id) ids_reg[row_to_change] <= #1 {data_from_cr_id,min_id_1};
+		end 
+		
 	end	
 	
 	always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N || ready_new_frame) begin 
+		if (!reset_N ) begin 
 			//for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin pointers_reg[i] <= #1 '0; end
 			pointers_reg <= #1 '{default: 0};
 		end	
-		else if  (write_to_pointer)  pointers_reg[row_to_change] <= #1 data_from_cr_pointer;
+		else begin 
+			if (ready_new_frame) begin 
+				//for (int i=0; i<`MAX_ROWS_IN_SCORE_BOARD; i+=1) begin pointers_reg[i] <= #1 '0; end
+				pointers_reg <= #1 '{default: 0};
+			end	
+			else if  (write_to_pointer)  pointers_reg[row_to_change] <= #1 data_from_cr_pointer;
+		end 
+		
+		
+		
 	end	
 	
 	always_ff @(posedge clk or negedge reset_N) begin
-		if (!reset_N || ready_new_frame|| done_score_board) begin done_score_board <= #1 1'b0; end
-		else if  (start_score_board )  done_score_board <= #1 1'b1 ;
+		if (!reset_N ) begin 
+			done_score_board <= #1 1'b0; 
+		end
+		else begin
+			
+			
+			if (ready_new_frame|| done_score_board) begin 
+				done_score_board <= #1 1'b0; 
+			end
+			else if  (start_score_board )  done_score_board <= #1 1'b1 ;
+
+			
+		end
+		
+		
+		
+		
+		
+		
+		
 	end	
 	
 	

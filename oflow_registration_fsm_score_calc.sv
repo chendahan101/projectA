@@ -57,9 +57,11 @@ sm_type next_state;
 //--------------------counter_set_fe_prev---------------------------------	
 
 	 always_ff @(posedge clk or negedge reset_N) begin
-		 if (!reset_N || current_state ==  idle_st ) counter_of_sets <= #1 0;
-		 else  if( current_state == wait_st && next_state==score_calc_st) counter_of_sets <= #1 counter_of_sets+1 ;
-		 
+		 if (!reset_N ) counter_of_sets <= #1 0;
+		 else begin
+			if (current_state ==  idle_st ) counter_of_sets <= #1 0;
+		 	else  if( current_state == wait_st && next_state==score_calc_st) counter_of_sets <= #1 counter_of_sets+1 ;
+		 end 
 	  end	
 
 		 
