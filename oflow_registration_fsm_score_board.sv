@@ -18,6 +18,7 @@ module oflow_registration_fsm_score_board #() (
 	input logic [`TOTAL_FRAME_NUM_WIDTH-1:0] frame_num, // counter for frame_num
 	input logic [`SET_LEN-1:0] num_of_sets, 
 	input logic  start_registration,
+	input logic  not_start_registration,
 
 	//fsm score calc in  registration
 	input logic [`SET_LEN-1:0] counter_of_sets,
@@ -93,7 +94,7 @@ sm_type next_state;
 		 score_board_st: begin
 		
 			 //start_score_board = 1'b1;		
-			if (counter_of_sets == num_of_sets-1) next_state = idle_st;
+			if (counter_of_sets == num_of_sets-1 || not_start_registration) next_state = idle_st;
 			else next_state = wait_st;
 
 			

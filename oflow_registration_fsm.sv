@@ -69,6 +69,7 @@ oflow_registration_fsm_score_board oflow_registration_fsm_score_board(
 	.frame_num(frame_num), // counter for frame_num
 	.num_of_sets(num_of_sets), 
 	.start_registration(start_registration),
+	.not_start_registration(not_start_registration),
 	
 	.counter_of_sets(counter_of_sets),
 	

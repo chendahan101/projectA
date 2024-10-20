@@ -278,14 +278,14 @@ endtask
 
 		   @(posedge ready_new_frame);
 		 
-		   num_of_bbox_in_frame = 72;
+		   num_of_bbox_in_frame = 70;
 		   
 
 		   //====================================
 
 		   //==================== START SET 0================
 
-		   set_of_bboxes(13,2000);
+		   set_of_bboxes(13,200);
 		   new_frame = 1'b1;
 		   @(posedge clk);
 		   new_frame = 1'b0;
@@ -322,14 +322,14 @@ endtask
 
 		   @(posedge ready_new_frame);
 		  
-		   num_of_bbox_in_frame = 72;
+		   num_of_bbox_in_frame = 70;
 		   
 
 		   //====================================
 
 		   //==================== START SET 0================
 
-		   set_of_bboxes(10,2000);
+		   set_of_bboxes_frame_2(10,200);
 		   new_frame = 1'b1;
 		   @(posedge clk);
 		   new_frame = 1'b0;
@@ -339,7 +339,7 @@ endtask
 		   
 		   //==================== START SET 1================
 
-		   set_of_bboxes(9,2000);
+		   set_of_bboxes_frame_2(9,200);
 		   //@(posedge clk);
 		   new_set_from_dma = 1'b1;
 		   @(posedge clk);
@@ -350,7 +350,7 @@ endtask
 
 		   //==================== START SET 2================
 
-		   set_of_bboxes(4,200);
+		   set_of_bboxes_frame_2(4,200);
 		   //@(posedge clk);
 		   new_set_from_dma = 1'b1;
 		   @(posedge clk);
@@ -366,7 +366,7 @@ endtask
 
 		   @(posedge ready_new_frame);
 		   
-		   num_of_bbox_in_frame = 70;
+		   num_of_bbox_in_frame = 24;
 		   
 
 		   //====================================
@@ -377,9 +377,12 @@ endtask
 		   new_frame = 1'b1;
 		   @(posedge clk);
 		   new_frame = 1'b0;
+		 
 		   
+		   /*
 		   @(posedge ready_new_set);
 		   //====================================
+		  
 		   
 		   //==================== START SET 1================
 
@@ -401,6 +404,9 @@ endtask
 		   new_set_from_dma = 1'b0;
 		   
 		   //====================================
+		   
+		   
+		   |*/
 		   
 		   @(posedge ready_new_frame);
 		   
@@ -452,6 +458,36 @@ endtask
 	   end
 	   endtask
 	   
+	   task set_of_bboxes_frame_2 (input logic [`CM_CONCATE_LEN/2-1:0 ] x, input logic [`COLOR_LEN-1:0 ] z);
+	   begin
+
+		   set_of_bboxes_from_dma[0] = bbox(1,2,10,20,130,200);
+		   set_of_bboxes_from_dma[1] = bbox(6,400,10,20,130,200);
+		   set_of_bboxes_from_dma[2] = bbox(x,60,10,20,130,z);
+		   set_of_bboxes_from_dma[3] = bbox(x,59,10,20,130,z);
+		   set_of_bboxes_from_dma[4] = bbox(x,58,10,20,130,z);
+		   set_of_bboxes_from_dma[5] = bbox(x,57,10,20,130,z);
+		   set_of_bboxes_from_dma[6] = bbox(x,56,10,20,130,z);
+		   set_of_bboxes_from_dma[7] = bbox(x,55,10,20,130,z);
+		   set_of_bboxes_from_dma[8] = bbox(x,54,10,20,130,z);
+		   set_of_bboxes_from_dma[9] = bbox(x,67,10,20,130,200);
+		   set_of_bboxes_from_dma[10] = bbox(x,68,10,20,130,200);
+		   set_of_bboxes_from_dma[11] = bbox(x,69,10,20,130,200);
+		   set_of_bboxes_from_dma[12] = bbox(x,70,10,20,130,200);
+		   set_of_bboxes_from_dma[13] = bbox(x,71,10,20,130,200);
+		   set_of_bboxes_from_dma[14] = bbox(x,72,10,20,130,200);
+		   set_of_bboxes_from_dma[15] = bbox(x,73,10,20,130,200);
+		   set_of_bboxes_from_dma[16] = bbox(x,74,10,20,130,200);
+		   set_of_bboxes_from_dma[17] = bbox(x,75,10,20,130,200);
+		   set_of_bboxes_from_dma[18] = bbox(x,76,10,20,130,200);
+		   set_of_bboxes_from_dma[19] = bbox(x,77,10,20,130,200);
+		   set_of_bboxes_from_dma[20] = bbox(x,78,10,20,130,200);
+		   set_of_bboxes_from_dma[21] = bbox(x,79,10,20,130,200);
+		   set_of_bboxes_from_dma[22] = bbox(x,80,10,20,130,200);
+		   set_of_bboxes_from_dma[23] = bbox(x,81,10,20,130,200);
+	   
+   end
+   endtask 
 	   
 endmodule
 
