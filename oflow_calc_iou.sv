@@ -148,16 +148,17 @@ always_comb begin
 			//if(counter == 0)
 			//	start_DW_div_seq = 1'b1;
 			//temp_iou = ((Intersection )<< 22) / (size_length_k + size_length_history - Intersection); // its ok to sub 22 bits from 16 bits because the 22 bits is less than 16 bits actually
-			if (temp_iou[22]) begin 
-				iou =0; // iou q0.22
-			end
-			else begin 
-				iou = {22{1'b1}} - temp_iou[21:0];  // iou q0.22
-			end
+		
 			
 			
 			// iou = 1 - (Intersection / (size_length_k + size_length_history - Intersection));
 			if (done_DW_div_seq_derivative) begin// counter start fom 0
+				if (temp_iou[22]) begin 
+					iou =0; // iou q0.22
+				end
+				else begin 
+					iou = {22{1'b1}} - temp_iou[21:0];  // iou q0.22
+				end
 				next_state = idle_st;
 				valid_iou = 1'b1;
 			end	

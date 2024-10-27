@@ -56,6 +56,7 @@ module oflow_top (
  logic [`WEIGHT_LEN-1:0] dhistory_weight;
  logic [`SCORE_LEN-1:0] score_th_for_new_bbox;
  logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frames;
+ logic [`MAX_THRESHOLD_FOR_CONFLICTS_LEN-1:0]  max_threshold_for_conflicts;
 
 
 

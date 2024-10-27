@@ -180,7 +180,16 @@ generate
 	end
 endgenerate
 
-assign initial_counter_for_new_bbox = (frame_num == 1);
+assign initial_counter_for_new_bbox = (frame_num == 0);
+
+
+//--------------------total_bboxes_first_frame---------------------------------	
+
+always_ff @(posedge clk or negedge reset_N) begin
+	if (!reset_N ) total_bboxes_first_frame <= #1 0;
+	else if (frame_num==0) total_bboxes_first_frame <= #1 num_of_bbox_in_frame;
+ end	
+
 // -----------------------------------------------------------       
 //                Instantiations
 // -----------------------------------------------------------  
@@ -300,7 +309,7 @@ oflow_conflict_resolve #() oflow_conflict_resolve (
 	// for new bbox 
 	.score_th_for_new_bbox(score_th_for_new_bbox), // from reg_file
 	.initial_counter_for_new_bbox(initial_counter_for_new_bbox),
-	.total_bboxes_first_frame(num_of_bbox_in_frame),
+	.total_bboxes_first_frame(total_bboxes_first_frame),
 	
 	//for conflict_counter_th
 	.max_threshold_for_conflicts(max_threshold_for_conflicts),
