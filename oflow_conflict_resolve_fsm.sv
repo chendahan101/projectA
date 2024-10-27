@@ -17,7 +17,7 @@
 `define INSTANCES_LEN 4
 
 
-module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 10 ) (
+module oflow_conflict_resolve_fsm #() (
 	
 	input logic clk,
 	input logic reset_N,
@@ -30,6 +30,9 @@ module oflow_conflict_resolve_fsm #(parameter MAX_CONFLICTS_TH = 10 ) (
 	input logic [`SCORE_LEN-1:0] score_th_for_new_bbox, // from reg_file
 	input logic initial_counter_for_new_bbox,
 	input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] total_bboxes_first_frame,
+	
+	//for conflict_counter_th
+	input logic [`MAX_THRESHOLD_FOR_CONFLICTS_LEN-1:0] max_threshold_for_conflicts,
 	
 	//LUT 
 	input logic [`DATA_WIDTH_LUT-1:0] data_out_lut_for_fsm, 
@@ -375,7 +378,7 @@ always_ff @(posedge clk or negedge reset_N) begin
 			else update_hist = 1'b1;
 			
 			
-			if( hist_reg_instances[cur_data_lut_reg -1] >= MAX_CONFLICTS_TH ) begin
+			if( hist_reg_instances[cur_data_lut_reg -1] >= max_threshold_for_conflicts ) begin
 				done_cr = 1'b1;
 				th_conflict_flg = 1'b1;
 				next_state = idle_st;

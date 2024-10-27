@@ -26,6 +26,9 @@ module oflow_conflict_resolve #() (
 	input logic initial_counter_for_new_bbox,
 	input logic [`NUM_OF_BBOX_IN_FRAME_WIDTH-1:0] total_bboxes_first_frame,
 	
+	//for conflict_counter_th
+	input logic [`MAX_THRESHOLD_FOR_CONFLICTS_LEN-1:0] max_threshold_for_conflicts,
+	
 	//interface_betwe_luten_conflict_resolve_and_pes
 	input logic [`SCORE_LEN-1:0] score_to_cr, //arrives from score_board
 	input logic [`ID_LEN-1:0] id_to_cr, //arrives from score_board
@@ -92,7 +95,6 @@ module oflow_conflict_resolve #() (
  
 // Instantiate the oflow_conflict_resolve_fsm module
 oflow_conflict_resolve_fsm #(
-		.MAX_CONFLICTS_TH() // Set the parameter value here
 	) oflow_conflict_resolve_fsm (
 		.clk(clk),
 		.reset_N(reset_N),
@@ -105,6 +107,9 @@ oflow_conflict_resolve_fsm #(
 		.score_th_for_new_bbox(score_th_for_new_bbox), //  from reg_file
 		.initial_counter_for_new_bbox(initial_counter_for_new_bbox),
 		.total_bboxes_first_frame(total_bboxes_first_frame),
+		
+		//for conflict_counter_th
+		.max_threshold_for_conflicts(max_threshold_for_conflicts),
 		
 		// LUT
 		.data_out_lut_for_fsm(data_out_lut_for_fsm),

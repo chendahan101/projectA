@@ -36,7 +36,8 @@ module oflow_reg_file #() (
 	output logic [`WEIGHT_LEN-1:0] color2_weight,
 	output logic [`WEIGHT_LEN-1:0] dhistory_weight,
 	output logic [`SCORE_LEN-1:0] score_th_for_new_bbox,
-	output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frames
+	output logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frames,
+	output logic [`MAX_THRESHOLD_FOR_CONFLICTS_LEN-1:0]  max_threshold_for_conflicts
 	);
 
 
@@ -53,6 +54,7 @@ module oflow_reg_file #() (
    
    logic [`SCORE_LEN-1:0] score_th_for_new_bbox_reg;
    logic [`NUM_OF_HISTORY_FRAMES_WIDTH-1:0]  num_of_history_frame_reg;
+   logic [`MAX_THRESHOLD_FOR_CONFLICTS_LEN-1:0]  max_threshold_for_conflicts_reg;
    
    //logic [31:0] apb_prdata_reg;
    
@@ -65,7 +67,7 @@ module oflow_reg_file #() (
 	assign time_to_write = apb_pwrite && apb_psel && apb_penable ;
 	assign time_to_read = !apb_pwrite && apb_psel && apb_penable ;
 	assign apb_pready = (time_to_write || time_to_read) && (apb_addr == `W_IOU_ADDR || apb_addr == `W_WIDTH_ADDR || apb_addr == `W_HEIGHT_ADDR ||  apb_addr == `W_COLOR1_ADDR ||apb_addr == `W_COLOR2_ADDR || 
-						 apb_addr == `NUM_OF_HISTORY_FRAMES_ADDR || apb_addr == `W_HISTORY_ADDR)  ;
+						 apb_addr == `NUM_OF_HISTORY_FRAMES_ADDR || apb_addr == `W_HISTORY_ADDR || apb_addr == `MAX_THRESHOLD_FOR_CONFLICTS_ADDR)  ;
 	
 	assign iou_weight = w_iou_reg;
 	assign w_weight = w_w_reg;
@@ -74,8 +76,10 @@ module oflow_reg_file #() (
 	assign color2_weight = w_color2_reg;
 	assign dhistory_weight = w_dhistory_reg;
 	
+	
 	assign score_th_for_new_bbox = score_th_for_new_bbox_reg;
 	assign num_of_history_frames = num_of_history_frame_reg;
+	assign max_threshold_for_conflicts = max_threshold_for_conflicts_reg;
 
 	//assign apb_prdata = apb_prdata_reg;
 // -----------------------------------------------------------       
@@ -126,14 +130,20 @@ module oflow_reg_file #() (
 
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
-		if(!reset_N) score_th_for_new_bbox_reg <= #1 3'd0; 
+		if(!reset_N) score_th_for_new_bbox_reg <= #1 0; 
 		else if(time_to_write && (apb_addr == `SCORE_TH_FOR_NEW_BBOX_ADDR)) score_th_for_new_bbox_reg <= #1 apb_pwdata; 
 	end 
 	
 	always_ff @(posedge clk or negedge reset_N)   
 	begin 
-		if(!reset_N) num_of_history_frame_reg <= #1 3'd0; 
+		if(!reset_N) num_of_history_frame_reg <= #1 0; 
 		else if(time_to_write && (apb_addr == `NUM_OF_HISTORY_FRAMES_ADDR)) num_of_history_frame_reg <= #1 apb_pwdata; 
+	end 
+	
+	always_ff @(posedge clk or negedge reset_N)   
+	begin 
+		if(!reset_N) max_threshold_for_conflicts_reg <= #1 0; 
+		else if(time_to_write && (apb_addr == `MAX_THRESHOLD_FOR_CONFLICTS_ADDR)) max_threshold_for_conflicts_reg <= #1 apb_pwdata; 
 	end 
 		
 	
@@ -185,6 +195,7 @@ module oflow_reg_file #() (
 					`W_HISTORY_ADDR: apb_prdata= w_dhistory_reg;
 					`SCORE_TH_FOR_NEW_BBOX_ADDR: apb_prdata = score_th_for_new_bbox_reg;
 					`NUM_OF_HISTORY_FRAMES_ADDR: apb_prdata =  num_of_history_frame_reg;
+					`MAX_THRESHOLD_FOR_CONFLICTS_ADDR: apb_prdata =  max_threshold_for_conflicts_reg;
 					//default: apb_prdata = num_of_history_frame_reg; 	
 				endcase	
 			end

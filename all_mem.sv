@@ -29,7 +29,7 @@
  // Date     : 1-Nov-2005
  //<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=<=
  module all_mem #(parameter NUM_OF_MEM = 6,
-				   parameter DATA_WIDTH_MEM = 290,
+				   parameter DATA_WIDTH_MEM = 284,
 				   parameter DATA_INST_WIDTH = 64,
 				   parameter ADDR_WIDTH = 8,
 				   parameter RAM_DEPTH = (1 << ADDR_WIDTH))(

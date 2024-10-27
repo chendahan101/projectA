@@ -38,6 +38,7 @@ module oflow_core #() (
 	input logic [`WEIGHT_LEN-1:0] color2_weight,
 	input logic [`WEIGHT_LEN-1:0] dhistory_weight,
 	input logic [`SCORE_LEN-1:0] score_th_for_new_bbox,
+	input logic [`MAX_THRESHOLD_FOR_CONFLICTS_LEN-1:0] max_threshold_for_conflicts,
 	
 	
 	
@@ -301,6 +302,9 @@ oflow_conflict_resolve #() oflow_conflict_resolve (
 	.initial_counter_for_new_bbox(initial_counter_for_new_bbox),
 	.total_bboxes_first_frame(num_of_bbox_in_frame),
 	
+	//for conflict_counter_th
+	.max_threshold_for_conflicts(max_threshold_for_conflicts),
+	
 	// Interface between CR and PEs
 	.score_to_cr(score_to_cr),
 	.id_to_cr(id_to_cr),
@@ -312,7 +316,7 @@ oflow_conflict_resolve #() oflow_conflict_resolve (
 	.write_to_pointer(write_to_pointer_from_cr),
 	.data_to_score_board_from_cr_id(data_to_score_board_from_cr_id),
 	.write_to_id(write_to_id_from_cr),
-	.conflict_counter_th(conflict_counter_th) 
+	.conflict_counter_th(conflict_counter_th)
 );
 
 

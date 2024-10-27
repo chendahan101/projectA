@@ -36,6 +36,9 @@ sm_type next_state;
 //                  logicisters & Wires
 // -----------------------------------------------------------  
 
+
+ 
+
    logic [`POSITION_INTERSECTION-1:0] x_tl_intersection;
    logic [`POSITION_INTERSECTION-1:0] x_br_intersection;
    logic [`POSITION_INTERSECTION-1:0] y_tl_intersection;
@@ -47,9 +50,9 @@ sm_type next_state;
    logic [`BBOX_POSITION_FRAME-1:0] temp_iou;
 
 	logic start_DW_div_seq;
-	logic done_DW_div_seq, divide_by_0, remainder;
+	logic done_DW_div_seq, done_DW_div_seq_prev,done_DW_div_seq_derivative, divide_by_0;
 	logic [`INTERSECTION*2-1:0] a;
-	logic [`INTERSECTION-1:0] b;
+	logic [`INTERSECTION-1:0] b, remainder;
 
 // -----------------------------------------------------------       
 //                 Instantiations
@@ -58,7 +61,23 @@ sm_type next_state;
    DW_div_seq # ( .a_width(`INTERSECTION*2), .b_width(`INTERSECTION) ) DW_div_seq ( .clk(clk) , .rst_n(reset_N), .hold(1'b0)
 	   , .start(start_DW_div_seq), .a(a),   .b(b) , .complete(done_DW_div_seq), .divide_by_0(divide_by_0), .quotient(temp_iou), .remainder(remainder) );
    
-   
+   //--------------------done_DW_div_seq_prev---------------------------------	
+
+   always_ff @(posedge clk or negedge reset_N) begin
+	   if (!reset_N ) done_DW_div_seq_prev <= #1 1'b0;
+	   else   done_DW_div_seq_prev <= #1 done_DW_div_seq;
+	   
+   end
+
+   //--------------------done_DW_div_seq_derivative---------------------------------	
+
+   always_ff @(posedge clk or negedge reset_N) begin
+	   if (!reset_N ) done_DW_div_seq_derivative <= #1 1'b0;
+	   else  if(done_DW_div_seq == 1'b1 && done_DW_div_seq_prev == 1'b0) done_DW_div_seq_derivative <= #1 1'b1;
+	   else done_DW_div_seq_derivative <= #1 1'b0;
+	   
+   end	
+	 
 // -----------------------------------------------------------       
 //                FSM synchronous procedural block.	
 // -----------------------------------------------------------
@@ -138,7 +157,7 @@ always_comb begin
 			
 			
 			// iou = 1 - (Intersection / (size_length_k + size_length_history - Intersection));
-			if (counter == 3) begin// counter start fom 0
+			if (done_DW_div_seq_derivative) begin// counter start fom 0
 				next_state = idle_st;
 				valid_iou = 1'b1;
 			end	

@@ -30,7 +30,8 @@ module oflow_core_tb #() ();
 	 logic [`WEIGHT_LEN-1:0] color1_weight;
 	 logic [`WEIGHT_LEN-1:0] color2_weight;
 	 logic [`WEIGHT_LEN-1:0] dhistory_weight;
-	
+	 logic [`SCORE_LEN-1:0] score_th_for_new_bbox;
+	 
 	 logic start; // from top
 	 logic new_frame;
 	
@@ -123,7 +124,8 @@ task initiate_all ();        // sets all oflow inputs to '0'.
 	  color1_weight=0;
 	  color2_weight=0;
 	  dhistory_weight=0;
-	 
+	  score_th_for_new_bbox = 32'h1_2a00;
+	  
 	  start=0; // from top
 	  new_frame=0;
 	 
@@ -161,7 +163,7 @@ begin
 
 	//==================== START SET 0================
 
-	set_of_bboxes(12);
+	set_of_bboxes(12,200);
 	new_frame = 1'b1;
 	@(posedge clk);
 	new_frame = 1'b0;
@@ -171,7 +173,7 @@ begin
 
 	//==================== START SET 1================
 
-	set_of_bboxes(5);
+	set_of_bboxes(5,200);
 	//@(posedge clk);
 	new_set_from_dma = 1'b1;
 	@(posedge clk);
@@ -182,7 +184,7 @@ begin
 
 	//==================== START SET 2================
 
-	set_of_bboxes(7);
+	set_of_bboxes(7,200);
 	//@(posedge clk);
 	new_set_from_dma = 1'b1;
 	@(posedge clk);
@@ -205,7 +207,7 @@ begin
 
 	//==================== START SET 0================
 
-	set_of_bboxes(13);
+	set_of_bboxes(13,2000);
 	new_frame = 1'b1;
 	@(posedge clk);
 	new_frame = 1'b0;
@@ -215,7 +217,7 @@ begin
 	
 	//==================== START SET 1================
 
-	set_of_bboxes(6);
+	set_of_bboxes(6,200);
 	//@(posedge clk);
 	new_set_from_dma = 1'b1;
 	@(posedge clk);
@@ -226,7 +228,7 @@ begin
 
 	//==================== START SET 2================
 
-	set_of_bboxes(8);
+	set_of_bboxes(8,200);
 	//@(posedge clk);
 	new_set_from_dma = 1'b1;
 	@(posedge clk);
@@ -249,7 +251,7 @@ begin
 
 	//==================== START SET 0================
 
-	set_of_bboxes(10);
+	set_of_bboxes(10,2000);
 	new_frame = 1'b1;
 	@(posedge clk);
 	new_frame = 1'b0;
@@ -259,7 +261,7 @@ begin
 	
 	//==================== START SET 1================
 
-	set_of_bboxes(9);
+	set_of_bboxes(9,2000);
 	//@(posedge clk);
 	new_set_from_dma = 1'b1;
 	@(posedge clk);
@@ -270,7 +272,7 @@ begin
 
 	//==================== START SET 2================
 
-	set_of_bboxes(4);
+	set_of_bboxes(4,200);
 	//@(posedge clk);
 	new_set_from_dma = 1'b1;
 	@(posedge clk);
@@ -293,7 +295,7 @@ begin
 
 	//==================== START SET 0================
 
-	set_of_bboxes(12);
+	set_of_bboxes(12,200);
 	new_frame = 1'b1;
 	@(posedge clk);
 	new_frame = 1'b0;
@@ -303,7 +305,7 @@ begin
 	
 	//==================== START SET 1================
 
-	set_of_bboxes(6);
+	set_of_bboxes(6,200);
 	//@(posedge clk);
 	new_set_from_dma = 1'b1;
 	@(posedge clk);
@@ -314,7 +316,7 @@ begin
 
 	//==================== START SET 2================
 
-	set_of_bboxes(7);
+	set_of_bboxes(7,200);
 	//@(posedge clk);
 	new_set_from_dma = 1'b1;
 	@(posedge clk);
@@ -354,18 +356,18 @@ function logic[85:0] bbox (input logic [`CM_CONCATE_LEN/2-1:0 ] x,input logic  [
 endfunction	
 
 
-task set_of_bboxes (input logic [`CM_CONCATE_LEN/2-1:0 ] x);
+task set_of_bboxes (input logic [`CM_CONCATE_LEN/2-1:0 ] x, input logic [`COLOR_LEN-1:0 ] z);
 begin
 
 		set_of_bboxes_from_dma[0] = bbox(1,2,10,20,130,200);
 		set_of_bboxes_from_dma[1] = bbox(6,400,10,20,130,200);
-		set_of_bboxes_from_dma[2] = bbox(x,60,10,20,130,200);
-		set_of_bboxes_from_dma[3] = bbox(x,61,10,20,130,200);
-		set_of_bboxes_from_dma[4] = bbox(x,62,10,20,130,200);
-		set_of_bboxes_from_dma[5] = bbox(x,63,10,20,130,200);
-		set_of_bboxes_from_dma[6] = bbox(x,64,10,20,130,200);
-		set_of_bboxes_from_dma[7] = bbox(x,65,10,20,130,200);
-		set_of_bboxes_from_dma[8] = bbox(x,66,10,20,130,200);
+		set_of_bboxes_from_dma[2] = bbox(x,60,10,20,130,z);
+		set_of_bboxes_from_dma[3] = bbox(x,61,10,20,130,z);
+		set_of_bboxes_from_dma[4] = bbox(x,62,10,20,130,z);
+		set_of_bboxes_from_dma[5] = bbox(x,63,10,20,130,z);
+		set_of_bboxes_from_dma[6] = bbox(x,64,10,20,130,z);
+		set_of_bboxes_from_dma[7] = bbox(x,65,10,20,130,z);
+		set_of_bboxes_from_dma[8] = bbox(x,66,10,20,130,z);
 		set_of_bboxes_from_dma[9] = bbox(x,67,10,20,130,200);
 		set_of_bboxes_from_dma[10] = bbox(x,68,10,20,130,200);
 		set_of_bboxes_from_dma[11] = bbox(x,69,10,20,130,200);
@@ -434,117 +436,5 @@ endtask
 
 endmodule
 
-/*
-   
-// -----------------------------------------------------------       
-//                  Registers & Wires
-// -----------------------------------------------------------  
 
-	
-	logic clk;
-	logic reset_N;
-	logic [`BIT_NUMBER_OF_PE-1:0][111:0] data_in;
-	logic [`BIT_NUMBER_OF_PE-1:0] wr;
-	logic [`BIT_NUMBER_OF_PE-1:0][7:0] addr;
-	logic  EN;
-	logic [`BIT_NUMBER_OF_PE-1:0] pe;
-	logic [`BIT_NUMBER_OF_PE-1:0][111:0] data_out;
-
-			
-// ----------------------------------------------------------------------
-//                   Instantiation
-// ----------------------------------------------------------------------
-
-
-
-oflow_core oflow_core( .clk(clk),
-			.reset_N(reset_N)	,
-			.data_in(data_in),
-			.wr(wr),
-			.addr(addr),
-			.EN(EN),
-			
-			.data_out(data_out)
-			);
-	
-	 
-// ----------------------------------------------------------------------
-//                   Test Pattern
-// ----------------------------------------------------------------------
-
-
-initial 
-begin
-   initiate_all;                                 // Initiates all input signals to '0' and open necessary files
-	 
-   #100 
-   @(posedge clk); 
-   //						data_2_write, addr_2_write,pe_2_write
-	write_2_score_board_in_pe(112'd3, 8'hff, 22'd3);
-	#100 $finish;  
-	read_2_score_board_in_pe(8'hff, 22'd3);
-//   #100000  $finish;
-   
-end
-   
-
-
-
-// ----------------------------------------------------------------------
-//                   Clock generator  (Duty cycle 8ns)
-// ----------------------------------------------------------------------
-
-   
- always begin
-	#2.5 clk = ~clk;
-  end
-
-// ----------------------------------------------------------------------
-//                   Tasks
-// ----------------------------------------------------------------------
-
- 
- task initiate_all;        // sets all tso inputs to '0'.
-	begin
-	clk = 0;
-	reset_N = 1;
-
-	data_in = 0;//[5-1:0]->22 PEs
-	wr[3] = 0;
-	addr = 0;
-	EN = 0;
-	#2 reset_N = 1'b0;     // Disable Reset signal.	 
-	end
- endtask
-
-
-
- task write_2_score_board_in_pe(input logic [111:0] data_2_write, input logic [7:0] addr_2_write,input logic [4:0] pe_2_write);
-	begin
-		addr[pe_2_write][addr_2_write] = addr_2_write;
-		data_in [pe_2_write] = data_2_write;
-		wr[3] = 1'b1;
-		EN = 1'b1;
-		@(posedge clk); 
-		wr = 1'b0;
-		EN = 1'b0;
-	end   
- endtask	
- 
- 
- task read_2_score_board_in_pe(input logic [7:0] addr_2_read,input logic [4:0] pe_2_read);
-	begin
-		addr[pe_2_read][addr_2_read] = addr_2_read;
-		//data_in [pe_2_read] = data_2_read;
-		wr[3] = 1'b0;
-		EN = 1'b1;
-		@(posedge clk); 
-		wr = 1'b0;
-		EN = 1'b0;
-	end   
- endtask
- 
-endmodule  
-
-*/
 

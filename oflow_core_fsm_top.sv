@@ -82,7 +82,8 @@ logic done_DW_div_seq;
 logic done_DW_div_seq_prev;
 
 logic divide_by_0;
-logic [`SET_LEN-1:0] div_result, div_result_reg;
+logic [`REMAIN_BBOX_LEN-1:0] div_result;
+logic [`SET_LEN-1:0]  div_result_reg;
 logic [`PE_LEN-1:0] rem_result, rem_result_reg;
 
 logic [`SET_LEN-1:0]	counter_set_fe_prev;
@@ -123,7 +124,7 @@ assign num_of_bbox_in_last_set_remainder_4 = rem_result[1:0];
 	
 	end
 
-//--------------------done_DW_div_seq_next---------------------------------	
+//--------------------done_DW_div_seq_prev---------------------------------	
 
 always_ff @(posedge clk or negedge reset_N) begin
 	if (!reset_N ) done_DW_div_seq_prev <= #1 1'b0;

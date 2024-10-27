@@ -24,3 +24,6 @@
 //score board
 `define MAX_ROWS_IN_SCORE_BOARD 11 //COMES FROM: CEIL(TOTAL BBOX NUMBERS/PE NUM)=CEIL(256/24)=11
 `define FLAG_REG_WIDTH  2
+
+//for conflict_counter_th
+`define MAX_THRESHOLD_FOR_CONFLICTS_LEN 4
