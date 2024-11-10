@@ -58,12 +58,12 @@ sm_type next_state;
 //                 Instantiations
 // -----------------------------------------------------------  
    
-   /* DW_div_seq # ( .a_width(`INTERSECTION*2), .b_width(`INTERSECTION) ) DW_div_seq ( .clk(clk) , .rst_n(reset_N), .hold(1'b0)
+   DW_div_seq # ( .a_width(`INTERSECTION*2), .b_width(`INTERSECTION), .num_cyc(3) ) DW_div_seq ( .clk(clk) , .rst_n(reset_N), .hold(1'b0)
 	   , .start(start_DW_div_seq), .a(a),  .b(b) , .complete(done_DW_div_seq), .divide_by_0(divide_by_0), .quotient(temp_iou), .remainder(remainder) );
-   */
-	DW_div_pipe # ( .a_width(`INTERSECTION*2), .b_width(`INTERSECTION), .num_stages(7), .stall_mode(1) ) DW_div_pipe ( .clk(clk) , .rst_n(reset_N), 
+   
+/*	DW_div_pipe # ( .a_width(`INTERSECTION*2), .b_width(`INTERSECTION), .num_stages(7), .stall_mode(1) ) DW_div_pipe ( .clk(clk) , .rst_n(reset_N), 
 	 .en(1'b1), .a(a),  .b(b) , .divide_by_0(divide_by_0), .quotient(temp_iou), .remainder(remainder) );
-	
+	*/
    //--------------------done_DW_div_seq_prev---------------------------------	
 
    always_ff @(posedge clk or negedge reset_N) begin
@@ -110,7 +110,7 @@ sm_type next_state;
 	
 	
 // -----------------------------------------------------------       
-//						FSM – Async Logic
+//						FSM  Async Logic
 // -----------------------------------------------------------	
 always_comb begin
 	next_state = current_state;
@@ -155,8 +155,8 @@ always_comb begin
 			
 			
 			// iou = 1 - (Intersection / (size_length_k + size_length_history - Intersection));
-			// if (done_DW_div_seq_derivative) begin// counter start from 0
-			if(counter == 7) begin // counter start from 0
+			 if (done_DW_div_seq_derivative) begin// counter start from 0
+			//if(counter == 7) begin // counter start from 0
 				if (temp_iou[22]) begin 
 					iou = 0; // iou q0.22
 				end
